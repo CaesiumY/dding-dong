@@ -5,7 +5,7 @@
   "author": {
     "name": "ChangSik Yoon"
   },
-  "repository": "https://github.com/ycs-201607083/dding-dong",
+  "repository": "https://github.com/CaesiumY/dding-dong",
   "license": "MIT",
   "keywords": ["claude-code", "plugin", "notification", "sound", "korean", "alert"]
 }
