@@ -1,6 +1,8 @@
 ---
-description: dding-dong 사운드 팩 관리
+name: 사운드 팩 관리
+description: "dding-dong 사운드 팩을 관리합니다. list(설치된 팩 목록), use(팩 변경), preview(미리듣기)를 지원합니다."
 allowed-tools: [Bash, Read]
+disable-model-invocation: true
 ---
 
 # dding-dong 사운드 팩 관리

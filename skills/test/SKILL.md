@@ -1,6 +1,8 @@
 ---
-description: dding-dong 알림 테스트
+name: 알림 테스트
+description: "dding-dong 알림을 테스트합니다. 인자 없이 실행하면 모든 이벤트를 순서대로 테스트하고, 특정 이벤트명을 지정할 수도 있습니다."
 allowed-tools: [Bash, Read]
+disable-model-invocation: true
 ---
 
 # dding-dong 알림 테스트

@@ -39,14 +39,15 @@ claude plugin add .
 
 환경 감지 및 초기 설정을 도와드립니다.
 
-## 커맨드 목록
+## 스킬 목록
 
-| 커맨드 | 설명 |
-|--------|------|
+| 스킬 | 설명 |
+|------|------|
 | `/dding-dong:setup` | 환경 감지 및 초기 설정 |
 | `/dding-dong:test` | 모든 이벤트 알림 테스트 |
 | `/dding-dong:config` | 설정 보기/변경 |
 | `/dding-dong:sounds` | 사운드 팩 관리 |
+| `/dding-dong:diagnose` | 알림 문제 자동 진단 |
 
 ## 설정
 

@@ -1,6 +1,8 @@
 ---
-description: dding-dong 알림 설정 마법사 (한국어)
+name: 설정 마법사
+description: "dding-dong 알림 설정 마법사. 환경 감지, 스코프 선택, 이벤트/볼륨/야간모드 설정을 단계별로 안내합니다."
 allowed-tools: [Bash, Read, Write, AskUserQuestion]
+disable-model-invocation: true
 ---
 
 # dding-dong 설정 마법사

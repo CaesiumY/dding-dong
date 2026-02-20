@@ -30,6 +30,17 @@ hooks/                 # Claude Code hook entry points (.mjs)
   stop.mjs             # Stop hook → task.complete (MUST respond with decision)
   session-start.mjs    # SessionStart hook → session.start
   session-end.mjs      # SessionEnd hook → session.end
+skills/                # Skill definitions (SKILL.md with YAML frontmatter)
+  config/
+    SKILL.md           # /dding-dong:config - 설정 변경
+  setup/
+    SKILL.md           # /dding-dong:setup - 환경 설정
+  sounds/
+    SKILL.md           # /dding-dong:sounds - 사운드팩 관리
+  test/
+    SKILL.md           # /dding-dong:test - 알림 테스트
+  diagnose/
+    SKILL.md           # /dding-dong:diagnose - 문제 진단 (서브에이전트)
 scripts/
   notify.mjs           # Unified notification entry point
   generate-sounds.mjs  # Programmatic WAV generation (16-bit PCM, 44100Hz, mono)
@@ -41,7 +52,6 @@ scripts/
     notifier.mjs       # Cross-platform OS notification delivery
     messages.mjs       # Per-event messages (ko/en)
 sounds/default/        # Built-in sound pack (WAV + manifest.json)
-commands/              # Slash command definitions (.md)
 .claude-plugin/        # Plugin metadata (plugin.json, marketplace.json)
 ```
 
