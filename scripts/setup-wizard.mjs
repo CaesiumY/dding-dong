@@ -18,7 +18,7 @@ function parseCwd() {
 if (subcmd === 'detect') {
   const cwd = parseCwd();
   const { detectAll } = await import(resolve(PLUGIN_ROOT, 'scripts/core/platform.mjs'));
-  const { getConfigFile, getPacksDir, findProjectRoot, getProjectConfigFile } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
+  const { getConfigFile, getPacksDir, findProjectRoot, getProjectConfigFile, getProjectLocalConfigFile } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
 
   const detected = detectAll();
   const configFile = getConfigFile();
@@ -43,9 +43,10 @@ if (subcmd === 'detect') {
     }
   } catch {}
 
-  // 기존 설정 감지 (Global + Project)
+  // 기존 설정 감지 (Global + Project + Project Local)
   const projectRoot = findProjectRoot(cwd);
   const projectConfigFile = projectRoot ? getProjectConfigFile(projectRoot) : null;
+  const projectLocalConfigFile = projectRoot ? getProjectLocalConfigFile(projectRoot) : null;
 
   const result = {
     platform: detected.platform,
@@ -59,6 +60,10 @@ if (subcmd === 'detect') {
       project: {
         exists: projectConfigFile ? existsSync(projectConfigFile) : false,
         path: projectConfigFile
+      },
+      projectLocal: {
+        exists: projectLocalConfigFile ? existsSync(projectLocalConfigFile) : false,
+        path: projectLocalConfigFile
       }
     },
     projectRoot

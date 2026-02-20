@@ -49,22 +49,24 @@ export function getPacksDir() { return join(CONFIG_DIR, 'packs'); }
 export function getConfigFile() { return CONFIG_FILE; }
 export function getStateFile() { return STATE_FILE; }
 
-// --- Project 경로 함수 (신규) ---
+// --- Project 경로 함수 ---
 export function getProjectConfigDir(projectRoot) { return join(projectRoot, '.dding-dong'); }
 export function getProjectConfigFile(projectRoot) { return join(projectRoot, '.dding-dong', 'config.json'); }
+export function getProjectLocalConfigFile(projectRoot) { return join(projectRoot, '.dding-dong', 'config.local.json'); }
 
 /**
  * 프로젝트 루트 탐지 (3단 폴백, 깊이 상한 10단계)
- * 1차: .dding-dong/config.json 존재 여부
+ * 1차: .dding-dong/ 디렉토리 내 설정 파일 존재 여부 (config.json 또는 config.local.json)
  * 2차: .git 디렉토리 존재 여부
  * 3차: null (프로젝트 루트 없음)
  */
 export function findProjectRoot(startDir, maxDepth = 10) {
-  // 1차: .dding-dong/config.json 탐색
+  // 1차: .dding-dong/ 설정 파일 탐색
   let dir = startDir;
   let depth = 0;
   while (dir !== dirname(dir) && depth < maxDepth) {
-    if (existsSync(join(dir, '.dding-dong', 'config.json'))) return dir;
+    const ddDir = join(dir, '.dding-dong');
+    if (existsSync(join(ddDir, 'config.json')) || existsSync(join(ddDir, 'config.local.json'))) return dir;
     dir = dirname(dir);
     depth++;
   }
@@ -84,7 +86,7 @@ export function findProjectRoot(startDir, maxDepth = 10) {
 
 // --- 설정 디렉토리 보장 (스코프 인식) ---
 export function ensureConfigDir(scope = 'global', projectRoot = null) {
-  if (scope === 'project' && projectRoot) {
+  if ((scope === 'project' || scope === 'local') && projectRoot) {
     mkdirSync(join(projectRoot, '.dding-dong'), { recursive: true });
   } else {
     mkdirSync(CONFIG_DIR, { recursive: true });
@@ -111,7 +113,7 @@ function deepMerge(target, source) {
 }
 
 /**
- * 설정 로드 (4단계 병합: Default <- Global <- Project <- 환경변수)
+ * 설정 로드 (5단계 병합: Default <- Global <- Project <- Project Local <- 환경변수)
  * @param {string} [cwd] - 프로젝트 설정 탐색 시작 디렉토리. 미전달 시 Global만 사용 (하위 호환)
  */
 export function loadConfig(cwd) {
@@ -124,21 +126,31 @@ export function loadConfig(cwd) {
     config = deepMerge(config, globalConfig);
   } catch {}
 
-  // Stage 3: Project config (cwd가 전달된 경우만)
+  // Stage 3 & 4: Project + Project Local (cwd가 전달된 경우만)
   if (cwd) {
     const projectRoot = findProjectRoot(cwd);
     if (projectRoot) {
-      const projectConfigFile = getProjectConfigFile(projectRoot);
+      // Stage 3: Project config (팀 공유, 커밋됨)
       try {
+        const projectConfigFile = getProjectConfigFile(projectRoot);
         if (existsSync(projectConfigFile)) {
           const projectConfig = JSON.parse(readFileSync(projectConfigFile, 'utf8'));
           config = deepMerge(config, projectConfig);
         }
       } catch {}
+
+      // Stage 4: Project Local config (개인 오버라이드, 커밋 제외)
+      try {
+        const localConfigFile = getProjectLocalConfigFile(projectRoot);
+        if (existsSync(localConfigFile)) {
+          const localConfig = JSON.parse(readFileSync(localConfigFile, 'utf8'));
+          config = deepMerge(config, localConfig);
+        }
+      } catch {}
     }
   }
 
-  // Stage 4: 환경변수 오버라이드 (최종 우선)
+  // Stage 5: 환경변수 오버라이드 (최종 우선)
   if (process.env.DDING_DONG_ENABLED === 'false') config.enabled = false;
   if (process.env.DDING_DONG_VOLUME) config.sound.volume = parseFloat(process.env.DDING_DONG_VOLUME);
   if (process.env.DDING_DONG_LANG) config.language = process.env.DDING_DONG_LANG;
@@ -148,12 +160,15 @@ export function loadConfig(cwd) {
 
 /**
  * 설정 저장 (스코프 인식)
- * @param {object} config - 저장할 설정 객체 (project 스코프에서는 diff-only 오버라이드만 전달)
- * @param {'global'|'project'} [scope='global']
- * @param {string} [projectRoot] - project 스코프일 때 필수
+ * @param {object} config - 저장할 설정 객체 (project/local 스코프에서는 diff-only 오버라이드만 전달)
+ * @param {'global'|'project'|'local'} [scope='global']
+ * @param {string} [projectRoot] - project/local 스코프일 때 필수
  */
 export function saveConfig(config, scope = 'global', projectRoot = null) {
-  if (scope === 'project' && projectRoot) {
+  if (scope === 'local' && projectRoot) {
+    ensureConfigDir('local', projectRoot);
+    writeFileSync(getProjectLocalConfigFile(projectRoot), JSON.stringify(config, null, 2) + '\n', 'utf8');
+  } else if (scope === 'project' && projectRoot) {
     ensureConfigDir('project', projectRoot);
     writeFileSync(getProjectConfigFile(projectRoot), JSON.stringify(config, null, 2) + '\n', 'utf8');
   } else {

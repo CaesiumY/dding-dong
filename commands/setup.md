@@ -34,10 +34,12 @@ WSL에서 wsl-notify-send가 없으면:
 **Pre-Setup Check** (기존 설정 감지):
 
 `existingConfig` 필드를 확인하여:
-- 기존 설정이 있으면 (global.exists 또는 project.exists가 true):
+- 기존 설정이 있으면 (global.exists, project.exists, projectLocal.exists 중 하나라도 true):
   ```
   기존 dding-dong 설정이 발견되었습니다.
-  - 전역 설정: ~/.config/dding-dong/config.json
+  - 전역 설정: ~/.config/dding-dong/config.json [존재/없음]
+  - 프로젝트 설정: .dding-dong/config.json [존재/없음]
+  - 내 설정: .dding-dong/config.local.json [존재/없음]
   ```
   AskUserQuestion으로 질문:
   - "기존 설정을 어떻게 하시겠습니까?"
@@ -58,10 +60,10 @@ AskUserQuestion으로 질문합니다:
 "설치 범위를 선택해주세요."
 
 선택지:
-1. **전역 설정 (Recommended)** -- "모든 프로젝트에 적용됩니다. 설정 경로: ~/.config/dding-dong/"
-2. **이 프로젝트만** -- "현재 프로젝트에만 적용됩니다. 설정 경로: .dding-dong/"
+1. **전역 설정 (Recommended)** -- "모든 프로젝트에 적용됩니다. 설정 경로: ~/.config/dding-dong/config.json"
+2. **프로젝트 설정** -- "팀원과 공유되는 프로젝트 설정입니다. Git에 커밋됩니다. 경로: .dding-dong/config.json"
+3. **내 설정 (Local)** -- "이 프로젝트에서 나만 사용하는 개인 설정입니다. Git에 포함되지 않습니다. 경로: .dding-dong/config.local.json"
 
-- "둘 다" 옵션은 제공하지 않습니다 (Global/Project 양자택일)
 - 선택 결과를 기억하여 이후 단계에서 사용합니다
 
 ### 3단계: 사용자 선호도 확인
@@ -108,12 +110,35 @@ saveConfig(config, 'global');
 **Project 스코프 선택 시:**
 - `.dding-dong/config.json`에 **오버라이드 키만** (diff-only) 저장합니다.
 - 기본값과 다른 항목만 설정 객체에 포함합니다.
-- AskUserQuestion으로 추가 질문:
-  ".dding-dong/ 디렉토리를 .gitignore에 추가하시겠습니까?"
-  1. "추가 (Recommended)" -- 개인 설정이므로 Git 추적 제외
-  2. "추가하지 않음" -- 팀 공유 설정으로 사용
+- `config.local.json`을 `.gitignore`에 자동으로 추가합니다 (개인 설정 보호).
 
-  "추가"를 선택하면 프로젝트 루트의 .gitignore에 `.dding-dong/` 라인을 추가합니다.
+```bash
+node --input-type=module -e "
+import { saveConfig } from '${CLAUDE_PLUGIN_ROOT}/scripts/core/config.mjs';
+const config = JSON.parse(process.argv[1]);
+saveConfig(config, 'project', process.argv[2]);
+" '${CONFIG_JSON}' '${PROJECT_ROOT}'
+```
+
+**Local 스코프 선택 시:**
+- `.dding-dong/config.local.json`에 **오버라이드 키만** (diff-only) 저장합니다.
+- 기본값과 다른 항목만 설정 객체에 포함합니다.
+- `.gitignore`에 `config.local.json` 라인이 없으면 추가합니다.
+
+```bash
+node --input-type=module -e "
+import { saveConfig } from '${CLAUDE_PLUGIN_ROOT}/scripts/core/config.mjs';
+const config = JSON.parse(process.argv[1]);
+saveConfig(config, 'local', process.argv[2]);
+" '${CONFIG_JSON}' '${PROJECT_ROOT}'
+```
+
+**Project/Local 공통 — .gitignore 처리:**
+- 프로젝트 루트의 `.gitignore`에 `config.local.json` 패턴이 없으면 추가합니다.
+- AskUserQuestion으로 추가 질문 (Project 스코프에서만):
+  ".dding-dong/ 디렉토리 전체를 .gitignore에 추가하시겠습니까?"
+  1. "config.local.json만 제외 (Recommended)" -- 팀 공유 config.json은 커밋, 개인 설정만 제외
+  2. "디렉토리 전체 제외" -- .dding-dong/ 전체를 Git 추적에서 제외
 
 ### 5단계: 테스트 + 완료 요약
 
@@ -129,7 +154,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/notify.mjs" test task.complete
 ```
 dding-dong 설정 완료!
 - 설정 파일: [설정 파일 경로]
-- 범위: [전역/프로젝트]
+- 범위: [전역/프로젝트/내 설정(Local)]
 - 활성 이벤트: [활성화된 이벤트 목록]
 - 볼륨: [설정된 볼륨]
 - 야간 모드: [활성/비활성]

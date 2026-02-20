@@ -14,8 +14,8 @@ allowed-tools: [Bash, Read, Write, AskUserQuestion]
 현재 설정을 한국어로 표시합니다. 스코프별 설정 출처도 함께 안내합니다.
 
 ```bash
-node -e "
-import { loadConfig, getConfigFile, findProjectRoot, getProjectConfigFile } from '${CLAUDE_PLUGIN_ROOT}/scripts/core/config.mjs';
+node --input-type=module -e "
+import { loadConfig, getConfigFile, findProjectRoot, getProjectConfigFile, getProjectLocalConfigFile } from '${CLAUDE_PLUGIN_ROOT}/scripts/core/config.mjs';
 import { existsSync } from 'node:fs';
 
 const cwd = process.cwd();
@@ -25,12 +25,15 @@ const globalExists = existsSync(globalPath);
 const projectRoot = findProjectRoot(cwd);
 const projectPath = projectRoot ? getProjectConfigFile(projectRoot) : null;
 const projectExists = projectPath ? existsSync(projectPath) : false;
+const localPath = projectRoot ? getProjectLocalConfigFile(projectRoot) : null;
+const localExists = localPath ? existsSync(localPath) : false;
 
 console.log(JSON.stringify({
   config,
   scope: {
     global: { exists: globalExists, path: globalPath },
-    project: { exists: projectExists, path: projectPath }
+    project: { exists: projectExists, path: projectPath },
+    local: { exists: localExists, path: localPath }
   }
 }, null, 2));
 "
@@ -42,6 +45,7 @@ console.log(JSON.stringify({
 현재 설정 (적용 중인 스코프: [스코프 정보])
 - 전역 설정: [경로] ([존재/없음])
 - 프로젝트 설정: [경로] ([존재/없음])
+- 내 설정 (Local): [경로] ([존재/없음])
 
 [설정 내용을 한국어로 정리하여 보여줍니다]
 - 활성화: [예/아니오]
@@ -57,9 +61,10 @@ console.log(JSON.stringify({
 
 `--scope` 옵션으로 대상 스코프를 지정할 수 있습니다:
 - `--scope global` -- 전역 설정에 반영 (기본값)
-- `--scope project` -- 프로젝트 설정에 반영
+- `--scope project` -- 프로젝트 설정에 반영 (팀 공유, 커밋됨)
+- `--scope local` -- 내 설정에 반영 (개인 오버라이드, 커밋 제외)
 
-프로젝트 스코프 지정 시 `.dding-dong/config.json`에 해당 키만 저장합니다 (diff-only).
+프로젝트/로컬 스코프 지정 시 해당 파일에 **오버라이드 키만** (diff-only) 저장합니다.
 
 ### reset
 
@@ -69,6 +74,7 @@ AskUserQuestion으로 대상 스코프를 확인합니다:
 "어떤 설정을 초기화하시겠습니까?"
 1. "전역 설정 초기화" -- `~/.config/dding-dong/config.json` 삭제
 2. "프로젝트 설정 초기화" -- `.dding-dong/config.json` 삭제 (프로젝트 설정이 존재하는 경우만 표시)
-3. "취소"
+3. "내 설정 초기화" -- `.dding-dong/config.local.json` 삭제 (내 설정이 존재하는 경우만 표시)
+4. "취소"
 
 사용자 확인 후 해당 설정 파일을 삭제합니다.
