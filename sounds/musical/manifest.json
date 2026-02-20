@@ -1,0 +1,14 @@
+{
+  "name": "musical",
+  "displayName": "뮤지컬 코드 (Musical)",
+  "version": "1.0.0",
+  "author": "dding-dong",
+  "description": "피아노 코드 기반의 화성적 알림음 팩",
+  "events": {
+    "task.complete": { "files": ["complete.wav"] },
+    "task.error": { "files": ["error.wav"] },
+    "input.required": { "files": ["input-required.wav"] },
+    "session.start": { "files": ["session-start.wav"] },
+    "session.end": { "files": ["session-end.wav"] }
+  }
+}

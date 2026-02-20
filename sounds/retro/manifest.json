@@ -1,0 +1,14 @@
+{
+  "name": "retro",
+  "displayName": "레트로 게임 (8-bit)",
+  "version": "1.0.0",
+  "author": "dding-dong",
+  "description": "칩튠 스타일의 게임기 효과음 팩",
+  "events": {
+    "task.complete": { "files": ["complete.wav"] },
+    "task.error": { "files": ["error.wav"] },
+    "input.required": { "files": ["input-required.wav"] },
+    "session.start": { "files": ["session-start.wav"] },
+    "session.end": { "files": ["session-end.wav"] }
+  }
+}

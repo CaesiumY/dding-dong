@@ -66,11 +66,45 @@ AskUserQuestion으로 질문합니다:
 
 - 선택 결과를 기억하여 이후 단계에서 사용합니다
 
-### 3단계: 사용자 선호도 확인
+### 3단계: 사운드팩 선택
+
+사운드 플레이어가 감지된 경우에만 이 단계를 실행합니다.
+사운드 플레이어가 없으면 기본 팩(`default`)을 유지하고 4단계로 건너뜁니다.
+
+AskUserQuestion으로 질문합니다:
+
+"사운드 테마를 선택해주세요."
+
+선택지:
+1. **기본 효과음 (Recommended)** -- "깔끔한 사인파 비프음. 심플하고 방해가 적습니다."
+2. **레트로 게임 (8-bit)** -- "칩튠 스타일의 게임기 효과음. NES/게임보이 감성."
+3. **뮤지컬 코드 (Musical)** -- "피아노 코드 기반의 화성적 알림음. 풍성하고 따뜻한 느낌."
+
+선택지와 `sound.pack` 값 매핑:
+- 기본 효과음 → `"default"`
+- 레트로 게임 → `"retro"`
+- 뮤지컬 코드 → `"musical"`
+
+선택 후 미리듣기를 제안합니다:
+
+AskUserQuestion으로 질문:
+"선택한 팩의 사운드를 미리 들어보시겠습니까?"
+- 예 (Recommended)
+- 아니오
+
+미리듣기 선택 시, 선택한 팩의 `task.complete` 사운드를 재생합니다:
+```bash
+DDING_DONG_PACK="${SELECTED_PACK}" node "${CLAUDE_PLUGIN_ROOT}/scripts/notify.mjs" test task.complete
+```
+
+미리듣기 후 변경을 원하면 다시 팩 선택으로 돌아갑니다.
+만족하면 4단계로 진행합니다.
+
+### 4단계: 사용자 선호도 확인
 
 AskUserQuestion으로 순차적으로 질문합니다:
 
-**3-a. 이벤트 선택** (multiSelect):
+**4-a. 이벤트 선택** (multiSelect):
 "어떤 이벤트에 알림을 받으시겠습니까?"
 - 작업 완료 (task.complete) - 기본 ON
 - 오류 발생 (task.error) - 기본 ON
@@ -78,7 +112,7 @@ AskUserQuestion으로 순차적으로 질문합니다:
 - 세션 시작 (session.start) - 기본 OFF
 - 세션 종료 (session.end) - 기본 OFF
 
-**3-b. 볼륨** (사운드 가능한 환경에서만 질문):
+**4-b. 볼륨** (사운드 가능한 환경에서만 질문):
 "사운드 볼륨을 선택해주세요."
 - 0.3 (작게)
 - 0.5 (보통)
@@ -87,14 +121,15 @@ AskUserQuestion으로 순차적으로 질문합니다:
 
 사운드 플레이어가 감지되지 않은 경우 이 질문을 건너뜁니다.
 
-**3-c. 야간 모드:**
+**4-c. 야간 모드:**
 "야간 모드를 사용하시겠습니까?"
 - 사용 안 함 (기본, Recommended)
 - 사용 (22:00~08:00)
 
-### 4단계: 설정 저장
+### 5단계: 설정 저장
 
 사용자 응답을 바탕으로 설정 객체를 구성합니다.
+3단계에서 선택한 사운드팩 이름을 `sound.pack` 필드에 포함합니다.
 
 **Global 스코프 선택 시:**
 - `~/.config/dding-dong/config.json`에 전체 설정을 저장합니다.
@@ -140,7 +175,7 @@ saveConfig(config, 'local', process.argv[2]);
   1. "config.local.json만 제외 (Recommended)" -- 팀 공유 config.json은 커밋, 개인 설정만 제외
   2. "디렉토리 전체 제외" -- .dding-dong/ 전체를 Git 추적에서 제외
 
-### 5단계: 테스트 + 완료 요약
+### 6단계: 테스트 + 완료 요약
 
 테스트 알림을 실행합니다:
 
@@ -155,6 +190,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/notify.mjs" test task.complete
 dding-dong 설정 완료!
 - 설정 파일: [설정 파일 경로]
 - 범위: [전역/프로젝트/내 설정(Local)]
+- 사운드 팩: [선택된 팩 displayName]
 - 활성 이벤트: [활성화된 이벤트 목록]
 - 볼륨: [설정된 볼륨]
 - 야간 모드: [활성/비활성]
