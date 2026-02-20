@@ -10,9 +10,9 @@ async function main() {
   const event = JSON.parse(input);
   const { notify } = await import(resolve(PLUGIN_ROOT, 'scripts/notify.mjs'));
   await notify('task.complete', { sessionId: event.session_id, hookEvent: event.hook_event_name });
-  process.stdout.write(JSON.stringify({ decision: 'continue' }));
+  process.stdout.write(JSON.stringify({}));
 }
 main().catch(() => {
-  process.stdout.write(JSON.stringify({ decision: 'continue' }));
+  process.stdout.write(JSON.stringify({}));
   process.exit(0);
 });

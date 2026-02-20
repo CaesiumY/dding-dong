@@ -78,7 +78,7 @@ Hook event → hooks/*.mjs → scripts/notify.mjs
 
 ## Critical Design Rules
 
-- **Stop hook MUST respond**: `stop.mjs` must write `{ "decision": "continue" }` to stdout. Missing this halts Claude execution.
+- **Stop hook MUST respond**: `stop.mjs` must write `{}` to stdout. Missing this halts Claude execution.
 - **Always exit(0) on error**: Notification failure must never block Claude. All hook catch blocks call `process.exit(0)`.
 - **detached + unref**: Audio processes use `spawn(..., { detached: true, stdio: 'ignore' }).unref()` to complete within the 5-second hook timeout.
 - **ESM only**: All scripts use `.mjs` extension with `import`/`export` syntax.
