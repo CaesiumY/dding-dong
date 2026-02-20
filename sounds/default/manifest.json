@@ -1,0 +1,14 @@
+{
+  "name": "default",
+  "displayName": "기본 효과음",
+  "version": "1.0.0",
+  "author": "dding-dong",
+  "description": "기본 알림 효과음 팩",
+  "events": {
+    "task.complete": { "files": ["complete.wav"], "rotation": "sequential" },
+    "task.error": { "files": ["error.wav"] },
+    "input.required": { "files": ["input-required.wav"] },
+    "session.start": { "files": ["session-start.wav"] },
+    "session.end": { "files": ["session-end.wav"] }
+  }
+}
