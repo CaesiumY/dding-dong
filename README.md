@@ -126,26 +126,47 @@ claude plugin add .
 
 ## 사운드 팩 시스템
 
-사운드 팩은 `~/.config/dding-dong/packs/<팩이름>/` 디렉터리에 위치합니다.
+사운드 팩은 두 위치에서 탐색되며, 사용자 팩이 우선합니다:
+
+1. **사용자 팩**: `~/.config/dding-dong/packs/<팩이름>/`
+2. **내장 팩**: `{플러그인 설치 경로}/sounds/<팩이름>/`
 
 ### manifest.json 구조
 
 ```json
 {
   "name": "my-pack",
-  "description": "나만의 사운드 팩",
-  "sounds": {
+  "displayName": "나만의 사운드 팩",
+  "version": "1.0.0",
+  "author": "작성자",
+  "description": "사운드 팩 설명",
+  "events": {
     "task.complete": {
       "files": ["complete1.wav", "complete2.wav"],
       "rotation": "random"
     },
     "task.error": {
-      "files": ["error.wav"],
-      "rotation": "sequential"
+      "files": ["error.wav"]
     }
   }
 }
 ```
+
+| 필드 | 필수 | 설명 |
+|------|------|------|
+| `name` | 예 | 팩 식별자 (디렉터리 이름과 일치) |
+| `displayName` | 아니오 | 사용자에게 표시되는 이름 |
+| `version` | 아니오 | 시맨틱 버전 |
+| `author` | 아니오 | 팩 작성자 |
+| `description` | 아니오 | 팩 설명 |
+| `events` | 예 | 이벤트별 사운드 매핑 |
+
+### rotation 모드
+
+| 모드 | 동작 |
+|------|------|
+| `"random"` | `files` 배열에서 랜덤 선택 |
+| `"sequential"` 또는 미지정 | 첫 번째 파일 재생 |
 
 ### 사운드 팩 적용
 
