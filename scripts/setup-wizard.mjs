@@ -5,11 +5,20 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || resolve(__dirname, '..');
 
-const subcmd = process.argv[2];
+const args = process.argv.slice(2);
+const subcmd = args[0];
+
+// --cwd 옵션 파싱
+function parseCwd() {
+  const idx = args.indexOf('--cwd');
+  if (idx !== -1 && args[idx + 1]) return args[idx + 1];
+  return process.cwd();
+}
 
 if (subcmd === 'detect') {
+  const cwd = parseCwd();
   const { detectAll } = await import(resolve(PLUGIN_ROOT, 'scripts/core/platform.mjs'));
-  const { getConfigFile, getPacksDir } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
+  const { getConfigFile, getPacksDir, findProjectRoot, getProjectConfigFile } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
 
   const detected = detectAll();
   const configFile = getConfigFile();
@@ -34,13 +43,25 @@ if (subcmd === 'detect') {
     }
   } catch {}
 
+  // 기존 설정 감지 (Global + Project)
+  const projectRoot = findProjectRoot(cwd);
+  const projectConfigFile = projectRoot ? getProjectConfigFile(projectRoot) : null;
+
   const result = {
     platform: detected.platform,
     audioPlayer: detected.audioPlayer,
     notifier: detected.notifier,
     nodeVersion: process.version,
     configExists: existsSync(configFile),
-    packsInstalled
+    packsInstalled,
+    existingConfig: {
+      global: { exists: existsSync(configFile), path: configFile },
+      project: {
+        exists: projectConfigFile ? existsSync(projectConfigFile) : false,
+        path: projectConfigFile
+      }
+    },
+    projectRoot
   };
 
   process.stdout.write(JSON.stringify(result, null, 2) + '\n');
@@ -50,7 +71,10 @@ if (subcmd === 'detect') {
 // 서브커맨드 없으면 도움말 출력
 console.log('dding-dong setup-wizard');
 console.log('');
-console.log('사용법: node setup-wizard.mjs <subcmd>');
+console.log('사용법: node setup-wizard.mjs <subcmd> [옵션]');
 console.log('');
 console.log('서브커맨드:');
 console.log('  detect    환경 감지 결과를 JSON으로 출력');
+console.log('');
+console.log('옵션:');
+console.log('  --cwd <path>  프로젝트 루트 탐색 시작 디렉토리');

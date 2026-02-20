@@ -38,7 +38,7 @@ function isCoolingDown(state, cooldownSeconds) {
  * @param {object} [context] - 추가 컨텍스트 (message 오버라이드 등)
  */
 export async function notify(eventType, context = {}) {
-  const config = loadConfig();
+  const config = loadConfig(context.cwd);
 
   if (!config.enabled) return;
   if (isQuietHours(config.quiet_hours)) return;

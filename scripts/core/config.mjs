@@ -1,7 +1,8 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { homedir } from 'node:os';
 
+// --- Global 경로 상수 (하위 호환 유지) ---
 const CONFIG_DIR = join(homedir(), '.config', 'dding-dong');
 const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
 const STATE_FILE = join(CONFIG_DIR, '.state.json');
@@ -42,20 +43,64 @@ const DEFAULT_CONFIG = {
   cooldown_seconds: 3
 };
 
+// --- Global 경로 함수 (하위 호환) ---
 export function getConfigDir() { return CONFIG_DIR; }
 export function getPacksDir() { return join(CONFIG_DIR, 'packs'); }
 export function getConfigFile() { return CONFIG_FILE; }
 export function getStateFile() { return STATE_FILE; }
 
-export function ensureConfigDir() {
-  mkdirSync(CONFIG_DIR, { recursive: true });
-  mkdirSync(join(CONFIG_DIR, 'packs'), { recursive: true });
+// --- Project 경로 함수 (신규) ---
+export function getProjectConfigDir(projectRoot) { return join(projectRoot, '.dding-dong'); }
+export function getProjectConfigFile(projectRoot) { return join(projectRoot, '.dding-dong', 'config.json'); }
+
+/**
+ * 프로젝트 루트 탐지 (3단 폴백, 깊이 상한 10단계)
+ * 1차: .dding-dong/config.json 존재 여부
+ * 2차: .git 디렉토리 존재 여부
+ * 3차: null (프로젝트 루트 없음)
+ */
+export function findProjectRoot(startDir, maxDepth = 10) {
+  // 1차: .dding-dong/config.json 탐색
+  let dir = startDir;
+  let depth = 0;
+  while (dir !== dirname(dir) && depth < maxDepth) {
+    if (existsSync(join(dir, '.dding-dong', 'config.json'))) return dir;
+    dir = dirname(dir);
+    depth++;
+  }
+
+  // 2차: .git 디렉토리 탐색
+  dir = startDir;
+  depth = 0;
+  while (dir !== dirname(dir) && depth < maxDepth) {
+    if (existsSync(join(dir, '.git'))) return dir;
+    dir = dirname(dir);
+    depth++;
+  }
+
+  // 3차: 프로젝트 루트 없음
+  return null;
 }
 
+// --- 설정 디렉토리 보장 (스코프 인식) ---
+export function ensureConfigDir(scope = 'global', projectRoot = null) {
+  if (scope === 'project' && projectRoot) {
+    mkdirSync(join(projectRoot, '.dding-dong'), { recursive: true });
+  } else {
+    mkdirSync(CONFIG_DIR, { recursive: true });
+    mkdirSync(join(CONFIG_DIR, 'packs'), { recursive: true });
+  }
+}
+
+/**
+ * 재귀적 깊은 병합 (null = 해당 키 비활성화/제거)
+ */
 function deepMerge(target, source) {
   const result = { ...target };
   for (const key of Object.keys(source)) {
-    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])
+    if (source[key] === null) {
+      delete result[key];
+    } else if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])
         && target[key] && typeof target[key] === 'object') {
       result[key] = deepMerge(target[key], source[key]);
     } else {
@@ -65,15 +110,35 @@ function deepMerge(target, source) {
   return result;
 }
 
-export function loadConfig() {
-  let userConfig = {};
+/**
+ * 설정 로드 (4단계 병합: Default <- Global <- Project <- 환경변수)
+ * @param {string} [cwd] - 프로젝트 설정 탐색 시작 디렉토리. 미전달 시 Global만 사용 (하위 호환)
+ */
+export function loadConfig(cwd) {
+  // Stage 1: Default
+  let config = structuredClone(DEFAULT_CONFIG);
+
+  // Stage 2: Global config
   try {
-    userConfig = JSON.parse(readFileSync(CONFIG_FILE, 'utf8'));
+    const globalConfig = JSON.parse(readFileSync(CONFIG_FILE, 'utf8'));
+    config = deepMerge(config, globalConfig);
   } catch {}
 
-  const config = deepMerge(DEFAULT_CONFIG, userConfig);
+  // Stage 3: Project config (cwd가 전달된 경우만)
+  if (cwd) {
+    const projectRoot = findProjectRoot(cwd);
+    if (projectRoot) {
+      const projectConfigFile = getProjectConfigFile(projectRoot);
+      try {
+        if (existsSync(projectConfigFile)) {
+          const projectConfig = JSON.parse(readFileSync(projectConfigFile, 'utf8'));
+          config = deepMerge(config, projectConfig);
+        }
+      } catch {}
+    }
+  }
 
-  // 환경변수 오버라이드
+  // Stage 4: 환경변수 오버라이드 (최종 우선)
   if (process.env.DDING_DONG_ENABLED === 'false') config.enabled = false;
   if (process.env.DDING_DONG_VOLUME) config.sound.volume = parseFloat(process.env.DDING_DONG_VOLUME);
   if (process.env.DDING_DONG_LANG) config.language = process.env.DDING_DONG_LANG;
@@ -81,13 +146,25 @@ export function loadConfig() {
   return config;
 }
 
-export function saveConfig(config) {
-  ensureConfigDir();
-  writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2) + '\n', 'utf8');
+/**
+ * 설정 저장 (스코프 인식)
+ * @param {object} config - 저장할 설정 객체 (project 스코프에서는 diff-only 오버라이드만 전달)
+ * @param {'global'|'project'} [scope='global']
+ * @param {string} [projectRoot] - project 스코프일 때 필수
+ */
+export function saveConfig(config, scope = 'global', projectRoot = null) {
+  if (scope === 'project' && projectRoot) {
+    ensureConfigDir('project', projectRoot);
+    writeFileSync(getProjectConfigFile(projectRoot), JSON.stringify(config, null, 2) + '\n', 'utf8');
+  } else {
+    ensureConfigDir();
+    writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2) + '\n', 'utf8');
+  }
 }
 
 export function getDefaultConfig() { return structuredClone(DEFAULT_CONFIG); }
 
+// --- State 함수 (Global 단일 유지 - 스코프 분리 없음) ---
 export function loadState() {
   try {
     return JSON.parse(readFileSync(STATE_FILE, 'utf8'));
