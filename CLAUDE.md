@@ -31,20 +31,20 @@ hooks/                 # Claude Code hook entry points (.mjs)
   hooks.json           # Hook registration manifest
   _common.mjs          # Shared runHook() utility (stdin parse → notify → optional stdout)
   notification.mjs     # Notification hook → input.required
-  stop.mjs             # Stop hook → task.complete (MUST respond with decision)
+  stop.mjs             # Stop hook → task.complete (MUST respond with {})
   session-start.mjs    # SessionStart hook → session.start
   session-end.mjs      # SessionEnd hook → session.end
 skills/                # Skill definitions (SKILL.md with YAML frontmatter)
-  config/
-    SKILL.md           # /dding-dong:config - 설정 변경
-  setup/
-    SKILL.md           # /dding-dong:setup - 환경 설정
-  sounds/
-    SKILL.md           # /dding-dong:sounds - 사운드팩 관리
-  test/
-    SKILL.md           # /dding-dong:test - 알림 테스트
-  doctor/
-    SKILL.md           # /dding-dong:doctor - 문제 진단 (서브에이전트)
+  dd-config/
+    SKILL.md           # /dding-dong:dd-config - settings management
+  dd-setup/
+    SKILL.md           # /dding-dong:dd-setup - interactive setup wizard
+  dd-sounds/
+    SKILL.md           # /dding-dong:dd-sounds - sound pack management
+  dd-test/
+    SKILL.md           # /dding-dong:dd-test - notification testing
+  dd-doctor/
+    SKILL.md           # /dding-dong:dd-doctor - diagnostics (subagent, context: fork — no disable-model-invocation, needs model reasoning)
 scripts/
   notify.mjs           # Unified notification entry point
   generate-sounds.mjs  # Programmatic WAV generation (16-bit PCM, 44100Hz, mono)
@@ -75,7 +75,7 @@ Hook event → hooks/*.mjs
       → isCoolingDown() check (early return if within cooldown)
       → playSound() + sendNotification() in parallel (Promise.allSettled)
       → saveState()           (persist cooldown timestamp)
-    → optional stdout response (e.g. stop hook → { decision: 'continue' })
+    → optional stdout response (e.g. stop hook → {})
 ```
 
 ### Config & State Files
@@ -85,7 +85,7 @@ Config is loaded via 5-stage merge (later stages override earlier):
 2. **Global** — `~/.config/dding-dong/config.json`
 3. **Project** — `.dding-dong/config.json` (team-shared, committed)
 4. **Project Local** — `.dding-dong/config.local.json` (personal override, gitignored)
-5. **Env vars** — `DDING_DONG_ENABLED`, `DDING_DONG_VOLUME`, `DDING_DONG_LANG`
+5. **Env vars** — `DDING_DONG_ENABLED`, `DDING_DONG_VOLUME`, `DDING_DONG_LANG`, `DDING_DONG_PACK`
 
 Other paths:
 - State: `~/.config/dding-dong/.state.json` (global, no scope split)
@@ -114,14 +114,16 @@ The `_meta` field in the global config (`~/.config/dding-dong/config.json`) stor
 
 ### Event Types
 
-`task.complete`, `task.error`, `input.required`, `session.start`, `session.end`
+`task.complete`, `task.error`*, `input.required`, `session.start`, `session.end`
+
+> *`task.error` is defined in config/messages but has no triggering hook in hooks.json. Only testable via CLI `test` mode. Reserved for future Claude Code error hook support.
 
 ## Critical Design Rules
 
-- **Stop hook MUST respond**: `stop.mjs` must write `{ "decision": "continue" }` to stdout. Missing this halts Claude execution.
+- **Stop hook MUST respond**: `stop.mjs` must write `{}` (empty JSON object) to stdout. Missing this halts Claude execution.
 - **Always exit(0) on error**: Notification failure must never block Claude. All hook catch blocks call `process.exit(0)`.
 - **detached + unref**: Audio processes use `spawn(..., { detached: true, stdio: 'ignore' }).unref()` to complete within the 5-second hook timeout.
 - **ESM only**: All scripts use `.mjs` extension with `import`/`export` syntax.
 - **No npm dependencies**: Only Node.js built-in modules (`node:fs`, `node:path`, `node:child_process`, `node:os`, `node:url`).
-- **Env var overrides**: `DDING_DONG_ENABLED`, `DDING_DONG_VOLUME`, `DDING_DONG_LANG` override config values.
+- **Env var overrides**: `DDING_DONG_ENABLED`, `DDING_DONG_VOLUME`, `DDING_DONG_LANG`, `DDING_DONG_PACK` override config values.
 - **Sound pack resolution order**: User packs (`~/.config/dding-dong/packs/`) → built-in packs (`sounds/`).

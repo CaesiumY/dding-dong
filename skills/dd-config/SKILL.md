@@ -1,6 +1,6 @@
 ---
-name: 설정 관리
-description: "dding-dong 알림 설정을 확인하고 변경합니다. show(현재 설정 표시), set(값 변경), reset(초기화)을 지원합니다."
+name: dd-config
+description: "View and manage dding-dong notification settings. Supports show, set, reset commands. 설정 확인, 변경, 초기화."
 allowed-tools: [Bash, Read, Write, AskUserQuestion]
 disable-model-invocation: true
 ---

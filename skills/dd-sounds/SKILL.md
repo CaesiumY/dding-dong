@@ -1,6 +1,6 @@
 ---
-name: 사운드 팩 관리
-description: "dding-dong 사운드 팩을 관리합니다. list(설치된 팩 목록), use(팩 변경), preview(미리듣기)를 지원합니다."
+name: dd-sounds
+description: "Manage dding-dong sound packs. Supports list, use, preview commands. 사운드 팩 관리."
 allowed-tools: [Bash, Read]
 disable-model-invocation: true
 ---
@@ -15,21 +15,20 @@ disable-model-invocation: true
 설치된 사운드 팩 목록을 표시합니다.
 
 ```bash
-node -e "
-const fs = require('fs');
-const path = require('path');
+node --input-type=module -e "
+import { readdirSync, readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { homedir } from 'node:os';
 const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT || '.';
-// 내장 팩
-const builtinDir = path.join(pluginRoot, 'sounds');
-// 사용자 팩
-const userDir = path.join(require('os').homedir(), '.config', 'dding-dong', 'packs');
+const builtinDir = join(pluginRoot, 'sounds');
+const userDir = join(homedir(), '.config', 'dding-dong', 'packs');
 const packs = [];
 for (const dir of [builtinDir, userDir]) {
   try {
-    for (const name of fs.readdirSync(dir)) {
-      const mf = path.join(dir, name, 'manifest.json');
-      if (fs.existsSync(mf)) {
-        const m = JSON.parse(fs.readFileSync(mf, 'utf8'));
+    for (const name of readdirSync(dir)) {
+      const mf = join(dir, name, 'manifest.json');
+      if (existsSync(mf)) {
+        const m = JSON.parse(readFileSync(mf, 'utf8'));
         packs.push({ name: m.name, displayName: m.displayName, dir, version: m.version });
       }
     }

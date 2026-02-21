@@ -1,6 +1,6 @@
 ---
-name: 알림 문제 진단
-description: "dding-dong 알림 문제를 진단합니다. 사운드가 재생되지 않거나, 알림이 오지 않거나, 설정이 적용되지 않을 때 사용합니다. 환경 감지, 설정 확인, 사운드 파일 검증, 테스트 알림을 자동으로 수행합니다."
+name: dd-doctor
+description: "Diagnose dding-dong notification issues. Checks environment, config, sound files, and runs test notifications. 알림 문제 진단."
 allowed-tools: [Bash(node *), Read, Glob, Grep]
 context: fork
 ---
@@ -30,7 +30,7 @@ const config = loadConfig(process.cwd());
 if (config._meta?.setupCompleted) {
   console.log('셋업 완료:', config._meta.setupDate || '날짜 불명');
 } else {
-  console.log('셋업 미완료: /dding-dong:setup 실행을 권장합니다');
+  console.log('셋업 미완료: /dding-dong:dd-setup 실행을 권장합니다');
 }
 "
 ```

@@ -1,6 +1,6 @@
 ---
-name: 설정 마법사
-description: "dding-dong 알림 설정 마법사. 환경 감지, 스코프 선택, 이벤트/볼륨/야간모드 설정을 단계별로 안내합니다."
+name: dd-setup
+description: "Interactive setup wizard for dding-dong notifications. Detects platform, configures scope, events, volume, and quiet hours. 환경 감지 및 초기 설정."
 allowed-tools: [Bash, Read, Write, AskUserQuestion]
 disable-model-invocation: true
 ---
@@ -17,7 +17,7 @@ disable-model-invocation: true
   ```
   dding-dong 설정 마법사
 
-  사용법: /dding-dong:setup [옵션]
+  사용법: /dding-dong:dd-setup [옵션]
 
   옵션:
     --scope global|project|local  설치 범위 지정 (2단계 건너뜀)
@@ -266,5 +266,5 @@ dding-dong 설정 완료!
 **테스트 실패 시:**
 ```
 설정이 저장되었지만 테스트 알림에 실패했습니다.
-/dding-dong:config show 로 설정을 확인해주세요.
+/dding-dong:dd-config show 로 설정을 확인해주세요.
 ```

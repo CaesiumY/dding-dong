@@ -57,7 +57,7 @@ claude plugin add .
 ### Step 1. 환경 설정
 
 ```
-/dding-dong:setup
+/dding-dong:dd-setup
 ```
 
 플랫폼을 자동 감지하고 오디오 플레이어와 알림 도구를 확인합니다.
@@ -65,7 +65,7 @@ claude plugin add .
 ### Step 2. 테스트
 
 ```
-/dding-dong:test
+/dding-dong:dd-test
 ```
 
 모든 이벤트 타입의 알림을 순서대로 테스트합니다. 소리가 들리면 설정 완료!
@@ -74,11 +74,11 @@ claude plugin add .
 
 | 스킬                   | 설명                    |
 | ---------------------- | ----------------------- |
-| `/dding-dong:setup`    | 환경 감지 및 초기 설정  |
-| `/dding-dong:test`     | 모든 이벤트 알림 테스트 |
-| `/dding-dong:config`   | 설정 보기/변경          |
-| `/dding-dong:sounds`   | 사운드 팩 관리          |
-| `/dding-dong:doctor`   | 알림 문제 자동 진단     |
+| `/dding-dong:dd-setup`    | 환경 감지 및 초기 설정  |
+| `/dding-dong:dd-test`     | 모든 이벤트 알림 테스트 |
+| `/dding-dong:dd-config`   | 설정 보기/변경          |
+| `/dding-dong:dd-sounds`   | 사운드 팩 관리          |
+| `/dding-dong:dd-doctor`   | 알림 문제 자동 진단     |
 
 ## 설정
 
@@ -239,7 +239,7 @@ claude plugin add .
 소리가 나지 않거나 알림이 표시되지 않을 때:
 
 ```
-/dding-dong:doctor
+/dding-dong:dd-doctor
 ```
 
 자동으로 환경을 점검하고 문제 원인과 해결 방법을 안내합니다.
