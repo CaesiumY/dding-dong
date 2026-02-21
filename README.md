@@ -78,7 +78,7 @@ claude plugin add .
 | `/dding-dong:test`     | 모든 이벤트 알림 테스트 |
 | `/dding-dong:config`   | 설정 보기/변경          |
 | `/dding-dong:sounds`   | 사운드 팩 관리          |
-| `/dding-dong:diagnose` | 알림 문제 자동 진단     |
+| `/dding-dong:doctor`   | 알림 문제 자동 진단     |
 
 ## 설정
 
@@ -239,7 +239,7 @@ claude plugin add .
 소리가 나지 않거나 알림이 표시되지 않을 때:
 
 ```
-/dding-dong:diagnose
+/dding-dong:doctor
 ```
 
 자동으로 환경을 점검하고 문제 원인과 해결 방법을 안내합니다.

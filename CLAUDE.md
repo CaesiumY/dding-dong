@@ -43,8 +43,8 @@ skills/                # Skill definitions (SKILL.md with YAML frontmatter)
     SKILL.md           # /dding-dong:sounds - 사운드팩 관리
   test/
     SKILL.md           # /dding-dong:test - 알림 테스트
-  diagnose/
-    SKILL.md           # /dding-dong:diagnose - 문제 진단 (서브에이전트)
+  doctor/
+    SKILL.md           # /dding-dong:doctor - 문제 진단 (서브에이전트)
 scripts/
   notify.mjs           # Unified notification entry point
   generate-sounds.mjs  # Programmatic WAV generation (16-bit PCM, 44100Hz, mono)
@@ -100,7 +100,7 @@ The `_meta` field in the global config (`~/.config/dding-dong/config.json`) stor
 ```
 - **Stored in**: Global config only (never in project/local configs)
 - **Merge behavior**: Isolated from `deepMerge` in `loadConfig()` — extracted before merge, re-attached after
-- **Usage**: `diagnose` skill checks `_meta.setupCompleted` to detect first-time setup status
+- **Usage**: `doctor` skill checks `_meta.setupCompleted` to detect first-time setup status
 
 ### Cross-Platform Strategy
 

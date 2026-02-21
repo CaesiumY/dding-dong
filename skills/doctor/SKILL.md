@@ -5,7 +5,7 @@ allowed-tools: [Bash(node *), Read, Glob, Grep]
 context: fork
 ---
 
-# dding-dong 진단
+# dding-dong doctor
 
 알림이 정상 작동하지 않을 때 원인을 분석합니다.
 

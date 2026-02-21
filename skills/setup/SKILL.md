@@ -202,7 +202,7 @@ saveConfig(config, 'local', process.argv[2]);
 
 ### 5-a단계: 설정 완료 메타데이터 기록
 
-글로벌 설정 파일에 `_meta` 필드를 기록합니다 (진단 스킬에서 셋업 완료 여부 판별에 사용):
+글로벌 설정 파일에 `_meta` 필드를 기록합니다 (doctor 스킬에서 셋업 완료 여부 판별에 사용):
 
 ```bash
 node --input-type=module -e "
