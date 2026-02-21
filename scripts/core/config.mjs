@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync, readdirSync, unlinkSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { homedir } from 'node:os';
 
@@ -94,6 +94,59 @@ export function ensureConfigDir(scope = 'global', projectRoot = null) {
   }
 }
 
+// --- Backup & Validation ---
+
+/**
+ * 설정 파일 백업 생성
+ * @param {string} filePath - 백업할 파일 경로
+ * @returns {string|null} 백업 파일 경로, 실패 시 null
+ */
+export function backupConfig(filePath) {
+  if (!existsSync(filePath)) return null;
+  const now = new Date();
+  const ts = now.toISOString().replace(/[-:T]/g, '').replace(/\..+/, '').replace(/(\d{8})(\d{6})/, '$1_$2');
+  const backupPath = `${filePath}.backup.${ts}`;
+  copyFileSync(filePath, backupPath);
+  cleanOldBackups(filePath);
+  return backupPath;
+}
+
+/**
+ * 오래된 백업 파일 정리 (최대 maxCount개 유지)
+ * @param {string} filePath - 원본 파일 경로
+ * @param {number} [maxCount=3]
+ */
+function cleanOldBackups(filePath, maxCount = 3) {
+  const dir = dirname(filePath);
+  const baseName = filePath.split('/').pop();
+  const pattern = `${baseName}.backup.`;
+  const backups = readdirSync(dir)
+    .filter(f => f.startsWith(pattern))
+    .sort();
+  while (backups.length > maxCount) {
+    const oldest = backups.shift();
+    unlinkSync(join(dir, oldest));
+  }
+}
+
+/**
+ * 가장 최근 백업에서 복원
+ * @param {string} filePath - 복원 대상 파일 경로
+ * @returns {boolean} 복원 성공 여부
+ */
+function restoreFromBackup(filePath) {
+  const dir = dirname(filePath);
+  const baseName = filePath.split('/').pop();
+  const pattern = `${baseName}.backup.`;
+  const backups = readdirSync(dir)
+    .filter(f => f.startsWith(pattern))
+    .sort();
+  if (backups.length === 0) return false;
+  const latest = backups[backups.length - 1];
+  copyFileSync(join(dir, latest), filePath);
+  return true;
+}
+
 /**
  * 재귀적 깊은 병합 (null = 해당 키 비활성화/제거)
  */
@@ -119,10 +172,15 @@ function deepMerge(target, source) {
 export function loadConfig(cwd) {
   // Stage 1: Default
   let config = structuredClone(DEFAULT_CONFIG);
+  let meta = null;
 
-  // Stage 2: Global config
+  // Stage 2: Global config (_meta는 병합에서 격리하여 글로벌 원본 보존)
   try {
     const globalConfig = JSON.parse(readFileSync(CONFIG_FILE, 'utf8'));
+    if (globalConfig._meta) {
+      meta = globalConfig._meta;
+      delete globalConfig._meta;
+    }
     config = deepMerge(config, globalConfig);
   } catch {}
 
@@ -155,6 +213,9 @@ export function loadConfig(cwd) {
   if (process.env.DDING_DONG_VOLUME) config.sound.volume = parseFloat(process.env.DDING_DONG_VOLUME);
   if (process.env.DDING_DONG_LANG) config.language = process.env.DDING_DONG_LANG;
 
+  // _meta 재부착 (글로벌 원본, deepMerge 오염 없음)
+  if (meta) config._meta = meta;
+
   return config;
 }
 
@@ -165,15 +226,31 @@ export function loadConfig(cwd) {
  * @param {string} [projectRoot] - project/local 스코프일 때 필수
  */
 export function saveConfig(config, scope = 'global', projectRoot = null) {
+  let filePath;
   if (scope === 'local' && projectRoot) {
     ensureConfigDir('local', projectRoot);
-    writeFileSync(getProjectLocalConfigFile(projectRoot), JSON.stringify(config, null, 2) + '\n', 'utf8');
+    filePath = getProjectLocalConfigFile(projectRoot);
   } else if (scope === 'project' && projectRoot) {
     ensureConfigDir('project', projectRoot);
-    writeFileSync(getProjectConfigFile(projectRoot), JSON.stringify(config, null, 2) + '\n', 'utf8');
+    filePath = getProjectConfigFile(projectRoot);
   } else {
     ensureConfigDir();
-    writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2) + '\n', 'utf8');
+    filePath = CONFIG_FILE;
+  }
+
+  // 백업 (실패해도 계속 진행)
+  try { backupConfig(filePath); } catch {}
+
+  // 저장
+  const content = JSON.stringify(config, null, 2) + '\n';
+  writeFileSync(filePath, content, 'utf8');
+
+  // Round-trip 검증 (실패 시 백업에서 복원 시도)
+  try {
+    JSON.parse(readFileSync(filePath, 'utf8'));
+  } catch {
+    console.error('[dding-dong] 설정 파일 검증 실패:', filePath);
+    try { restoreFromBackup(filePath); } catch {}
   }
 }
 

@@ -79,4 +79,16 @@ AskUserQuestion으로 대상 스코프를 확인합니다:
 3. "내 설정 초기화" -- `.dding-dong/config.local.json` 삭제 (내 설정이 존재하는 경우만 표시)
 4. "취소"
 
-사용자 확인 후 해당 설정 파일을 삭제합니다.
+사용자 확인 후, **삭제 전에 백업을 생성**합니다:
+
+```bash
+node --input-type=module -e "
+import { backupConfig } from '${CLAUDE_PLUGIN_ROOT}/scripts/core/config.mjs';
+const filePath = process.argv[1];
+const result = backupConfig(filePath);
+if (result) console.log('백업 생성:', result);
+else console.log('백업 대상 파일 없음');
+" '${TARGET_FILE_PATH}'
+```
+
+백업 생성 후 해당 설정 파일을 삭제합니다. 백업 실패 시에도 삭제는 진행합니다.

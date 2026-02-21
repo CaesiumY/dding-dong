@@ -15,6 +15,9 @@ node scripts/generate-sounds.mjs
 # Detect platform, audio player, and notifier
 node scripts/setup-wizard.mjs detect
 
+# Validate config files (JSON parsing, required keys, sound pack existence)
+node scripts/setup-wizard.mjs validate
+
 # Register plugin with Claude Code
 claude plugin add /path/to/dding-dong
 ```
@@ -45,9 +48,9 @@ skills/                # Skill definitions (SKILL.md with YAML frontmatter)
 scripts/
   notify.mjs           # Unified notification entry point
   generate-sounds.mjs  # Programmatic WAV generation (16-bit PCM, 44100Hz, mono)
-  setup-wizard.mjs     # Environment detection tool
+  setup-wizard.mjs     # Environment detection + config validation tool (detect, validate)
   core/
-    config.mjs         # Config/state load & save, default values
+    config.mjs         # Config/state load & save, backup & validation, default values
     platform.mjs       # Platform detection + audio player/notifier discovery
     player.mjs         # Cross-platform sound playback (detached + unref)
     notifier.mjs       # Cross-platform OS notification delivery
@@ -87,6 +90,17 @@ Config is loaded via 5-stage merge (later stages override earlier):
 Other paths:
 - State: `~/.config/dding-dong/.state.json` (global, no scope split)
 - User sound packs: `~/.config/dding-dong/packs/<pack-name>/manifest.json`
+- Backup files: `<config-path>.backup.<YYYYMMDD_HHMMSS>` (max 3, auto-rotated)
+
+#### `_meta` field convention
+
+The `_meta` field in the global config (`~/.config/dding-dong/config.json`) stores setup metadata:
+```json
+{ "_meta": { "setupCompleted": true, "setupVersion": "1.0.0", "setupDate": "..." } }
+```
+- **Stored in**: Global config only (never in project/local configs)
+- **Merge behavior**: Isolated from `deepMerge` in `loadConfig()` — extracted before merge, re-attached after
+- **Usage**: `diagnose` skill checks `_meta.setupCompleted` to detect first-time setup status
 
 ### Cross-Platform Strategy
 

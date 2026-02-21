@@ -9,6 +9,25 @@ disable-model-invocation: true
 
 사용자의 환경을 확인하고 dding-dong 알림 플러그인을 설정합니다.
 
+## 플래그 파싱
+
+`$ARGUMENTS`에서 플래그를 확인합니다:
+
+- `--help`: 아래 사용법을 출력하고 종료합니다.
+  ```
+  dding-dong 설정 마법사
+
+  사용법: /dding-dong:setup [옵션]
+
+  옵션:
+    --scope global|project|local  설치 범위 지정 (2단계 건너뜀)
+    --force                       기존 설정 무시, 전체 재설정
+    --help                        이 도움말 표시
+  ```
+
+- `--scope <값>`: `global`, `project`, `local` 중 하나. 지정 시 2단계(스코프 선택)를 건너뛰고 해당 스코프로 진행합니다.
+- `--force`: Pre-Setup Check를 건너뛰고 바로 "전체 재설정" 모드로 진행합니다.
+
 ## 실행 순서
 
 ### 1단계: Pre-Setup Check + 환경 감지
@@ -35,6 +54,8 @@ WSL에서 wsl-notify-send가 없으면:
 
 **Pre-Setup Check** (기존 설정 감지):
 
+`--force` 플래그가 있으면 이 단계를 건너뛰고 "전체 재설정" 모드로 2단계에 진행합니다.
+
 `existingConfig` 필드를 확인하여:
 - 기존 설정이 있으면 (global.exists, project.exists, projectLocal.exists 중 하나라도 true):
   ```
@@ -56,6 +77,8 @@ WSL에서 wsl-notify-send가 없으면:
 - 기존 설정이 없으면: 바로 2단계로 진행합니다.
 
 ### 2단계: 설치 스코프 선택
+
+`--scope` 플래그가 지정되어 있으면 이 단계를 건너뛰고 해당 스코프로 3단계에 진행합니다.
 
 AskUserQuestion으로 질문합니다:
 
@@ -176,6 +199,48 @@ saveConfig(config, 'local', process.argv[2]);
   ".dding-dong/ 디렉토리 전체를 .gitignore에 추가하시겠습니까?"
   1. "config.local.json만 제외 (Recommended)" -- 팀 공유 config.json은 커밋, 개인 설정만 제외
   2. "디렉토리 전체 제외" -- .dding-dong/ 전체를 Git 추적에서 제외
+
+### 5-a단계: 설정 완료 메타데이터 기록
+
+글로벌 설정 파일에 `_meta` 필드를 기록합니다 (진단 스킬에서 셋업 완료 여부 판별에 사용):
+
+```bash
+node --input-type=module -e "
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { homedir } from 'node:os';
+
+const configDir = join(homedir(), '.config', 'dding-dong');
+const configFile = join(configDir, 'config.json');
+mkdirSync(configDir, { recursive: true });
+
+let config = {};
+try { config = JSON.parse(readFileSync(configFile, 'utf8')); } catch {}
+config._meta = { setupCompleted: true, setupVersion: '1.0.0', setupDate: new Date().toISOString() };
+writeFileSync(configFile, JSON.stringify(config, null, 2) + '\n', 'utf8');
+console.log('_meta 기록 완료');
+"
+```
+
+이 단계는 자동으로 실행됩니다 (사용자 인터랙션 없음).
+
+### 5-b단계: 플러그인 설치 검증
+
+플러그인이 Claude Code에 등록되어 있는지 확인합니다:
+
+```bash
+claude plugin list 2>/dev/null | grep -qi dding-dong && echo "REGISTERED" || echo "NOT_REGISTERED"
+```
+
+- `REGISTERED`: "dding-dong 플러그인이 정상 등록되어 있습니다." 안내
+- `NOT_REGISTERED` 또는 명령 실행 실패:
+  ```
+  dding-dong 플러그인이 Claude Code에 등록되지 않았습니다.
+  아래 명령어로 등록해주세요:
+    claude plugin add ${CLAUDE_PLUGIN_ROOT}
+  ```
+
+이 확인이 실패해도 셋업을 중단하지 않고 안내만 합니다.
 
 ### 6단계: 테스트 + 완료 요약
 

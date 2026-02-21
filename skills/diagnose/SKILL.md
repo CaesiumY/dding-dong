@@ -19,6 +19,22 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/setup-wizard.mjs" detect --cwd "$(pwd)"
 
 결과를 분석하여 플랫폼, 사운드 플레이어, 알림 도구 상태를 확인합니다.
 
+### 1-b. 셋업 완료 여부 확인
+
+설정에 `_meta.setupCompleted` 필드가 있는지 확인합니다:
+
+```bash
+node --input-type=module -e "
+import { loadConfig } from '${CLAUDE_PLUGIN_ROOT}/scripts/core/config.mjs';
+const config = loadConfig(process.cwd());
+if (config._meta?.setupCompleted) {
+  console.log('셋업 완료:', config._meta.setupDate || '날짜 불명');
+} else {
+  console.log('셋업 미완료: /dding-dong:setup 실행을 권장합니다');
+}
+"
+```
+
 ### 2. 설정 상태 확인
 
 ```bash
