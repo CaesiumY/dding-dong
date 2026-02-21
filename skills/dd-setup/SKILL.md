@@ -64,6 +64,32 @@ WSL에서 wsl-notify-send가 없으면:
   - 프로젝트 설정: .dding-dong/config.json [존재/없음]
   - 내 설정: .dding-dong/config.local.json [존재/없음]
   ```
+
+  **구버전 업그레이드 감지:**
+
+  기존 설정이 발견된 경우, `_meta.setupVersion`과 현재 플러그인 버전을 비교합니다:
+
+  ```bash
+  node --input-type=module -e "
+  import { loadConfig } from '${CLAUDE_PLUGIN_ROOT}/scripts/core/config.mjs';
+  import { readFileSync } from 'node:fs';
+  import { join } from 'node:path';
+
+  const config = loadConfig();
+  const setupVersion = config._meta?.setupVersion ?? null;
+  const pluginJson = JSON.parse(readFileSync(join('${CLAUDE_PLUGIN_ROOT}', '.claude-plugin', 'plugin.json'), 'utf8'));
+  const currentVersion = pluginJson.version;
+  console.log(JSON.stringify({ setupVersion, currentVersion }));
+  "
+  ```
+
+  결과에 따라 안내 메시지를 출력합니다:
+  - `setupVersion`이 `null` → "이전 버전에서 업그레이드된 설정이 감지되었습니다. 설정을 업데이트하면 최신 기능을 활용할 수 있습니다."
+  - `setupVersion`과 `currentVersion`이 다름 → "dding-dong이 v{setupVersion}에서 v{currentVersion}으로 업데이트되었습니다. 설정을 업데이트하여 새 기능을 반영할 수 있습니다."
+  - 버전이 같음 → 별도 안내 없음
+
+  이 안내는 정보 제공만 하며, 이후 AskUserQuestion 흐름을 변경하지 않습니다.
+
   AskUserQuestion으로 질문:
   - "기존 설정을 어떻게 하시겠습니까?"
     1. "설정 업데이트 (Recommended)" -- 기존 값 유지, 변경할 항목만 수정
@@ -267,4 +293,40 @@ dding-dong 설정 완료!
 ```
 설정이 저장되었지만 테스트 알림에 실패했습니다.
 /dding-dong:dd-config show 로 설정을 확인해주세요.
+```
+
+### 7단계: GitHub 스타 요청
+
+이 단계는 셋업 결과에 영향을 주지 않는 부가적 단계입니다.
+
+먼저 `gh` CLI 인증 여부를 확인합니다:
+
+```bash
+gh auth status 2>&1 && echo "GH_AUTHENTICATED" || echo "GH_NOT_AUTHENTICATED"
+```
+
+**인증된 경우 (`GH_AUTHENTICATED`):**
+
+AskUserQuestion으로 질문합니다:
+"dding-dong이 마음에 드셨다면 GitHub에 스타를 남겨주세요!"
+
+선택지:
+1. **스타 남기기** -- "CaesiumY/dding-dong 저장소에 스타를 남깁니다."
+2. **건너뛰기** -- "다음에 남기겠습니다."
+
+- "스타 남기기" 선택 시:
+  ```bash
+  gh repo star CaesiumY/dding-dong
+  ```
+  성공 시: "감사합니다! 스타가 등록되었습니다." 안내
+  실패 시: 오류를 무시하고 조용히 진행
+
+- "건너뛰기" 선택 시: 그냥 진행
+
+**미인증 또는 실패한 경우 (`GH_NOT_AUTHENTICATED`):**
+
+저장소 URL만 안내합니다:
+```
+dding-dong이 마음에 드셨다면 GitHub에 스타를 남겨주세요!
+https://github.com/CaesiumY/dding-dong
 ```
