@@ -69,9 +69,15 @@ export async function notify(eventType, context = {}) {
   saveState({ ...state, lastNotifiedAt: Date.now() });
 }
 
-// CLI 테스트 모드: node notify.mjs test
+// CLI 테스트 모드: node notify.mjs test [이벤트]
 if (process.argv[2] === 'test') {
-  const events = ['task.complete', 'task.error', 'input.required', 'session.start', 'session.end'];
+  const validEvents = ['task.complete', 'task.error', 'input.required', 'session.start', 'session.end'];
+  const specificEvent = process.argv[3];
+  if (specificEvent && !validEvents.includes(specificEvent)) {
+    console.error(`알 수 없는 이벤트: ${specificEvent}\n사용 가능: ${validEvents.join(', ')}`);
+    process.exit(1);
+  }
+  const events = specificEvent ? [specificEvent] : validEvents;
   console.log('dding-dong 테스트 모드 시작...');
   for (const ev of events) {
     console.log(`  테스트: ${ev}`);
@@ -79,4 +85,18 @@ if (process.argv[2] === 'test') {
     await new Promise(r => setTimeout(r, 1500));
   }
   console.log('테스트 완료.');
+}
+
+// CLI 사운드 팩 미리듣기: node notify.mjs test-sound [팩이름]
+if (process.argv[2] === 'test-sound') {
+  const packName = process.argv[3] || 'default';
+  process.env.DDING_DONG_PACK = packName;
+  const soundEvents = ['task.complete', 'task.error', 'input.required', 'session.start', 'session.end'];
+  console.log(`dding-dong 사운드 팩 미리듣기: ${packName}`);
+  for (const ev of soundEvents) {
+    console.log(`  재생: ${ev}`);
+    await notify(ev, { message: `${packName} - ${ev}` });
+    await new Promise(r => setTimeout(r, 1500));
+  }
+  console.log('미리듣기 완료.');
 }

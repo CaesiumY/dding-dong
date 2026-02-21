@@ -212,6 +212,7 @@ export function loadConfig(cwd) {
   if (process.env.DDING_DONG_ENABLED === 'false') config.enabled = false;
   if (process.env.DDING_DONG_VOLUME) config.sound.volume = parseFloat(process.env.DDING_DONG_VOLUME);
   if (process.env.DDING_DONG_LANG) config.language = process.env.DDING_DONG_LANG;
+  if (process.env.DDING_DONG_PACK) config.sound.pack = process.env.DDING_DONG_PACK;
 
   // _meta 재부착 (글로벌 원본, deepMerge 오염 없음)
   if (meta) config._meta = meta;
