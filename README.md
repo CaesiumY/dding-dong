@@ -18,13 +18,13 @@
 ### Claude Code 플러그인으로 설치 (권장)
 
 ```bash
-claude plugin add https://github.com/ycs-201607083/dding-dong
+claude plugin add https://github.com/CaesiumY/dding-dong
 ```
 
 ### 로컬 설치 (개발/테스트)
 
 ```bash
-git clone https://github.com/ycs-201607083/dding-dong
+git clone https://github.com/CaesiumY/dding-dong
 cd dding-dong
 claude plugin add .
 ```
@@ -51,7 +51,15 @@ claude plugin add .
 
 ## 설정
 
-설정 파일 위치: `~/.config/dding-dong/config.json`
+설정은 5단계로 병합됩니다 (아래로 갈수록 우선):
+
+| 단계 | 경로 | 설명 |
+|------|------|------|
+| Default | *(내장 기본값)* | 플러그인 하드코딩 |
+| Global | `~/.config/dding-dong/config.json` | 전역 설정 |
+| Project | `.dding-dong/config.json` | 프로젝트 공유 (커밋 대상) |
+| Local | `.dding-dong/config.local.json` | 개인 오버라이드 (`.gitignore` 권장) |
+| Env | 환경변수 | 최종 오버라이드 |
 
 ```json
 {
@@ -140,6 +148,14 @@ claude plugin add .
 1. **사용자 팩**: `~/.config/dding-dong/packs/<팩이름>/`
 2. **내장 팩**: `{플러그인 설치 경로}/sounds/<팩이름>/`
 
+### 내장 사운드 팩
+
+| 팩 | 설명 |
+|------|------|
+| `default` | 기본 효과음 |
+| `retro` | 8-bit 칩튠 스타일 게임기 효과음 |
+| `musical` | 피아노 코드 기반 화성적 알림음 |
+
 ### manifest.json 구조
 
 ```json
@@ -175,7 +191,7 @@ claude plugin add .
 | 모드 | 동작 |
 |------|------|
 | `"random"` | `files` 배열에서 랜덤 선택 |
-| `"sequential"` 또는 미지정 | 첫 번째 파일 재생 |
+| 그 외 또는 미지정 | 첫 번째 파일 재생 |
 
 ### 사운드 팩 적용
 
