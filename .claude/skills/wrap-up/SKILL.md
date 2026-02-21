@@ -2,6 +2,7 @@
 name: wrap-up
 description: 세션 마무리 — 소스코드 기반 문서(README.md, CLAUDE.md) 자동 동기화
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, Task]
+context: fork
 ---
 
 # dding-dong 세션 마무리
@@ -240,27 +241,15 @@ git diff --stat:
 [git diff --stat 출력 결과]
 ```
 
-#### 3-c. git commit 제안
+#### 3-c. 커밋 제안
 
-변경 사항이 있으면 커밋 메시지를 제안합니다:
+변경 사항이 있으면 완료 보고에 아래를 포함합니다:
 
 ```
-커밋을 생성하시겠습니까?
-
-제안 커밋 메시지:
-  docs: sync README.md and CLAUDE.md with source code
-
-- "yes" -- 위 메시지로 커밋 생성
-- "custom" -- 직접 커밋 메시지 입력
-- "no" -- 커밋하지 않음
+💡 커밋 제안: docs: sync README.md and CLAUDE.md with source code
 ```
 
-사용자가 "yes"를 선택하면:
-```bash
-git add README.md CLAUDE.md && git commit -m "docs: sync README.md and CLAUDE.md with source code"
-```
-
-"custom"을 선택하면 사용자에게 메시지를 입력받아 커밋합니다.
+**실제 커밋은 실행하지 않습니다.** 메인 컨텍스트에서 사용자에게 확인 후 처리합니다.
 
 #### 3-d. 에러 시 보고
 
