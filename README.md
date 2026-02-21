@@ -79,6 +79,13 @@ claude plugin add .
       "session.end": false
     }
   },
+  "messages": {
+    "task.complete": "작업이 완료되었습니다!",
+    "task.error": "오류가 발생했습니다",
+    "input.required": "확인이 필요합니다",
+    "session.start": "코딩을 시작합니다",
+    "session.end": "세션이 종료되었습니다"
+  },
   "quiet_hours": {
     "enabled": false,
     "start": "22:00",
@@ -98,6 +105,7 @@ claude plugin add .
 | `sound.pack` | `"default"` | 사용할 사운드 팩 이름 |
 | `sound.volume` | `0.7` | 볼륨 (0.0 ~ 1.0) |
 | `notification.enabled` | `true` | OS 알림 활성화 |
+| `messages.<event>` | *(언어별 기본값)* | 이벤트별 커스텀 메시지 (설정 시 언어 기본값 오버라이드) |
 | `quiet_hours.enabled` | `false` | 야간 모드 활성화 |
 | `quiet_hours.start` | `"22:00"` | 야간 모드 시작 시간 |
 | `quiet_hours.end` | `"08:00"` | 야간 모드 종료 시간 |

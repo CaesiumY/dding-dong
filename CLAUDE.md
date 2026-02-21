@@ -26,6 +26,7 @@ claude plugin add /path/to/dding-dong
 ```
 hooks/                 # Claude Code hook entry points (.mjs)
   hooks.json           # Hook registration manifest
+  _common.mjs          # Shared runHook() utility (stdin parse → notify → optional stdout)
   notification.mjs     # Notification hook → input.required
   stop.mjs             # Stop hook → task.complete (MUST respond with decision)
   session-start.mjs    # SessionStart hook → session.start
@@ -52,24 +53,39 @@ scripts/
     notifier.mjs       # Cross-platform OS notification delivery
     messages.mjs       # Per-event messages (ko/en)
 sounds/default/        # Built-in sound pack (WAV + manifest.json)
+sounds/retro/          # 8-bit retro sound pack
+sounds/musical/        # Piano chord sound pack
 .claude-plugin/        # Plugin metadata (plugin.json, marketplace.json)
 ```
 
 ### Data Flow
 
 ```
-Hook event → hooks/*.mjs → scripts/notify.mjs
-  → loadConfig()
-  → isQuietHours() check (early return if in quiet hours)
-  → isCoolingDown() check (early return if within cooldown)
-  → playSound() + sendNotification() in parallel (Promise.allSettled)
-  → saveState() (persist cooldown timestamp)
+Hook event → hooks/*.mjs
+  → _common.mjs runHook(eventType, options)
+    → stdin parse (JSON event)
+    → scripts/notify.mjs notify(eventType, context)
+      → loadConfig(cwd)       (5-stage merge: Default ← Global ← Project ← Local ← env)
+      → config.enabled check  (early return if disabled)
+      → isQuietHours() check  (early return if in quiet hours)
+      → loadState()
+      → isCoolingDown() check (early return if within cooldown)
+      → playSound() + sendNotification() in parallel (Promise.allSettled)
+      → saveState()           (persist cooldown timestamp)
+    → optional stdout response (e.g. stop hook → { decision: 'continue' })
 ```
 
 ### Config & State Files
 
-- Config: `~/.config/dding-dong/config.json`
-- State: `~/.config/dding-dong/.state.json`
+Config is loaded via 5-stage merge (later stages override earlier):
+1. **Default** — hardcoded `DEFAULT_CONFIG` in `config.mjs`
+2. **Global** — `~/.config/dding-dong/config.json`
+3. **Project** — `.dding-dong/config.json` (team-shared, committed)
+4. **Project Local** — `.dding-dong/config.local.json` (personal override, gitignored)
+5. **Env vars** — `DDING_DONG_ENABLED`, `DDING_DONG_VOLUME`, `DDING_DONG_LANG`
+
+Other paths:
+- State: `~/.config/dding-dong/.state.json` (global, no scope split)
 - User sound packs: `~/.config/dding-dong/packs/<pack-name>/manifest.json`
 
 ### Cross-Platform Strategy
@@ -88,7 +104,7 @@ Hook event → hooks/*.mjs → scripts/notify.mjs
 
 ## Critical Design Rules
 
-- **Stop hook MUST respond**: `stop.mjs` must write `{}` to stdout. Missing this halts Claude execution.
+- **Stop hook MUST respond**: `stop.mjs` must write `{ "decision": "continue" }` to stdout. Missing this halts Claude execution.
 - **Always exit(0) on error**: Notification failure must never block Claude. All hook catch blocks call `process.exit(0)`.
 - **detached + unref**: Audio processes use `spawn(..., { detached: true, stdio: 'ignore' }).unref()` to complete within the 5-second hook timeout.
 - **ESM only**: All scripts use `.mjs` extension with `import`/`export` syntax.
