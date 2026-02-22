@@ -19,7 +19,7 @@ node scripts/setup-wizard.mjs detect
 node scripts/setup-wizard.mjs validate
 
 # Sound pack management (discover, validate, create, clone, apply)
-node skills/dd-pack-create/scripts/pack-wizard.mjs discover
+node scripts/pack-wizard.mjs discover
 
 # Version sync (plugin.json → marketplace.json)
 node scripts/sync-version.mjs sync
@@ -45,8 +45,13 @@ hooks/                 # Claude Code hook entry points (.mjs)
 skills/                # Skill definitions (SKILL.md with YAML frontmatter)
   dd-config/
     SKILL.md           # /dding-dong:dd-config - settings management
+    scripts/
+      config-get.mjs   # Config key reader (JSON output)
+      config-set.mjs   # Config key writer with validation
   dd-setup/
     SKILL.md           # /dding-dong:dd-setup - interactive setup wizard
+    scripts/
+      setup-meta.mjs   # Setup metadata reader/writer (_meta field)
   dd-sounds/
     SKILL.md           # /dding-dong:dd-sounds - sound pack management
   dd-test/
@@ -55,17 +60,22 @@ skills/                # Skill definitions (SKILL.md with YAML frontmatter)
     SKILL.md           # /dding-dong:dd-doctor - diagnostics (subagent, context: fork — no disable-model-invocation, needs model reasoning)
   dd-feedback/
     SKILL.md           # /dding-dong:dd-feedback - submit feedback as GitHub issue (NL auto-classification, no disable-model-invocation)
+    scripts/
+      collect-context.mjs  # Context collector for issue submission
   dd-help/
     SKILL.md           # /dding-dong:dd-help - plugin help with dynamic discovery (no disable-model-invocation, needs model reasoning)
-  dd-pack-create/
-    SKILL.md           # /dding-dong:dd-pack-create - custom sound pack creation wizard (no disable-model-invocation)
     scripts/
-      pack-wizard.mjs  # Sound pack management utility (discover, check-exists, create, clone, validate, apply)
+      gather-info.mjs  # Skill/plugin info gatherer for help display
+  dd-pack-create/
+    SKILL.md           # /dding-dong:dd-pack-create - custom sound pack creation wizard (no disable-model-invocation, uses scripts/pack-wizard.mjs)
 scripts/
   notify.mjs           # Unified notification entry point
   generate-sounds.mjs  # Programmatic WAV generation (16-bit PCM, 44100Hz, mono)
   setup-wizard.mjs     # Environment detection + config validation tool (detect, validate)
   sync-version.mjs     # Version sync tool (sync, verify, bump) — source of truth: plugin.json
+  check-config.mjs     # Config diagnostics collector (setup status, merged config, paths)
+  config-save.mjs      # Config writer with scope routing (global/project/local)
+  pack-wizard.mjs      # Sound pack management utility (discover, check-exists, create, clone, validate, apply)
   core/
     config.mjs         # Config/state load & save, backup & validation, default values
     platform.mjs       # Platform detection + audio player/notifier discovery
@@ -137,6 +147,9 @@ The `_meta` field in the global config (`~/.config/dding-dong/config.json`) stor
 
 ## Critical Design Rules
 
+- **Simplicity First**: Make every change as simple as possible. Impact minimal code.
+- **Root cause fixes**: Find root causes. No temporary fixes. Senior developer standards.
+- **Minimal impact**: Changes should only touch what's necessary. Avoid introducing bugs.
 - **Stop hook MUST respond**: `stop.mjs` must write `{}` (empty JSON object) to stdout. Missing this halts Claude execution.
 - **Always exit(0) on error**: Notification failure must never block Claude. All hook catch blocks call `process.exit(0)`.
 - **detached + unref**: Audio processes use `spawn(..., { detached: true, stdio: 'ignore' }).unref()` to complete within the 5-second hook timeout.
@@ -146,3 +159,11 @@ The `_meta` field in the global config (`~/.config/dding-dong/config.json`) stor
 - **Sound pack resolution order**: User packs (`~/.config/dding-dong/packs/`) → built-in packs (`sounds/`).
 - **SKILL.md description convention**: Format as `"<English description>. <한글 요약>. Use when the user says '<trigger1>', '<trigger2>'."` — dd-help dynamically extracts the Korean portion for display. Trigger phrases enable automatic skill matching.
 - **Version management**: `plugin.json` is the single source of truth. Use `node scripts/sync-version.mjs bump <patch|minor|major>` to bump and auto-sync to `marketplace.json` (root version + plugins[0].version). Use `verify` subcommand to check consistency (exit 1 on mismatch). Follow semver: `feat:` → **minor**, `fix:` → **patch**. **When committing**: if the commit type is `feat:` or `fix:`, first run the appropriate bump command, commit the version bump as a separate `chore:` commit, then create the original commit.
+
+## Testing
+
+No automated test suite exists yet. When adding tests:
+- Test runner: `node:test` (maintains zero-dependency policy)
+- Priority: `config.mjs` (5-stage merge), `platform.mjs` (detection), `notify.mjs` (dispatch flow)
+- Hook tests: stop.mjs must always output `{}`, all hooks must exit(0) on error
+- Sound pack tests: manifest validation, resolution order (user > built-in)
