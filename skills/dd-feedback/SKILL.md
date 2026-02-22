@@ -1,6 +1,6 @@
 ---
 name: dd-feedback
-description: "Submit feedback or bug reports for dding-dong. Describe your feedback naturally - it will be auto-classified and filed as a GitHub issue. 피드백을 자연어로 입력하면 자동으로 GitHub 이슈를 생성합니다."
+description: "Submit feedback or bug reports for dding-dong. Describe your feedback naturally - it will be auto-classified and filed as a GitHub issue. 피드백을 자연어로 입력하면 자동으로 GitHub 이슈를 생성합니다. Use when the user says '피드백', 'feedback', '버그 신고', 'report bug'."
 allowed-tools: [Bash, Read, AskUserQuestion]
 ---
 

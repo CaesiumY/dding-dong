@@ -1,6 +1,6 @@
 ---
 name: dd-setup
-description: "Interactive setup wizard for dding-dong notifications. Detects platform, configures scope, notification mode, events, volume, and quiet hours. 환경 감지 및 초기 설정."
+description: "Interactive setup wizard for dding-dong notifications. Detects platform, configures scope, notification mode, events, volume, and quiet hours. 환경 감지 및 초기 설정. Use when the user says '알림 설정', 'setup notifications', '초기 설정'."
 allowed-tools: [Bash, Read, Write, AskUserQuestion]
 disable-model-invocation: true
 ---

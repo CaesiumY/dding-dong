@@ -1,9 +1,11 @@
 ---
 name: dd-doctor
-description: "Diagnose dding-dong notification issues. Checks environment, config, sound files, and runs test notifications. 알림 문제 진단."
+description: "Diagnose dding-dong notification issues. Checks environment, config, sound files, and runs test notifications. 알림 문제 진단. Use when the user says '알림 안됨', '소리 안남', 'notification not working'."
 allowed-tools: [Bash(node *), Read, Glob, Grep]
 context: fork
 ---
+
+> **설계 노트**: `disable-model-invocation`은 의도적으로 생략되었습니다. 진단 결과를 분석하고 문제 원인을 추론하는 데 모델 판단이 필수적입니다.
 
 # dding-dong doctor
 

@@ -1,8 +1,10 @@
 ---
 name: dd-help
-description: "Display comprehensive dding-dong plugin help and reference guide. This skill should be used when the user asks \"help\", \"how to use dding-dong\", \"what can I do\", \"show features\", \"list options\", or wants an overview of available skills, config options, and sound packs. 도움말 및 기능 가이드."
+description: "Display comprehensive dding-dong plugin help and reference guide. This skill should be used when the user asks \"help\", \"how to use dding-dong\", \"what can I do\", \"show features\", \"list options\", or wants an overview of available skills, config options, and sound packs. 도움말 및 기능 가이드. Use when the user says '도움말', 'help', '사용법', 'how to use'."
 allowed-tools: [Bash, Read]
 ---
+
+> **설계 노트**: `disable-model-invocation`은 의도적으로 생략되었습니다. Bash 결과를 파싱하여 한국어 마크다운으로 구조화하는 데 모델 추론이 필요합니다.
 
 # dding-dong 도움말
 
