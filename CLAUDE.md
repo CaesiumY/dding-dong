@@ -45,6 +45,8 @@ skills/                # Skill definitions (SKILL.md with YAML frontmatter)
     SKILL.md           # /dding-dong:dd-test - notification testing
   dd-doctor/
     SKILL.md           # /dding-dong:dd-doctor - diagnostics (subagent, context: fork — no disable-model-invocation, needs model reasoning)
+  dd-feedback/
+    SKILL.md           # /dding-dong:dd-feedback - submit feedback as GitHub issue (NL auto-classification, no disable-model-invocation)
 scripts/
   notify.mjs           # Unified notification entry point
   generate-sounds.mjs  # Programmatic WAV generation (16-bit PCM, 44100Hz, mono)
