@@ -1,18 +1,12 @@
 ---
 name: dd-feedback
-description: "Submit feedback or bug reports for dding-dong. Describe your feedback naturally - it will be auto-classified and filed as a GitHub issue. 피드백을 자연어로 입력하면 자동으로 GitHub 이슈를 생성합니다. Use when the user says '피드백', 'feedback', '버그 신고', 'report bug'."
+description: "Submit feedback or bug reports for dding-dong as a GitHub issue. This skill should be used when the user says \"feedback\", \"bug report\", \"report issue\", \"suggest feature\", \"file a bug\", \"피드백\", \"버그 신고\", \"기능 요청\", \"건의\", or wants to submit feedback about the plugin. 피드백 및 버그 리포트 자동 생성."
 allowed-tools: [Bash, Read, AskUserQuestion]
 ---
 
 # dding-dong 피드백 제출
 
 사용자의 피드백을 자연어로 받아 자동 분류하고 GitHub 이슈를 생성합니다.
-
-> **설계 노트**: `disable-model-invocation`은 의도적으로 생략되었습니다.
-> 이 스킬은 자연어 입력의 분석·분류·구조화에 모델 추론이 필수적입니다.
-> 기존 스킬들은 `disable-model-invocation: true` (기계적 작업) 또는
-> `context: fork` (dd-doctor, 서브에이전트 진단)를 사용하지만,
-> dd-feedback은 현재 대화 컨텍스트에서 NL 이해가 필요한 유일한 스킬입니다.
 
 ## 1단계: 입력 수집
 
@@ -42,50 +36,19 @@ GitHub CLI(gh)가 설치되지 않았거나 인증되지 않았습니다.
 https://github.com/CaesiumY/dding-dong/issues/new
 ```
 
-## 3단계: 대상 저장소 확인
+## 3단계: 컨텍스트 수집
 
-plugin.json에서 저장소 정보를 동적으로 추출합니다:
-
-```bash
-node --input-type=module -e "
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-const pluginJson = JSON.parse(readFileSync(join('${CLAUDE_PLUGIN_ROOT}', '.claude-plugin', 'plugin.json'), 'utf8'));
-const repo = pluginJson.repository.replace('https://github.com/', '');
-console.log(repo);
-"
-```
-
-출력된 값을 대상 저장소로 사용합니다 (예: `CaesiumY/dding-dong`).
-추출 실패 시 `CaesiumY/dding-dong`을 기본값으로 사용합니다.
-
-## 4단계: 환경 정보 수집
+저장소 정보와 환경 정보를 한 번에 수집합니다:
 
 ```bash
-node --input-type=module -e "
-import { detectAll } from '${CLAUDE_PLUGIN_ROOT}/scripts/core/platform.mjs';
-import { loadConfig } from '${CLAUDE_PLUGIN_ROOT}/scripts/core/config.mjs';
-try {
-  const env = detectAll();
-  const config = loadConfig(process.cwd());
-  console.log(JSON.stringify({
-    platform: env.platform,
-    audioPlayer: env.audioPlayer?.name || 'none',
-    notifier: env.notifier?.name || 'none',
-    soundPack: config.sound?.pack || 'default',
-    volume: config.sound?.volume ?? 'unknown',
-    language: config.language || 'unknown',
-    nodeVersion: process.version
-  }, null, 2));
-} catch (e) {
-  console.log(JSON.stringify({ error: e.message }));
-}
-"
+node "${CLAUDE_PLUGIN_ROOT}/skills/dd-feedback/scripts/collect-context.mjs" --cwd "$(pwd)"
 ```
 
-수집 실패 시 (JSON에 `error` 필드가 있으면) 환경 정보를 "감지 불가"로 표시하고 계속 진행합니다.
+JSON 결과를 파싱하여 이후 단계에서 사용합니다:
+- `repository`: 대상 저장소 (예: `CaesiumY/dding-dong`). `null`이면 기본값 `CaesiumY/dding-dong` 사용.
+- `environment`: 환경 정보 객체. `error` 필드가 있으면 환경 정보를 "감지 불가"로 표시하고 계속 진행.
 
-## 5단계: 자동 분류 및 구조화
+## 4단계: 자동 분류 및 구조화
 
 1단계에서 수집한 피드백 텍스트를 분석하여 아래 항목을 결정합니다.
 
@@ -151,7 +114,7 @@ try {
 *이 이슈는 `/dding-dong:dd-feedback`을 통해 자동 생성되었습니다.*
 ```
 
-## 6단계: 미리보기 및 확인
+## 5단계: 미리보기 및 확인
 
 분류 결과를 사용자에게 미리보기로 보여줍니다:
 
@@ -174,9 +137,9 @@ AskUserQuestion으로 질문: "위 내용으로 GitHub 이슈를 생성하시겠
 2. "수정 후 제출" — 수정할 내용을 입력받아 반영 후 다시 미리보기를 보여줍니다
 3. "취소" — 아무것도 생성하지 않고 종료합니다
 
-"수정 후 제출"을 선택하면 사용자에게 수정 사항을 물어본 뒤, 5단계의 분류 결과를 수정하여 다시 미리보기를 보여줍니다.
+"수정 후 제출"을 선택하면 사용자에게 수정 사항을 물어본 뒤, 4단계의 분류 결과를 수정하여 다시 미리보기를 보여줍니다.
 
-## 7단계: 이슈 생성
+## 6단계: 이슈 생성
 
 ### 보안 지침 (셸 인젝션 방어)
 
@@ -197,7 +160,7 @@ BODY_EOF
   --label "LABEL_NAME"
 ```
 
-`REPO_NAME`, 제목 텍스트, 본문 텍스트, `LABEL_NAME`을 5단계와 6단계의 결과로 채웁니다.
+`REPO_NAME`, 제목 텍스트, 본문 텍스트, `LABEL_NAME`을 4단계와 5단계의 결과로 채웁니다.
 
 ### 레이블 실패 시 2차 시도
 
@@ -226,7 +189,7 @@ BODY_EOF
 https://github.com/CaesiumY/dding-dong/issues/new
 ```
 
-## 8단계: 결과 안내
+## 7단계: 결과 안내
 
 이슈 생성 성공 시 `gh issue create`의 출력에서 이슈 URL을 추출하여 안내합니다:
 
@@ -241,3 +204,8 @@ https://github.com/CaesiumY/dding-dong/issues/new
 피드백이 제출되었습니다! (레이블은 수동으로 추가해주세요)
 이슈 URL: [생성된 이슈 URL]
 ```
+
+---
+**관련 스킬**
+- 알림이 안 될 때 → `/dding-dong:dd-doctor`
+- 전체 기능 안내 → `/dding-dong:dd-help`
