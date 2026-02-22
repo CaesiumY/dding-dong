@@ -7,6 +7,13 @@
   },
   "repository": "https://github.com/CaesiumY/dding-dong",
   "license": "MIT",
-  "keywords": ["claude-code", "plugin", "notification", "sound", "korean", "alert"],
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "notification",
+    "sound",
+    "korean",
+    "alert"
+  ],
   "skills": "./skills/"
 }

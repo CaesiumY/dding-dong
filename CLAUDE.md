@@ -18,6 +18,14 @@ node scripts/setup-wizard.mjs detect
 # Validate config files (JSON parsing, required keys, sound pack existence)
 node scripts/setup-wizard.mjs validate
 
+# Sound pack management (discover, validate, create, clone, apply)
+node skills/dd-pack-create/scripts/pack-wizard.mjs discover
+
+# Version sync (plugin.json → marketplace.json)
+node scripts/sync-version.mjs sync
+node scripts/sync-version.mjs verify
+node scripts/sync-version.mjs bump patch   # or minor, major
+
 # Register plugin with Claude Code
 claude plugin add /path/to/dding-dong
 ```
@@ -49,10 +57,15 @@ skills/                # Skill definitions (SKILL.md with YAML frontmatter)
     SKILL.md           # /dding-dong:dd-feedback - submit feedback as GitHub issue (NL auto-classification, no disable-model-invocation)
   dd-help/
     SKILL.md           # /dding-dong:dd-help - plugin help with dynamic discovery (no disable-model-invocation, needs model reasoning)
+  dd-pack-create/
+    SKILL.md           # /dding-dong:dd-pack-create - custom sound pack creation wizard (no disable-model-invocation)
+    scripts/
+      pack-wizard.mjs  # Sound pack management utility (discover, check-exists, create, clone, validate, apply)
 scripts/
   notify.mjs           # Unified notification entry point
   generate-sounds.mjs  # Programmatic WAV generation (16-bit PCM, 44100Hz, mono)
   setup-wizard.mjs     # Environment detection + config validation tool (detect, validate)
+  sync-version.mjs     # Version sync tool (sync, verify, bump) — source of truth: plugin.json
   core/
     config.mjs         # Config/state load & save, backup & validation, default values
     platform.mjs       # Platform detection + audio player/notifier discovery
@@ -100,7 +113,7 @@ Other paths:
 
 The `_meta` field in the global config (`~/.config/dding-dong/config.json`) stores setup metadata:
 ```json
-{ "_meta": { "setupCompleted": true, "setupVersion": "1.0.0", "setupDate": "..." } }
+{ "_meta": { "setupCompleted": true, "setupVersion": "<from plugin.json>", "setupDate": "..." } }
 ```
 - **Stored in**: Global config only (never in project/local configs)
 - **Merge behavior**: Isolated from `deepMerge` in `loadConfig()` — extracted before merge, re-attached after
@@ -131,4 +144,5 @@ The `_meta` field in the global config (`~/.config/dding-dong/config.json`) stor
 - **No npm dependencies**: Only Node.js built-in modules (`node:fs`, `node:path`, `node:child_process`, `node:os`, `node:url`).
 - **Env var overrides**: `DDING_DONG_ENABLED`, `DDING_DONG_VOLUME`, `DDING_DONG_LANG`, `DDING_DONG_PACK` override config values.
 - **Sound pack resolution order**: User packs (`~/.config/dding-dong/packs/`) → built-in packs (`sounds/`).
-- **SKILL.md description convention**: Format as `"<English description>. <한글 요약>."` — dd-help dynamically extracts the Korean portion for display.
+- **SKILL.md description convention**: Format as `"<English description>. <한글 요약>. Use when the user says '<trigger1>', '<trigger2>'."` — dd-help dynamically extracts the Korean portion for display. Trigger phrases enable automatic skill matching.
+- **Version management**: `plugin.json` is the single source of truth. Use `node scripts/sync-version.mjs bump <patch|minor|major>` to bump and auto-sync to `marketplace.json` (root version + plugins[0].version). Use `verify` subcommand to check consistency (exit 1 on mismatch). Follow semver: `feat:` → **minor**, `fix:` → **patch**. Bump in a dedicated `chore:` commit.

@@ -159,10 +159,12 @@ if (subcmd === 'validate') {
     if (marketplaceJson.version !== src) {
       errors.push({ field: 'version', error: `marketplace.json 루트 버전 '${marketplaceJson.version}'이(가) plugin.json '${src}'과(와) 불일치` });
     }
-    if (marketplaceJson.plugins?.[0]?.version !== src) {
+    if (marketplaceJson.plugins?.[0] && marketplaceJson.plugins[0].version !== src) {
       errors.push({ field: 'version', error: `marketplace.json plugins[0].version '${marketplaceJson.plugins[0].version}'이(가) plugin.json '${src}'과(와) 불일치` });
     }
-  } catch {}
+  } catch (e) {
+    errors.push({ field: 'version', error: `버전 파일 읽기 실패: ${e.message}` });
+  }
 
   process.stdout.write(JSON.stringify({ valid: errors.length === 0, errors }, null, 2) + '\n');
   process.exit(0);
