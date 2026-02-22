@@ -10,18 +10,13 @@
  */
 
 import { existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import {
   loadConfig,
   getConfigFile,
   findProjectRoot,
   getProjectConfigFile,
   getProjectLocalConfigFile
-} from '../../../scripts/core/config.mjs';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+} from './core/config.mjs';
 
 // Parse --cwd argument
 function parseCwd(args) {

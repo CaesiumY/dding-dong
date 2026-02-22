@@ -24,7 +24,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || resolve(__dirname, '..');
+const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || resolve(__dirname, '..', '..', '..');
 
 const PACKS_DIR = join(homedir(), '.config', 'dding-dong', 'packs');
 const BUILTIN_DIR = join(PLUGIN_ROOT, 'sounds');

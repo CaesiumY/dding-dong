@@ -22,7 +22,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/setup-wizard.mjs" detect --cwd "$(pwd)"
 ### 2. 설정 진단
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/dd-doctor/scripts/check-config.mjs" --cwd "$(pwd)"
+node "${CLAUDE_PLUGIN_ROOT}/scripts/check-config.mjs" --cwd "$(pwd)"
 ```
 
 JSON 결과에서 다음을 확인합니다:
