@@ -1,11 +1,9 @@
 ---
 name: dd-doctor
-description: "Diagnose dding-dong notification issues. Checks environment, config, sound files, and runs test notifications. 알림 문제 진단. Use when the user says '알림 안됨', '소리 안남', 'notification not working'."
+description: "Diagnose dding-dong notification issues. This skill should be used when the user says \"notification not working\", \"sound not playing\", \"no alert\", \"diagnose\", \"알림 안됨\", \"소리 안남\", \"알림 문제\", \"진단\", or experiences notification failures. 알림 문제 진단."
 allowed-tools: [Bash(node *), Read, Glob, Grep]
 context: fork
 ---
-
-> **설계 노트**: `disable-model-invocation`은 의도적으로 생략되었습니다. 진단 결과를 분석하고 문제 원인을 추론하는 데 모델 판단이 필수적입니다.
 
 # dding-dong doctor
 
@@ -21,44 +19,28 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/setup-wizard.mjs" detect --cwd "$(pwd)"
 
 결과를 분석하여 플랫폼, 사운드 플레이어, 알림 도구 상태를 확인합니다.
 
-### 1-b. 셋업 완료 여부 확인
-
-설정에 `_meta.setupCompleted` 필드가 있는지 확인합니다:
+### 2. 설정 진단
 
 ```bash
-node --input-type=module -e "
-import { loadConfig } from '${CLAUDE_PLUGIN_ROOT}/scripts/core/config.mjs';
-const config = loadConfig(process.cwd());
-if (config._meta?.setupCompleted) {
-  console.log('셋업 완료:', config._meta.setupDate || '날짜 불명');
-} else {
-  console.log('셋업 미완료: /dding-dong:dd-setup 실행을 권장합니다');
-}
-"
+node "${CLAUDE_PLUGIN_ROOT}/skills/dd-doctor/scripts/check-config.mjs" --cwd "$(pwd)"
 ```
 
-### 2. 설정 상태 확인
+JSON 결과에서 다음을 확인합니다:
+- `setup.completed` — 초기 셋업 완료 여부 (미완료 시 `/dding-dong:dd-setup` 권장)
+- `config` — 병합된 설정 (`enabled`, `sound.events`, `notification.events` 등)
+- `paths` — 각 설정 파일의 경로와 존재 여부
+
+### 3. 설정 검증
 
 ```bash
-node --input-type=module -e "
-import { loadConfig, getConfigFile, findProjectRoot, getProjectConfigFile } from '${CLAUDE_PLUGIN_ROOT}/scripts/core/config.mjs';
-import { existsSync } from 'node:fs';
-const cwd = process.cwd();
-const config = loadConfig(cwd);
-const globalPath = getConfigFile();
-const projectRoot = findProjectRoot(cwd);
-const projectPath = projectRoot ? getProjectConfigFile(projectRoot) : null;
-console.log(JSON.stringify({
-  config,
-  paths: { global: globalPath, project: projectPath },
-  exists: { global: existsSync(globalPath), project: projectPath ? existsSync(projectPath) : false }
-}, null, 2));
-"
+node "${CLAUDE_PLUGIN_ROOT}/scripts/setup-wizard.mjs" validate --cwd "$(pwd)"
 ```
 
-### 3. 사운드 파일 존재 확인
-
-설정에서 사용 중인 사운드 팩의 manifest.json과 WAV 파일이 존재하는지 확인합니다.
+자동 검증 항목:
+- JSON 파싱 오류
+- 필수 키 누락 또는 타입 오류
+- 알 수 없는 이벤트 타입
+- 사운드 팩 파일 존재 여부
 
 ### 4. 테스트 알림 실행
 
@@ -73,3 +55,9 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/notify.mjs" test task.complete
 - 설정 문제 (비활성화, 이벤트 OFF)
 - 파일 문제 (사운드 파일 누락)
 - 권한 문제 (실행 권한 부족)
+
+---
+**관련 스킬**
+- 초기 설정 → `/dding-dong:dd-setup`
+- 피드백 제출 → `/dding-dong:dd-feedback`
+- 전체 기능 안내 → `/dding-dong:dd-help`
