@@ -47,6 +47,8 @@ skills/                # Skill definitions (SKILL.md with YAML frontmatter)
     SKILL.md           # /dding-dong:dd-doctor - diagnostics (subagent, context: fork — no disable-model-invocation, needs model reasoning)
   dd-feedback/
     SKILL.md           # /dding-dong:dd-feedback - submit feedback as GitHub issue (NL auto-classification, no disable-model-invocation)
+  dd-help/
+    SKILL.md           # /dding-dong:dd-help - plugin help with dynamic discovery (no disable-model-invocation, needs model reasoning)
 scripts/
   notify.mjs           # Unified notification entry point
   generate-sounds.mjs  # Programmatic WAV generation (16-bit PCM, 44100Hz, mono)
@@ -129,3 +131,4 @@ The `_meta` field in the global config (`~/.config/dding-dong/config.json`) stor
 - **No npm dependencies**: Only Node.js built-in modules (`node:fs`, `node:path`, `node:child_process`, `node:os`, `node:url`).
 - **Env var overrides**: `DDING_DONG_ENABLED`, `DDING_DONG_VOLUME`, `DDING_DONG_LANG`, `DDING_DONG_PACK` override config values.
 - **Sound pack resolution order**: User packs (`~/.config/dding-dong/packs/`) → built-in packs (`sounds/`).
+- **SKILL.md description convention**: Format as `"<English description>. <한글 요약>."` — dd-help dynamically extracts the Korean portion for display.
