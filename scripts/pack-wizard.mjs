@@ -24,7 +24,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || resolve(__dirname, '..', '..', '..');
+const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || resolve(__dirname, '..');
 
 const PACKS_DIR = join(homedir(), '.config', 'dding-dong', 'packs');
 const BUILTIN_DIR = join(PLUGIN_ROOT, 'sounds');
@@ -44,6 +44,18 @@ function jsonError(msg) {
 
 // ─── discover ───────────────────────────────────
 if (cmd === 'discover') {
+  // --cwd 옵션으로 프로젝트 기준 활성 팩 판별
+  let cwd = process.cwd();
+  const cwdIdx = args.indexOf('--cwd');
+  if (cwdIdx !== -1 && args[cwdIdx + 1]) cwd = args[cwdIdx + 1];
+
+  let currentPack = 'default';
+  try {
+    const { loadConfig } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
+    const config = loadConfig(cwd);
+    currentPack = config.sound?.pack || 'default';
+  } catch {}
+
   const packs = [];
   for (const [dir, type] of [[BUILTIN_DIR, 'built-in'], [PACKS_DIR, 'user']]) {
     try {
@@ -51,7 +63,14 @@ if (cmd === 'discover') {
         const mf = join(dir, name, 'manifest.json');
         if (existsSync(mf)) {
           const m = JSON.parse(readFileSync(mf, 'utf8'));
-          packs.push({ name: m.name, displayName: m.displayName, type, dir: join(dir, name) });
+          packs.push({
+            name: m.name,
+            displayName: m.displayName,
+            type,
+            dir: join(dir, name),
+            version: m.version ?? null,
+            active: m.name === currentPack
+          });
         }
       }
     } catch {}
@@ -222,10 +241,22 @@ if (cmd === 'validate') {
 if (cmd === 'apply') {
   const packName = args[1];
   if (!packName) jsonError('팩 이름이 필요합니다.');
-  const { loadConfig, saveConfig } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
-  const config = loadConfig();
-  config.sound.pack = packName;
-  saveConfig(config, 'global');
+  // 팩 존재 확인
+  const found = [join(PACKS_DIR, packName), join(BUILTIN_DIR, packName)]
+    .some(d => existsSync(join(d, 'manifest.json')));
+  if (!found) jsonError('팩을 찾을 수 없습니다: ' + packName);
+  // raw 글로벌 config만 수정 (병합된 config를 저장하면 기본값까지 평탄화됨)
+  const { getConfigFile, ensureConfigDir, saveConfig } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
+  ensureConfigDir();
+  const configFile = getConfigFile();
+  let globalConfig = {};
+  try { globalConfig = JSON.parse(readFileSync(configFile, 'utf8')); } catch {}
+  const meta = globalConfig._meta;
+  delete globalConfig._meta;
+  if (!globalConfig.sound) globalConfig.sound = {};
+  globalConfig.sound.pack = packName;
+  if (meta) globalConfig._meta = meta;
+  saveConfig(globalConfig, 'global');
   json({ applied: true, pack: packName });
   process.exit(0);
 }

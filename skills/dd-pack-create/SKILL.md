@@ -86,7 +86,7 @@ AskUserQuestion으로 질문합니다:
 설치된 팩 목록을 조회합니다:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/dd-pack-create/scripts/pack-wizard.mjs" discover
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" discover
 ```
 
 조회된 팩 목록을 사용자에게 표시하고 AskUserQuestion으로 어떤 팩을 복제할지 선택하게 합니다.
@@ -118,7 +118,7 @@ AskUserQuestion으로 질문합니다:
 **이름 중복 검사:**
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/dd-pack-create/scripts/pack-wizard.mjs" check-exists 'PACK_NAME'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" check-exists 'PACK_NAME'
 ```
 
 `PACK_NAME`을 사용자 입력값으로 대체합니다.
@@ -154,7 +154,7 @@ AskUserQuestion으로 질문합니다:
 #### 2-d. 자동 설정 필드 감지
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/dd-pack-create/scripts/pack-wizard.mjs" detect-author
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" detect-author
 ```
 
 - `version`: 항상 `"1.0.0"`
@@ -165,7 +165,7 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/dd-pack-create/scripts/pack-wizard.mjs" detec
 **새로 만들기 모드:**
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/dd-pack-create/scripts/pack-wizard.mjs" create 'PACK_NAME' 'DISPLAY_NAME' 'AUTHOR' 'DESCRIPTION'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" create 'PACK_NAME' 'DISPLAY_NAME' 'AUTHOR' 'DESCRIPTION'
 ```
 
 `PACK_NAME`, `DISPLAY_NAME`, `AUTHOR`, `DESCRIPTION`을 수집된 값으로 대체합니다.
@@ -173,7 +173,7 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/dd-pack-create/scripts/pack-wizard.mjs" creat
 **복제 모드:**
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/dd-pack-create/scripts/pack-wizard.mjs" clone 'SOURCE_DIR' 'PACK_NAME' 'DISPLAY_NAME' 'AUTHOR' 'DESCRIPTION'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" clone 'SOURCE_DIR' 'PACK_NAME' 'DISPLAY_NAME' 'AUTHOR' 'DESCRIPTION'
 ```
 
 `SOURCE_DIR`은 1단계에서 선택한 복제 원본 팩의 디렉토리 경로, 나머지는 수집된 값으로 대체합니다.
@@ -239,7 +239,7 @@ WAV 파일 권장 사양:
 사용자가 파일 경로를 제공할 때마다 아래 검증을 실행합니다:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/dd-pack-create/scripts/pack-wizard.mjs" validate-file 'FILE_PATH'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate-file 'FILE_PATH'
 ```
 
 `FILE_PATH`를 사용자 입력 경로로 대체합니다.
@@ -252,7 +252,7 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/dd-pack-create/scripts/pack-wizard.mjs" valid
 검증 통과 후 즉시 실행합니다:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/dd-pack-create/scripts/pack-wizard.mjs" copy-sound 'SRC_PATH' 'PACK_NAME' 'EVENT_TYPE' 'DEST_FILENAME'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" copy-sound 'SRC_PATH' 'PACK_NAME' 'EVENT_TYPE' 'DEST_FILENAME'
 ```
 
 `SRC_PATH`는 사용자 파일 경로, `PACK_NAME`은 팩 이름, `EVENT_TYPE`은 이벤트 타입, `DEST_FILENAME`은 기본 파일명(위 표 참조)으로 대체합니다.
@@ -262,7 +262,7 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/dd-pack-create/scripts/pack-wizard.mjs" copy-
 "제거"를 선택한 경우:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/dd-pack-create/scripts/pack-wizard.mjs" remove-event 'PACK_NAME' 'EVENT_TYPE'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" remove-event 'PACK_NAME' 'EVENT_TYPE'
 ```
 
 ### 4단계: 최종 검증 + 적용
@@ -272,7 +272,7 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/dd-pack-create/scripts/pack-wizard.mjs" remov
 모든 이벤트 등록이 완료되면 최종 검증을 실행합니다:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/dd-pack-create/scripts/pack-wizard.mjs" validate 'PACK_NAME'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate 'PACK_NAME'
 ```
 
 결과를 아래 형식으로 사용자에게 표시합니다:
@@ -320,7 +320,7 @@ AskUserQuestion으로 질문합니다:
 기존 설정을 로드하고 `sound.pack`만 변경하여 저장합니다:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/dd-pack-create/scripts/pack-wizard.mjs" apply 'PACK_NAME'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" apply 'PACK_NAME'
 ```
 
 적용 성공 시: "사운드 팩이 'PACK_NAME'으로 변경되었습니다." 안내
