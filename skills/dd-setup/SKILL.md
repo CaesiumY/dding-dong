@@ -1,6 +1,6 @@
 ---
 name: dd-setup
-description: "Interactive setup wizard for dding-dong notifications. Detects platform, configures scope, notification mode, events, volume, and quiet hours. 환경 감지 및 초기 설정. Use when the user says '알림 설정', 'setup notifications', '초기 설정'."
+description: "Interactive setup wizard for dding-dong notifications. This skill should be used when the user says \"setup notifications\", \"initial setup\", \"configure dding-dong\", \"install plugin\", \"알림 설정\", \"초기 설정\", \"플러그인 설정\", \"설정 마법사\", or wants to configure the notification plugin for the first time. 환경 감지 및 초기 설정."
 allowed-tools: [Bash, Read, Write, AskUserQuestion]
 disable-model-invocation: true
 ---
@@ -67,25 +67,9 @@ WSL에서 wsl-notify-send가 없으면:
 
   **구버전 업그레이드 감지:**
 
-  기존 설정이 발견된 경우, `_meta.setupVersion`과 현재 플러그인 버전을 비교합니다:
-
-  ```bash
-  node --input-type=module -e "
-  import { loadConfig } from '${CLAUDE_PLUGIN_ROOT}/scripts/core/config.mjs';
-  import { readFileSync } from 'node:fs';
-  import { join } from 'node:path';
-
-  const config = loadConfig();
-  const setupVersion = config._meta?.setupVersion ?? null;
-  const pluginJson = JSON.parse(readFileSync(join('${CLAUDE_PLUGIN_ROOT}', '.claude-plugin', 'plugin.json'), 'utf8'));
-  const currentVersion = pluginJson.version;
-  console.log(JSON.stringify({ setupVersion, currentVersion }));
-  "
-  ```
-
-  결과에 따라 안내 메시지를 출력합니다:
+  기존 설정이 발견된 경우, `detect` 결과의 `setupVersion`과 `pluginVersion` 필드를 비교합니다:
   - `setupVersion`이 `null` → "이전 버전에서 업그레이드된 설정이 감지되었습니다. 설정을 업데이트하면 최신 기능을 활용할 수 있습니다."
-  - `setupVersion`과 `currentVersion`이 다름 → "dding-dong이 v{setupVersion}에서 v{currentVersion}으로 업데이트되었습니다. 설정을 업데이트하여 새 기능을 반영할 수 있습니다."
+  - `setupVersion`과 `pluginVersion`이 다름 → "dding-dong이 v{setupVersion}에서 v{pluginVersion}으로 업데이트되었습니다. 설정을 업데이트하여 새 기능을 반영할 수 있습니다."
   - 버전이 같음 → 별도 안내 없음
 
   이 안내는 정보 제공만 하며, 이후 AskUserQuestion 흐름을 변경하지 않습니다.
@@ -235,42 +219,21 @@ AskUserQuestion으로 순차적으로 질문합니다:
 3단계에서 결정한 `sound.enabled`와 `notification.enabled` 값을 설정 객체에 반영합니다.
 사운드가 활성화된 경우, 4단계에서 선택한 사운드팩 이름을 `sound.pack` 필드에 포함합니다.
 
-**Global 스코프 선택 시:**
-- `~/.config/dding-dong/config.json`에 전체 설정을 저장합니다.
-- 아래 Bash 코드를 사용합니다:
-```bash
-node --input-type=module -e "
-import { saveConfig } from '${CLAUDE_PLUGIN_ROOT}/scripts/core/config.mjs';
-const config = JSON.parse(process.argv[1]);
-saveConfig(config, 'global');
-" '${CONFIG_JSON}'
-```
-
-**Project 스코프 선택 시:**
-- `.dding-dong/config.json`에 **오버라이드 키만** (diff-only) 저장합니다.
-- 기본값과 다른 항목만 설정 객체에 포함합니다.
-- `config.local.json`을 `.gitignore`에 자동으로 추가합니다 (개인 설정 보호).
+스코프에 따라 아래 명령어로 설정을 저장합니다:
 
 ```bash
-node --input-type=module -e "
-import { saveConfig } from '${CLAUDE_PLUGIN_ROOT}/scripts/core/config.mjs';
-const config = JSON.parse(process.argv[1]);
-saveConfig(config, 'project', process.argv[2]);
-" '${CONFIG_JSON}' '${PROJECT_ROOT}'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/config-save.mjs" '${CONFIG_JSON}' --scope '${SCOPE}' --cwd "$(pwd)"
 ```
 
-**Local 스코프 선택 시:**
-- `.dding-dong/config.local.json`에 **오버라이드 키만** (diff-only) 저장합니다.
-- 기본값과 다른 항목만 설정 객체에 포함합니다.
-- `.gitignore`에 `config.local.json` 라인이 없으면 추가합니다.
+- `${SCOPE}`는 2단계에서 선택한 스코프 (`global`, `project`, `local`)
+- `${CONFIG_JSON}`은 사용자 응답을 바탕으로 구성한 설정 JSON 문자열
 
-```bash
-node --input-type=module -e "
-import { saveConfig } from '${CLAUDE_PLUGIN_ROOT}/scripts/core/config.mjs';
-const config = JSON.parse(process.argv[1]);
-saveConfig(config, 'local', process.argv[2]);
-" '${CONFIG_JSON}' '${PROJECT_ROOT}'
-```
+**스코프별 동작:**
+- **Global** (`--scope global`): `~/.config/dding-dong/config.json`에 전체 설정을 저장합니다.
+- **Project** (`--scope project`): `.dding-dong/config.json`에 **오버라이드 키만** (diff-only) 저장합니다. 기본값과 다른 항목만 설정 객체에 포함합니다. `config.local.json`을 `.gitignore`에 자동으로 추가합니다 (개인 설정 보호).
+- **Local** (`--scope local`): `.dding-dong/config.local.json`에 **오버라이드 키만** (diff-only) 저장합니다. 기본값과 다른 항목만 설정 객체에 포함합니다. `.gitignore`에 `config.local.json` 라인이 없으면 추가합니다.
+
+결과 JSON의 `success` 필드로 저장 성공 여부를 확인합니다. `error` 필드가 있으면 사용자에게 안내합니다.
 
 **Project/Local 공통 — .gitignore 처리:**
 - 프로젝트 루트의 `.gitignore`에 `config.local.json` 패턴이 없으면 추가합니다.
@@ -284,22 +247,10 @@ saveConfig(config, 'local', process.argv[2]);
 글로벌 설정 파일에 `_meta` 필드를 기록합니다 (doctor 스킬에서 셋업 완료 여부 판별에 사용):
 
 ```bash
-node --input-type=module -e "
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
-import { homedir } from 'node:os';
-
-const configDir = join(homedir(), '.config', 'dding-dong');
-const configFile = join(configDir, 'config.json');
-mkdirSync(configDir, { recursive: true });
-
-let config = {};
-try { config = JSON.parse(readFileSync(configFile, 'utf8')); } catch {}
-config._meta = { setupCompleted: true, setupVersion: '1.0.0', setupDate: new Date().toISOString() };
-writeFileSync(configFile, JSON.stringify(config, null, 2) + '\n', 'utf8');
-console.log('_meta 기록 완료');
-"
+node "${CLAUDE_PLUGIN_ROOT}/skills/dd-setup/scripts/setup-meta.mjs"
 ```
+
+결과 JSON의 `success` 필드로 기록 성공을 확인합니다. `setupVersion`은 `plugin.json`에서 자동으로 읽어옵니다.
 
 이 단계는 자동으로 실행됩니다 (사용자 인터랙션 없음).
 
@@ -386,3 +337,10 @@ AskUserQuestion으로 질문합니다:
 dding-dong이 마음에 드셨다면 GitHub에 스타를 남겨주세요!
 https://github.com/CaesiumY/dding-dong
 ```
+
+---
+
+**관련 스킬**
+- 설정 조회/변경 → `/dding-dong:dd-config`
+- 알림 문제 진단 → `/dding-dong:dd-doctor`
+- 전체 기능 안내 → `/dding-dong:dd-help`

@@ -18,7 +18,7 @@ function parseCwd() {
 if (subcmd === 'detect') {
   const cwd = parseCwd();
   const { detectAll } = await import(resolve(PLUGIN_ROOT, 'scripts/core/platform.mjs'));
-  const { getConfigFile, getPacksDir, findProjectRoot, getProjectConfigFile, getProjectLocalConfigFile } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
+  const { loadConfig, getConfigFile, getPacksDir, findProjectRoot, getProjectConfigFile, getProjectLocalConfigFile } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
 
   const detected = detectAll();
   const configFile = getConfigFile();
@@ -48,6 +48,20 @@ if (subcmd === 'detect') {
   const projectConfigFile = projectRoot ? getProjectConfigFile(projectRoot) : null;
   const projectLocalConfigFile = projectRoot ? getProjectLocalConfigFile(projectRoot) : null;
 
+  // 버전 정보 수집
+  let pluginVersion = null;
+  try {
+    const { readFileSync } = await import('node:fs');
+    const pluginJson = JSON.parse(readFileSync(resolve(PLUGIN_ROOT, '.claude-plugin', 'plugin.json'), 'utf8'));
+    pluginVersion = pluginJson.version ?? null;
+  } catch {}
+
+  let setupVersion = null;
+  try {
+    const config = loadConfig(cwd);
+    setupVersion = config._meta?.setupVersion ?? null;
+  } catch {}
+
   const result = {
     platform: detected.platform,
     audioPlayer: detected.audioPlayer,
@@ -55,6 +69,8 @@ if (subcmd === 'detect') {
     nodeVersion: process.version,
     configExists: existsSync(configFile),
     packsInstalled,
+    pluginVersion,
+    setupVersion,
     existingConfig: {
       global: { exists: existsSync(configFile), path: configFile },
       project: {
@@ -133,6 +149,20 @@ if (subcmd === 'validate') {
       errors.push({ field: 'sound.pack', error: `사운드 팩 '${config.sound.pack}' 을(를) 찾을 수 없음` });
     }
   }
+
+  // 버전 일관성 검증 (plugin.json ↔ marketplace.json)
+  try {
+    const { readFileSync } = await import('node:fs');
+    const pluginJson = JSON.parse(readFileSync(resolve(PLUGIN_ROOT, '.claude-plugin', 'plugin.json'), 'utf8'));
+    const marketplaceJson = JSON.parse(readFileSync(resolve(PLUGIN_ROOT, '.claude-plugin', 'marketplace.json'), 'utf8'));
+    const src = pluginJson.version;
+    if (marketplaceJson.version !== src) {
+      errors.push({ field: 'version', error: `marketplace.json 루트 버전 '${marketplaceJson.version}'이(가) plugin.json '${src}'과(와) 불일치` });
+    }
+    if (marketplaceJson.plugins?.[0]?.version !== src) {
+      errors.push({ field: 'version', error: `marketplace.json plugins[0].version '${marketplaceJson.plugins[0].version}'이(가) plugin.json '${src}'과(와) 불일치` });
+    }
+  } catch {}
 
   process.stdout.write(JSON.stringify({ valid: errors.length === 0, errors }, null, 2) + '\n');
   process.exit(0);
