@@ -704,7 +704,7 @@ AskUserQuestion으로 질문합니다:
 
 AskUserQuestion으로 스코프를 질문합니다:
 
-"사운드 팩 설정을 어디에 저장하시겠습니까?"
+"사운드 팩을 어디에 적용하시겠습니까?"
 
 선택지:
 1. **프로젝트 로컬 (Recommended)** -- "이 프로젝트에서만 적용, 개인 설정 (.dding-dong/config.local.json). 글로벌·프로젝트 설정보다 우선합니다. gitignored."

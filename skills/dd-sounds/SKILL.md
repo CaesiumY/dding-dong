@@ -1,8 +1,7 @@
 ---
 name: dd-sounds
 description: "Manage dding-dong sound packs. This skill should be used when the user says \"change sound\", \"sound pack\", \"list packs\", \"switch pack\", \"preview sound\", \"사운드 변경\", \"팩 목록\", \"사운드 팩\", \"팩 변경\", \"미리듣기\", or wants to list, switch, or preview sound packs. 사운드 팩 관리."
-allowed-tools: [Bash, Read]
-disable-model-invocation: true
+allowed-tools: [Bash, Read, AskUserQuestion]
 ---
 
 # dding-dong 사운드 팩 관리
@@ -32,8 +31,20 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" discover --cwd "$(pwd)"
 - `--scope project` -- 프로젝트 설정에 반영 (팀 공유, 커밋됨)
 - `--scope local` -- 내 설정에 반영 (개인 오버라이드, 커밋 제외)
 
-`$ARGUMENTS`에서 팩 이름과 `--scope` 플래그를 추출하여 `${PACK_NAME}`, `${SCOPE}`로 치환합니다.
-`${SCOPE}`가 없으면 `global`을 기본값으로 사용합니다.
+`$ARGUMENTS`에서 팩 이름과 `--scope` 플래그를 추출합니다.
+
+`--scope` 플래그가 있으면 해당 값을 `${SCOPE}`로 사용합니다.
+
+`--scope` 플래그가 없으면 AskUserQuestion으로 질문합니다:
+
+"사운드 팩을 어디에 적용하시겠습니까?"
+
+선택지:
+1. **프로젝트 로컬 (Recommended)** -- "이 프로젝트에서만 적용, 개인 설정 (.dding-dong/config.local.json). gitignored."
+2. **프로젝트 (팀 공유)** -- "이 프로젝트의 팀 전체에 적용 (.dding-dong/config.json). 커밋됩니다."
+3. **글로벌** -- "모든 프로젝트에 적용 (~/.config/dding-dong/config.json)."
+
+선택 결과를 `${SCOPE}`로 설정합니다 ("프로젝트 로컬" → `local`, "프로젝트 (팀 공유)" → `project`, "글로벌" → `global`).
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" apply '${PACK_NAME}' --scope '${SCOPE}' --cwd "$(pwd)"
