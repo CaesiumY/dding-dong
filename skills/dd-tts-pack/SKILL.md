@@ -218,16 +218,40 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/validate-ref-audio.mjs" '
 
 ##### 4-A-b. 참조 텍스트(트랜스크립트)
 
+팩 디렉토리에 트랜스크립트 템플릿 파일을 생성합니다:
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/ref-text.mjs" create 'PACK_DIR/ref-text.txt'
+```
+
+사용자에게 안내합니다:
+```
+참조 음성의 트랜스크립트 파일이 생성되었습니다:
+  PACK_DIR/ref-text.txt
+
+파일을 열어 참조 음성에서 말하는 내용을 입력해주세요.
+트랜스크립트가 정확할수록 클로닝 품질이 높아집니다.
+없이 진행하려면 파일을 비워두세요 (x-vector 모드).
+```
+
 AskUserQuestion으로 질문합니다:
 
-"참조 음성에서 말하는 내용을 입력해주세요. (보이스 클로닝 품질 향상에 필요합니다)"
+"트랜스크립트 작성이 완료되면 알려주세요."
 
 선택지:
-1. **직접 입력** -- "참조 음성의 대사를 정확히 입력합니다. 정확할수록 클로닝 품질이 높아집니다."
+1. **작성 완료** -- "ref-text.txt에 트랜스크립트를 입력했습니다."
 2. **없이 진행 (x-vector 모드)** -- "트랜스크립트 없이 진행합니다. 음성 특징만 추출하며, 품질이 다소 저하될 수 있습니다."
 
-"직접 입력" 선택 시 Other 입력값을 `REF_TEXT`에 저장합니다.
-"없이 진행" 선택 시 `REF_TEXT`를 빈 문자열로 설정합니다.
+**"작성 완료" 선택 시:**
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/ref-text.mjs" read 'PACK_DIR/ref-text.txt'
+```
+
+결과 JSON의 `text` 필드를 `REF_TEXT`에 저장합니다.
+`empty: true`이면 "없이 진행"과 동일하게 처리합니다.
+
+**"없이 진행" 선택 시:** `REF_TEXT`를 빈 문자열로 설정합니다.
 
 #### 4-B. CustomVoice 모드 (`custom`)
 

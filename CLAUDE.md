@@ -75,6 +75,7 @@ skills/                # Skill definitions (SKILL.md with YAML frontmatter)
     scripts/
       check-env.mjs       # Environment checker (Python, qwen-tts, GPU)
       validate-ref-audio.mjs # Reference audio file validator
+      ref-text.mjs         # Reference text template create/read (deterministic comment stripping)
       generate-tts.py      # TTS generation + postprocessing (Python, requires qwen-tts + CUDA GPU)
 scripts/
   notify.mjs           # Unified notification entry point
