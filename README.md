@@ -3,7 +3,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/CaesiumY/dding-dong?style=flat&color=yellow)](https://github.com/CaesiumY/dding-dong/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-> Claude Code 알림 플러그인 — 작업 완료, 오류, 입력 필요 시 소리와 OS 알림으로 알려줍니다
+> Claude Code 알림 플러그인 — 작업 완료·오류·입력 필요 시 소리와 OS 알림으로 알려줍니다. AI 음성 합성으로 나만의 알림음도 만들 수 있습니다.
 
 **띵동(dding-dong)** 은 한국어로 초인종 소리를 나타냅니다. Claude Code가 작업을 마쳤을 때, 당신의 주의가 필요할 때 알려드립니다.
 
@@ -12,9 +12,9 @@
 - 작업 완료, 오류 발생, 입력 필요 시 즉시 알림
 - macOS, Linux, WSL(Windows) 크로스 플랫폼 지원
 - 사운드 팩 시스템으로 알림음 커스터마이즈
+- **AI 음성 합성** — Qwen3-TTS로 나만의 목소리 알림 생성 (보이스 클로닝 & 감정 제어)
 - 한국어/영어 메시지 지원
-- 야간 모드 및 쿨다운 설정
-- 환경변수로 빠른 제어
+- 야간 모드, 쿨다운, 환경변수 제어
 
 ## 요구사항
 
@@ -206,6 +206,33 @@ claude plugin add .
 | `default` | 기본 효과음                     |
 | `retro`   | 8-bit 칩튠 스타일 게임기 효과음 |
 | `musical` | 피아노 코드 기반 화성적 알림음  |
+
+### TTS 사운드 팩 생성
+
+Qwen3-TTS를 활용하여 음성 합성 기반 사운드 팩을 만들 수 있습니다.
+
+```
+/dding-dong:dd-tts-pack
+```
+
+| 모드 | 설명 |
+|------|------|
+| 보이스 클로닝 | 내 목소리(참조 음성)를 복제하여 알림음 생성. 3초 이상 음성 샘플 필요 |
+| CustomVoice | 9개 내장 화자 중 선택. 감정/스타일을 자연어로 제어 가능 (예: "밝고 활기찬 어조로") |
+
+**필요 환경:** NVIDIA GPU (CUDA) · Python 3.10+ (자동 venv 설치 지원)
+
+<details>
+<summary>TTS 팩 생성 흐름</summary>
+
+1. 환경 자동 검사 (GPU, Python, qwen-tts)
+2. 모드 선택 → 모델 크기 선택 (0.6B / 1.7B)
+3. 팩 이름·정보 입력 → 보일러플레이트 생성
+4. 음성 설정 (참조 음성 또는 화자 선택)
+5. 이벤트별 텍스트·감정 설정
+6. 미리듣기 → 전체 생성 → 검증 → 적용
+
+</details>
 
 <details>
 <summary>manifest.json 구조 및 사운드 팩 적용 방법</summary>
