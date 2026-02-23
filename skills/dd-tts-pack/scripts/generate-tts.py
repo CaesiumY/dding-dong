@@ -44,8 +44,10 @@ TARGET_SR = 44100       # dding-dong WAV 표준 샘플레이트
 TARGET_BITS = 16        # 16-bit PCM
 MAX_DURATION_S = 3.0    # 최대 길이 (초)
 MIN_DURATION_S = 0.3    # 최소 길이 (초)
-FADE_MS = 10            # 페이드 인/아웃 (ms)
-SILENCE_THRESHOLD = 0.01  # 무음 판정 진폭 기준
+FADE_MS = 30            # 페이드 인/아웃 (ms)
+SILENCE_THRESHOLD = 0.003  # 무음 판정 진폭 기준
+TAIL_PAD_MS = 150       # 뒤쪽 무음 트림 후 여유 (ms)
+END_PAD_MS = 100        # 최종 출력 끝에 추가할 무음 (ms, 재생기 호환성)
 
 # ─── 오디오 후처리 ───────────────────────────────────
 
@@ -69,11 +71,12 @@ def trim_silence(audio, sr, threshold=SILENCE_THRESHOLD):
         if np.mean(abs_audio[i:i + window]) > threshold:
             start = max(0, i - window)  # 약간의 여유
             break
-    # 뒤쪽 무음
+    # 뒤쪽 무음 (자연스러운 음성 끝을 보존하기 위해 여유를 더 줌)
+    tail_pad = int(sr * TAIL_PAD_MS / 1000)
     end = len(audio)
     for i in range(len(audio) - window, window, -window):
         if np.mean(abs_audio[i - window:i]) > threshold:
-            end = min(len(audio), i + window)
+            end = min(len(audio), i + tail_pad)
             break
     return audio[start:end]
 
@@ -134,6 +137,10 @@ def postprocess_and_save(audio, orig_sr, output_path):
 
     # 페이드
     audio = apply_fade(audio, TARGET_SR)
+
+    # 끝 무음 패딩 (재생기가 끝부분을 누락하지 않도록)
+    end_pad = np.zeros(int(TARGET_SR * END_PAD_MS / 1000), dtype=np.float32)
+    audio = np.concatenate([audio, end_pad])
 
     # 16-bit PCM 변환 및 저장
     audio_int16 = to_int16(audio)
