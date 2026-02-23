@@ -68,23 +68,29 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/check-env.mjs"
 
 **모두 통과 (`all_ok: true`)**: 2단계로 진행합니다.
 
-**실패 시**: 누락 항목별 안내를 표시합니다:
+**실패 시**: 누락 항목별 안내를 표시합니다.
+
+GPU 상태는 `gpu.ok`(하드웨어 존재)와 `gpu.cuda_ready`(torch+CUDA 동작)를 구분하여 3가지로 표시합니다:
+- `gpu.ok && gpu.cuda_ready` → `✓ NVIDIA GPU (CUDA)       {gpu.name} ({gpu.vram_gb}GB)`
+- `gpu.ok && !gpu.cuda_ready` → `✓ NVIDIA GPU (CUDA)       {gpu.name} ({gpu.vram_gb}GB) (torch 미설치 — pip install qwen-tts로 해결)`
+- `!gpu.ok` → `✗ NVIDIA GPU (CUDA)       — CUDA 지원 GPU 필요`
 
 ```
 TTS 사운드 팩 생성에는 다음 환경이 필요합니다:
 
   {python.ok ? "✓" : "✗"} Python 3.10+         {python.ok ? python.version : "— 미설치"}
   {qwen_tts.ok ? "✓" : "✗"} qwen-tts 패키지    {qwen_tts.ok ? qwen_tts.version : "— pip install -U qwen-tts"}
-  {gpu.ok ? "✓" : "✗"} NVIDIA GPU (CUDA)       {gpu.ok ? gpu.name + " (" + gpu.vram_gb + "GB)" : "— CUDA 지원 GPU 필요"}
+  {GPU 상태에 따른 3가지 분기 — 위 참조}
 
 설치 안내:
   conda create -n qwen3-tts python=3.12 -y
   conda activate qwen3-tts
   pip install -U qwen-tts
-
-GPU가 없는 경우 이 스킬을 사용할 수 없습니다.
-기존 WAV 파일로 팩을 만들려면: /dding-dong:dd-pack-create
 ```
+
+하단 안내 메시지도 GPU 상태에 따라 분기합니다:
+- `gpu.ok`인 경우: `"pip install -U qwen-tts 한 줄이면 환경이 완성됩니다.\n기존 WAV 파일로 팩을 만들려면: /dding-dong:dd-pack-create"`
+- `!gpu.ok`인 경우: `"GPU가 없는 경우 이 스킬을 사용할 수 없습니다.\n기존 WAV 파일로 팩을 만들려면: /dding-dong:dd-pack-create"`
 
 환경 미충족 시 여기서 종료합니다.
 

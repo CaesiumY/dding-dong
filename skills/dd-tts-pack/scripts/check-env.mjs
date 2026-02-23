@@ -45,24 +45,45 @@ function checkQwenTts() {
 }
 
 function checkGpu() {
-  const result = run('python3 -c "import torch; print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else \'\')"');
-  if (!result) return { ok: false, name: null, error: 'torch not installed or CUDA unavailable' };
+  let name = null;
+  let vram_gb = null;
+  let hwDetected = false;
 
-  const lines = result.split('\n');
-  const available = lines[0] === 'True';
-  const name = lines[1] || null;
+  // Step 1: nvidia-smi for hardware detection (no Python dependency)
+  const smiResult = run('nvidia-smi --query-gpu=name,memory.total --format=csv,noheader,nounits');
+  if (smiResult) {
+    const parts = smiResult.split(',').map(s => s.trim());
+    if (parts.length >= 2) {
+      name = parts[0];
+      const mib = parseFloat(parts[1]);
+      if (!isNaN(mib)) vram_gb = Math.round(mib / 1024 * 10) / 10;
+      hwDetected = true;
+    }
+  }
 
-  if (!available) return { ok: false, name: null, error: 'CUDA GPU not available' };
+  // Step 2: torch CUDA readiness check
+  let cuda_ready = false;
+  const torchResult = run('python3 -c "import torch; print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else \'\')"');
+  if (torchResult) {
+    const lines = torchResult.split('\n');
+    cuda_ready = lines[0] === 'True';
+    // Fill in name/vram from torch if nvidia-smi missed them
+    if (cuda_ready && !name && lines[1]) name = lines[1];
+    if (cuda_ready && vram_gb === null) {
+      const vram = run('python3 -c "import torch; print(round(torch.cuda.get_device_properties(0).total_mem / 1024**3, 1))"');
+      if (vram) vram_gb = parseFloat(vram);
+    }
+    if (cuda_ready) hwDetected = true;
+  }
 
-  // Try to get VRAM info
-  const vram = run('python3 -c "import torch; print(round(torch.cuda.get_device_properties(0).total_mem / 1024**3, 1))"');
-  return { ok: true, name, vram_gb: vram ? parseFloat(vram) : null };
+  if (!hwDetected) return { ok: false, name: null, vram_gb: null, cuda_ready: false, error: 'CUDA GPU not available' };
+  return { ok: true, name, vram_gb, cuda_ready };
 }
 
 try {
   const python = checkPython();
   const qwen_tts = python.ok ? checkQwenTts() : { ok: false, version: null, error: 'python check failed first' };
-  const gpu = python.ok ? checkGpu() : { ok: false, name: null, error: 'python check failed first' };
+  const gpu = checkGpu();
 
   const all_ok = python.ok && qwen_tts.ok && gpu.ok;
 
