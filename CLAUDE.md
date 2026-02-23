@@ -68,6 +68,8 @@ skills/                # Skill definitions (SKILL.md with YAML frontmatter)
       gather-info.mjs  # Skill/plugin info gatherer for help display
   dd-pack-create/
     SKILL.md           # /dding-dong:dd-pack-create - custom sound pack creation wizard (no disable-model-invocation, uses scripts/pack-wizard.mjs)
+    references/
+      manifest-spec.md # Sound pack manifest schema, directory structure, WAV spec
 scripts/
   notify.mjs           # Unified notification entry point
   generate-sounds.mjs  # Programmatic WAV generation (16-bit PCM, 44100Hz, mono)
@@ -75,7 +77,7 @@ scripts/
   sync-version.mjs     # Version sync tool (sync, verify, bump) — source of truth: plugin.json
   check-config.mjs     # Config diagnostics collector (setup status, merged config, paths)
   config-save.mjs      # Config writer with scope routing (global/project/local)
-  pack-wizard.mjs      # Sound pack management utility (discover, check-exists, create, clone, validate, apply)
+  pack-wizard.mjs      # Sound pack management utility (discover, check-exists, create, clone, validate-manifest, validate, apply)
   core/
     config.mjs         # Config/state load & save, backup & validation, default values
     platform.mjs       # Platform detection + audio player/notifier discovery
@@ -158,7 +160,7 @@ The `_meta` field in the global config (`~/.config/dding-dong/config.json`) stor
 - **Env var overrides**: `DDING_DONG_ENABLED`, `DDING_DONG_VOLUME`, `DDING_DONG_LANG`, `DDING_DONG_PACK` override config values.
 - **Sound pack resolution order**: User packs (`~/.config/dding-dong/packs/`) → built-in packs (`sounds/`).
 - **SKILL.md description convention**: Format as `"<English description>. <한글 요약>. Use when the user says '<trigger1>', '<trigger2>'."` — dd-help dynamically extracts the Korean portion for display. Trigger phrases enable automatic skill matching.
-- **Version management**: `plugin.json` is the single source of truth. Use `node scripts/sync-version.mjs bump <patch|minor|major>` to bump and auto-sync to `marketplace.json` (root version + plugins[0].version). Use `verify` subcommand to check consistency (exit 1 on mismatch). Follow semver: `feat:` → **minor**, `fix:` → **patch**. **When committing**: if the commit type is `feat:` or `fix:`, first run the appropriate bump command, commit the version bump as a separate `chore:` commit, then create the original commit.
+- **Version management**: `plugin.json` is the single source of truth. Use `node scripts/sync-version.mjs bump <patch|minor|major>` to bump and auto-sync to `marketplace.json` (root version + plugins[0].version). Use `verify` subcommand to check consistency (exit 1 on mismatch). Follow semver: `feat:` → **minor**, `fix:` → **patch**. **When committing**: if the commit type is `feat:` or `fix:`, first run the appropriate bump command, then create the feature/fix commit first, followed by the version bump as a separate `chore:` commit. (기능 커밋 → 버전 범프 순서)
 
 ## Testing
 
