@@ -72,13 +72,17 @@ claude plugin add .
 
 ## 스킬 목록
 
-| 스킬                   | 설명                    |
-| ---------------------- | ----------------------- |
-| `/dding-dong:dd-setup`    | 환경 감지 및 초기 설정  |
-| `/dding-dong:dd-test`     | 모든 이벤트 알림 테스트 |
-| `/dding-dong:dd-config`   | 설정 보기/변경          |
-| `/dding-dong:dd-sounds`   | 사운드 팩 관리          |
-| `/dding-dong:dd-doctor`   | 알림 문제 자동 진단     |
+| 스킬                          | 설명                              |
+| ----------------------------- | --------------------------------- |
+| `/dding-dong:dd-setup`        | 환경 감지 및 초기 설정            |
+| `/dding-dong:dd-test`         | 모든 이벤트 알림 테스트           |
+| `/dding-dong:dd-config`       | 설정 보기/변경                    |
+| `/dding-dong:dd-sounds`       | 사운드 팩 관리                    |
+| `/dding-dong:dd-doctor`       | 알림 문제 자동 진단               |
+| `/dding-dong:dd-feedback`     | 피드백/버그 리포트 자동 생성      |
+| `/dding-dong:dd-help`         | 도움말 및 기능 가이드             |
+| `/dding-dong:dd-pack-create`  | 커스텀 사운드 팩 생성 마법사      |
+| `/dding-dong:dd-tts-pack`     | TTS 음성 합성 사운드 팩 생성      |
 
 ## 설정
 
@@ -152,11 +156,12 @@ claude plugin add .
 
 ### 환경변수
 
-| 변수                       | 설명              |
-| -------------------------- | ----------------- |
-| `DDING_DONG_ENABLED=false` | 플러그인 비활성화 |
-| `DDING_DONG_VOLUME=0.5`    | 볼륨 오버라이드   |
-| `DDING_DONG_LANG=en`       | 언어 오버라이드   |
+| 변수                       | 설명               |
+| -------------------------- | ------------------ |
+| `DDING_DONG_ENABLED=false` | 플러그인 비활성화  |
+| `DDING_DONG_VOLUME=0.5`    | 볼륨 오버라이드    |
+| `DDING_DONG_LANG=en`       | 언어 오버라이드    |
+| `DDING_DONG_PACK=retro`    | 사운드팩 오버라이드 |
 
 ## 크로스 플랫폼 지원
 
@@ -174,10 +179,11 @@ claude plugin add .
 
 ## 사운드 팩 시스템
 
-사운드 팩은 두 위치에서 탐색되며, 사용자 팩이 우선합니다:
+사운드 팩은 세 위치에서 순서대로 탐색됩니다:
 
-1. **사용자 팩**: `~/.config/dding-dong/packs/<팩이름>/`
-2. **내장 팩**: `{플러그인 설치 경로}/sounds/<팩이름>/`
+1. **프로젝트 팩**: `.dding-dong/packs/<팩이름>/`
+2. **사용자 팩**: `~/.config/dding-dong/packs/<팩이름>/`
+3. **내장 팩**: `{플러그인 설치 경로}/sounds/<팩이름>/`
 
 ### 내장 사운드 팩
 

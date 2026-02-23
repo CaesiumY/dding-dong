@@ -77,6 +77,7 @@ skills/                # Skill definitions (SKILL.md with YAML frontmatter)
       validate-ref-audio.mjs # Reference audio file validator
       ref-text.mjs         # Reference text template create/read (deterministic comment stripping)
       generate-tts.py      # TTS generation + postprocessing (Python, requires qwen-tts + CUDA GPU)
+      setup-tts-venv.mjs   # TTS venv auto-installer (create venv + install packages)
 scripts/
   notify.mjs           # Unified notification entry point
   generate-sounds.mjs  # Programmatic WAV generation (16-bit PCM, 44100Hz, mono)
