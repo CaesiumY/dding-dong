@@ -7,6 +7,7 @@
  *
  * Commands:
  *   discover                                          설치된 팩 목록
+ *   validate-name <name>                              팩 이름 형식 검증
  *   check-exists <packName>                           팩 이름 중복 검사
  *   detect-author                                     작성자 자동 감지
  *   create <name> <displayName> <author> <desc>       빈 팩 생성
@@ -77,6 +78,25 @@ if (cmd === 'discover') {
     } catch {}
   }
   json(packs);
+  process.exit(0);
+}
+
+// ─── validate-name ──────────────────────────────
+if (cmd === 'validate-name') {
+  const name = args[1];
+  if (!name) jsonError('팩 이름이 필요합니다.');
+  const errors = [];
+  if (typeof name !== 'string') {
+    errors.push('이름은 문자열이어야 합니다.');
+  } else {
+    if (name.length < 2 || name.length > 50) errors.push('이름은 2~50자여야 합니다.');
+    if (!/^[a-z]/.test(name)) errors.push('이름은 영문 소문자로 시작해야 합니다.');
+    if (!/[a-z0-9]$/.test(name)) errors.push('이름은 영문 소문자 또는 숫자로 끝나야 합니다.');
+    if (/[^a-z0-9-]/.test(name)) errors.push('이름은 영문 소문자, 숫자, 하이픈만 사용할 수 있습니다.');
+    if (/--/.test(name)) errors.push('연속 하이픈은 사용할 수 없습니다.');
+    if (errors.length === 0 && !/^[a-z][a-z0-9-]*[a-z0-9]$/.test(name)) errors.push('이름 형식이 올바르지 않습니다.');
+  }
+  json({ valid: errors.length === 0, name, errors });
   process.exit(0);
 }
 
@@ -320,6 +340,7 @@ console.log('사용법: node pack-wizard.mjs <command> [args...]');
 console.log('');
 console.log('커맨드:');
 console.log('  discover                                          설치된 팩 목록');
+console.log('  validate-name <name>                              팩 이름 형식 검증');
 console.log('  check-exists <packName>                           팩 이름 중복 검사');
 console.log('  detect-author                                     작성자 자동 감지');
 console.log('  create <name> <displayName> <author> <desc>       빈 팩 생성');

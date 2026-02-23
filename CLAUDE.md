@@ -70,6 +70,12 @@ skills/                # Skill definitions (SKILL.md with YAML frontmatter)
     SKILL.md           # /dding-dong:dd-pack-create - custom sound pack creation wizard (no disable-model-invocation, uses scripts/pack-wizard.mjs)
     references/
       manifest-spec.md # Sound pack manifest schema, directory structure, WAV spec
+  dd-tts-pack/
+    SKILL.md           # /dding-dong:dd-tts-pack - TTS sound pack creation via Qwen3-TTS (voice cloning + CustomVoice, no disable-model-invocation)
+    scripts/
+      check-env.mjs       # Environment checker (Python, qwen-tts, GPU)
+      validate-ref-audio.mjs # Reference audio file validator
+      generate-tts.py      # TTS generation + postprocessing (Python, requires qwen-tts + CUDA GPU)
 scripts/
   notify.mjs           # Unified notification entry point
   generate-sounds.mjs  # Programmatic WAV generation (16-bit PCM, 44100Hz, mono)
@@ -77,7 +83,7 @@ scripts/
   sync-version.mjs     # Version sync tool (sync, verify, bump) — source of truth: plugin.json
   check-config.mjs     # Config diagnostics collector (setup status, merged config, paths)
   config-save.mjs      # Config writer with scope routing (global/project/local)
-  pack-wizard.mjs      # Sound pack management utility (discover, check-exists, create, clone, validate-manifest, validate, apply)
+  pack-wizard.mjs      # Sound pack management utility (discover, validate-name, check-exists, create, clone, validate-manifest, validate, apply)
   core/
     config.mjs         # Config/state load & save, backup & validation, default values
     platform.mjs       # Platform detection + audio player/notifier discovery

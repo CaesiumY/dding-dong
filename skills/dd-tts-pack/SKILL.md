@@ -1,0 +1,566 @@
+---
+name: dd-tts-pack
+description: "Create TTS sound pack using Qwen3-TTS voice cloning or built-in voices. TTS 음성 합성으로 사운드 팩 생성. Use when the user says 'TTS 팩', 'TTS 사운드', 'tts pack', '음성 합성 팩', '보이스 클로닝', 'voice clone pack', 'TTS로 만들기'."
+allowed-tools: [Bash, Read, Write, AskUserQuestion]
+---
+
+# TTS 사운드 팩 생성 마법사
+
+Qwen3-TTS를 사용하여 음성 합성 기반 사운드 팩을 생성합니다.
+보이스 클로닝(참조 음성 복제) 또는 CustomVoice(내장 음성) 모드를 지원합니다.
+
+> **설계 노트**: `disable-model-invocation`은 의도적으로 생략되었습니다.
+> 이 스킬은 사용자 입력 해석, 환경 검사 결과 분석,
+> TTS 설정 구성에 모델 추론이 필수적입니다.
+
+## 사운드 팩 구조 참고
+
+매니페스트 스키마, 디렉토리 구조, WAV 사양 상세는 [`../dd-pack-create/references/manifest-spec.md`](../dd-pack-create/references/manifest-spec.md) 참조.
+
+**핵심 규칙:**
+- 이벤트 엔트리는 반드시 `{ "files": ["filename.wav"] }` 형식
+- 미등록 이벤트는 `events`에서 키를 생략 (null 아님)
+- WAV 권장: 16-bit PCM, 44100Hz, mono, 1~3초
+
+## 플래그 파싱
+
+`$ARGUMENTS`에서 플래그를 확인합니다:
+
+- `--help`: 아래 사용법을 출력하고 종료합니다.
+  ```
+  TTS 사운드 팩 생성 마법사
+
+  Qwen3-TTS로 음성 합성 기반 사운드 팩을 생성합니다.
+  보이스 클로닝 또는 내장 음성(CustomVoice)을 선택할 수 있습니다.
+
+  사용법: /dding-dong:dd-tts-pack [옵션]
+
+  옵션:
+    --clone          보이스 클로닝 모드로 바로 시작
+    --custom         CustomVoice 모드로 바로 시작
+    --help           이 도움말 표시
+
+  필요 환경:
+    - Python 3.10+
+    - pip install -U qwen-tts
+    - NVIDIA GPU (8GB+ VRAM)
+
+  예시:
+    /dding-dong:dd-tts-pack
+    /dding-dong:dd-tts-pack --clone
+    /dding-dong:dd-tts-pack --custom
+  ```
+
+- `--clone`: 모드 선택을 건너뛰고 보이스 클로닝 모드로 진행합니다.
+- `--custom`: 모드 선택을 건너뛰고 CustomVoice 모드로 진행합니다.
+
+## 실행 순서
+
+### 1단계: 환경 검사
+
+스킬이 호출되면 환경을 자동 검사합니다:
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/check-env.mjs"
+```
+
+결과 JSON의 `all_ok` 필드를 확인합니다.
+
+**모두 통과 (`all_ok: true`)**: 2단계로 진행합니다.
+
+**실패 시**: 누락 항목별 안내를 표시합니다:
+
+```
+TTS 사운드 팩 생성에는 다음 환경이 필요합니다:
+
+  {python.ok ? "✓" : "✗"} Python 3.10+         {python.ok ? python.version : "— 미설치"}
+  {qwen_tts.ok ? "✓" : "✗"} qwen-tts 패키지    {qwen_tts.ok ? qwen_tts.version : "— pip install -U qwen-tts"}
+  {gpu.ok ? "✓" : "✗"} NVIDIA GPU (CUDA)       {gpu.ok ? gpu.name + " (" + gpu.vram_gb + "GB)" : "— CUDA 지원 GPU 필요"}
+
+설치 안내:
+  conda create -n qwen3-tts python=3.12 -y
+  conda activate qwen3-tts
+  pip install -U qwen-tts
+
+GPU가 없는 경우 이 스킬을 사용할 수 없습니다.
+기존 WAV 파일로 팩을 만들려면: /dding-dong:dd-pack-create
+```
+
+환경 미충족 시 여기서 종료합니다.
+
+### 2단계: 모드 선택
+
+`--clone` 또는 `--custom` 플래그가 있으면 이 단계를 건너뜁니다.
+
+AskUserQuestion으로 질문합니다:
+
+"TTS 생성 모드를 선택해주세요."
+
+선택지:
+1. **보이스 클로닝 (Recommended)** -- "내 목소리(참조 음성)를 복제하여 알림음을 생성합니다. 3초 이상의 음성 샘플이 필요합니다."
+2. **내장 음성 (CustomVoice)** -- "9개의 내장 음성 중 하나를 선택합니다. 참조 음성 없이 바로 사용 가능합니다."
+
+선택 결과를 `VOICE_MODE` 변수로 저장합니다:
+- "보이스 클로닝" → `clone`
+- "내장 음성" → `custom`
+
+### 3단계: 팩 정보 수집 + 보일러플레이트 생성
+
+#### 3-a. 팩 이름 입력
+
+AskUserQuestion으로 질문합니다:
+
+"새 TTS 사운드 팩의 이름을 입력해주세요. (영문 소문자, 숫자, 하이픈만 사용 가능)"
+
+선택지:
+1. **my-voice** -- "예시 이름입니다. 원하는 이름을 직접 입력해주세요."
+2. **tts-korean** -- "예시 이름입니다. 원하는 이름을 직접 입력해주세요."
+
+**이름 형식 검증:**
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate-name 'PACK_NAME'
+```
+
+- `valid: true` 시: 중복 검사로 진행
+- `valid: false` 시: `errors` 배열의 각 항목을 사용자에게 표시하고 다시 이름 입력을 요청합니다.
+
+**이름 중복 검사:**
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" check-exists 'PACK_NAME'
+```
+
+- **내장 팩과 동일 시**: "내장 팩 'PACK_NAME'과 같은 이름입니다. 사용자 팩이 우선 적용되어 내장 팩을 덮어씁니다." 경고를 표시합니다. 계속 진행할지 AskUserQuestion으로 확인합니다.
+- **기존 사용자 팩과 동일 시**: "이미 'PACK_NAME' 사용자 팩이 존재합니다." 안내 후, AskUserQuestion으로 덮어쓰기 여부를 확인합니다.
+  1. **덮어쓰기** -- "기존 팩을 대체합니다."
+  2. **다른 이름 사용** -- "다시 이름을 입력합니다."
+  "다른 이름 사용" 선택 시 3-a로 돌아갑니다.
+
+#### 3-b. 표시 이름 입력
+
+AskUserQuestion으로 질문합니다:
+
+"사운드 팩의 표시 이름을 입력해주세요. (한글/영문, 사용자에게 보여지는 이름)"
+
+선택지:
+1. **나의 TTS 사운드** -- "예시입니다. 원하는 이름을 직접 입력해주세요."
+2. **My Voice Pack** -- "예시입니다. 원하는 이름을 직접 입력해주세요."
+
+#### 3-c. 설명 입력
+
+AskUserQuestion으로 질문합니다:
+
+"사운드 팩의 설명을 입력해주세요."
+
+선택지:
+1. **Qwen3-TTS로 생성한 커스텀 음성 알림** -- "예시입니다. 원하는 설명을 직접 입력해주세요."
+2. **건너뛰기** -- "설명 없이 진행합니다."
+
+"건너뛰기" 선택 시 description을 빈 문자열로 설정합니다.
+
+#### 3-d. 자동 설정 필드 감지
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" detect-author
+```
+
+- `version`: 항상 `"1.0.0"`
+- `author`: `git config user.name` → 실패 시 `os.userInfo().username`
+
+#### 3-e. 보일러플레이트 생성
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" create 'PACK_NAME' 'DISPLAY_NAME' 'AUTHOR' 'DESCRIPTION'
+```
+
+생성 결과를 사용자에게 안내합니다:
+```
+팩 디렉토리가 생성되었습니다: ~/.config/dding-dong/packs/PACK_NAME/
+```
+
+`PACK_DIR`을 `~/.config/dding-dong/packs/PACK_NAME`으로 설정합니다.
+
+### 4단계: 음성 설정
+
+`VOICE_MODE`에 따라 분기합니다.
+
+#### 4-A. 보이스 클로닝 모드 (`clone`)
+
+##### 4-A-a. 참조 음성 파일
+
+AskUserQuestion으로 질문합니다:
+
+"보이스 클로닝을 위한 참조 음성 파일이 필요합니다."
+
+선택지에 앞서 안내 메시지를 표시합니다:
+```
+권장 사양:
+- 형식: WAV 또는 MP3
+- 길이: 3초 이상 (10~30초 권장)
+- 내용: 깨끗한 음성 (배경 소음 최소화)
+- 한 사람의 목소리만 포함
+```
+
+"참조 음성 파일의 절대 경로를 입력해주세요."
+
+선택지:
+1. **파일 경로 입력** -- "WAV/MP3 파일의 절대 경로를 입력합니다."
+
+사용자가 Other로 경로를 입력하면 즉시 검증합니다:
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/validate-ref-audio.mjs" 'FILE_PATH'
+```
+
+- **`ok: true`**: `REF_AUDIO` 변수에 경로를 저장합니다. 포맷 정보를 표시합니다.
+- **`ok: false`**: 에러 메시지를 표시하고 다시 파일 경로 입력을 요청합니다.
+
+##### 4-A-b. 참조 텍스트(트랜스크립트)
+
+AskUserQuestion으로 질문합니다:
+
+"참조 음성에서 말하는 내용을 입력해주세요. (보이스 클로닝 품질 향상에 필요합니다)"
+
+선택지:
+1. **직접 입력** -- "참조 음성의 대사를 정확히 입력합니다. 정확할수록 클로닝 품질이 높아집니다."
+2. **없이 진행 (x-vector 모드)** -- "트랜스크립트 없이 진행합니다. 음성 특징만 추출하며, 품질이 다소 저하될 수 있습니다."
+
+"직접 입력" 선택 시 Other 입력값을 `REF_TEXT`에 저장합니다.
+"없이 진행" 선택 시 `REF_TEXT`를 빈 문자열로 설정합니다.
+
+#### 4-B. CustomVoice 모드 (`custom`)
+
+AskUserQuestion으로 질문합니다:
+
+"내장 음성을 선택해주세요."
+
+선택지:
+1. **Sohee (Recommended)** -- "한국어 여성 음성. 따뜻하고 감성이 풍부합니다."
+2. **Ryan** -- "영어 남성 음성."
+3. **Aiden** -- "영어 남성 음성."
+4. **Ono_Anna** -- "일본어 여성 음성."
+
+> 참고: 중국어 음성(Vivian, Serena, Uncle_Fu, Dylan, Eric)은 한국어 텍스트에 적합하지 않아 기본 선택지에서 제외합니다.
+> 사용자가 Other로 직접 입력하면 모든 화자명을 수용합니다.
+
+선택 결과를 `SPEAKER` 변수에 저장합니다.
+
+### 5단계: 이벤트별 TTS 설정
+
+5개 이벤트에 대해 텍스트와 감정/스타일을 설정합니다.
+
+**기본 한국어 텍스트 및 감정:**
+
+| 이벤트 | 기본 텍스트 | 기본 감정(instruct) |
+|--------|-----------|---------------------|
+| `task.complete` | "작업이 완료되었습니다" | "밝고 활기찬 어조로" |
+| `task.error` | "오류가 발생했습니다" | "긴급하고 주의를 끄는 어조로" |
+| `input.required` | "입력이 필요합니다" | "부드럽고 안내하는 어조로" |
+| `session.start` | "세션을 시작합니다" | "차분하고 환영하는 어조로" |
+| `session.end` | "세션이 종료됩니다" | "차분하고 마무리하는 어조로" |
+
+먼저 안내를 표시합니다:
+```
+이벤트별 TTS 텍스트를 설정합니다.
+각 이벤트에 대해 읽어줄 텍스트와 감정/스타일을 지정할 수 있습니다.
+기본값은 한국어 텍스트입니다.
+```
+
+각 이벤트(5개)에 대해 순서대로 AskUserQuestion으로 질문합니다:
+
+"[이벤트 설명] (`EVENT_TYPE`) — 기본: 「DEFAULT_TEXT」"
+
+선택지:
+1. **기본 텍스트 사용 (Recommended)** -- "「DEFAULT_TEXT」 + 「DEFAULT_INSTRUCT」"
+2. **직접 입력** -- "텍스트와 감정/스타일을 직접 설정합니다."
+3. **건너뛰기** -- "이 이벤트에 사운드를 할당하지 않습니다."
+
+**"직접 입력" 선택 시:**
+
+1단계 — 텍스트: 사용자가 Other로 입력한 텍스트를 저장합니다.
+
+2단계 — AskUserQuestion으로 감정/스타일을 질문합니다:
+
+"감정 또는 스타일을 지정하세요. (선택사항, 자연어로 입력)"
+
+선택지:
+1. **기본 감정 사용 (Recommended)** -- "「DEFAULT_INSTRUCT」"
+2. **직접 입력** -- "원하는 감정/스타일을 자연어로 입력합니다. (예: '화난 어조로', '속삭이듯이')"
+3. **없음** -- "감정 지정 없이 기본 톤으로 생성합니다."
+
+모든 이벤트 설정이 끝나면 `.tts-config.json`을 팩 디렉토리에 저장합니다:
+
+```json
+{
+  "voice_mode": "clone 또는 custom",
+  "speaker": "Sohee (custom 모드 시)",
+  "ref_audio": "/path/to/ref.wav (clone 모드 시)",
+  "ref_text": "참조 텍스트 (clone 모드 시)",
+  "events": {
+    "task.complete": {
+      "text": "작업이 완료되었습니다",
+      "instruct": "밝고 활기찬 어조로",
+      "language": "Korean",
+      "output_file": "complete.wav"
+    }
+  }
+}
+```
+
+Write 도구로 `PACK_DIR/.tts-config.json`에 저장합니다.
+
+**건너뛴 이벤트는 `events` 객체에 포함하지 않습니다.**
+
+### 6단계: 음성 미리듣기
+
+최소 1개 이벤트가 설정된 경우에만 진행합니다.
+
+AskUserQuestion으로 질문합니다:
+
+"전체 생성 전에 미리듣기 샘플을 만들어볼까요? 설정된 첫 번째 이벤트로 1개 샘플을 생성합니다. (모델 로딩에 시간이 걸릴 수 있습니다)"
+
+선택지:
+1. **미리듣기 (Recommended)** -- "1개 샘플을 생성하고 재생합니다."
+2. **건너뛰기** -- "바로 전체 생성으로 진행합니다."
+
+**"미리듣기" 선택 시:**
+
+설정된 첫 번째 이벤트의 텍스트와 감정을 사용합니다.
+
+**클로닝 모드:**
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
+  --voice-mode clone \
+  --mode preview \
+  --ref-audio 'REF_AUDIO' \
+  --ref-text 'REF_TEXT' \
+  --text 'PREVIEW_TEXT' \
+  --instruct 'PREVIEW_INSTRUCT' \
+  --language Korean \
+  --output 'PACK_DIR/preview.wav'
+```
+
+**CustomVoice 모드:**
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
+  --voice-mode custom \
+  --mode preview \
+  --speaker 'SPEAKER' \
+  --text 'PREVIEW_TEXT' \
+  --instruct 'PREVIEW_INSTRUCT' \
+  --language Korean \
+  --output 'PACK_DIR/preview.wav'
+```
+
+타임아웃: 300초 (모델 로딩 + 생성 시간 고려)
+
+생성 성공 시 미리듣기 재생:
+```bash
+DDING_DONG_PACK='PACK_NAME' node "${CLAUDE_PLUGIN_ROOT}/scripts/notify.mjs" play 'PACK_DIR/preview.wav'
+```
+
+> notify.mjs에 `play` 서브커맨드가 없으면 platform.mjs의 플레이어를 직접 사용:
+> ```bash
+> node -e "import('${CLAUDE_PLUGIN_ROOT}/scripts/core/platform.mjs').then(m => m.detect()).then(p => { const {execSync} = require('child_process'); execSync(p.audioPlayer + ' PACK_DIR/preview.wav'); })"
+> ```
+
+AskUserQuestion으로 질문합니다:
+
+"미리듣기 결과가 만족스러우신가요?"
+
+선택지:
+1. **좋아요, 전체 생성 (Recommended)** -- "이 음성으로 모든 이벤트를 생성합니다."
+2. **다시 시도** -- "설정을 변경하고 다시 시도합니다."
+3. **중단** -- "TTS 팩 생성을 취소합니다."
+
+"다시 시도" 선택 시: 4단계(음성 설정)로 돌아갑니다.
+"중단" 선택 시: "TTS 팩 생성이 취소되었습니다." 안내 후 종료합니다.
+
+### 7단계: 전체 생성
+
+**클로닝 모드:**
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
+  --voice-mode clone \
+  --mode batch \
+  --ref-audio 'REF_AUDIO' \
+  --ref-text 'REF_TEXT' \
+  --config 'PACK_DIR/.tts-config.json' \
+  --output-dir 'PACK_DIR'
+```
+
+**CustomVoice 모드:**
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
+  --voice-mode custom \
+  --mode batch \
+  --speaker 'SPEAKER' \
+  --config 'PACK_DIR/.tts-config.json' \
+  --output-dir 'PACK_DIR'
+```
+
+타임아웃: 600초 (5개 이벤트 생성 + 모델 로딩)
+
+stdout으로 JSON 결과를 파싱합니다:
+
+```json
+{
+  "ok": true,
+  "results": {
+    "task.complete": { "ok": true, "file": "complete.wav", "duration": 1.2 },
+    "task.error": { "ok": true, "file": "error.wav", "duration": 1.1 }
+  }
+}
+```
+
+진행 상황을 사용자에게 표시합니다:
+```
+TTS 생성이 완료되었습니다.
+
+  task.complete    complete.wav        ✓ (1.2초)
+  task.error       error.wav           ✓ (1.1초)
+  input.required   input-required.wav  ✓ (1.3초)
+  session.start    session-start.wav   ✓ (1.0초)
+  session.end      session-end.wav     ✓ (1.1초)
+```
+
+실패한 이벤트가 있으면:
+```
+⚠ 일부 이벤트 생성에 실패했습니다:
+  task.error: [에러 메시지]
+
+성공한 이벤트만으로 팩을 계속 생성하시겠습니까?
+```
+
+AskUserQuestion:
+1. **계속 진행** -- "성공한 이벤트만으로 팩을 생성합니다."
+2. **다시 시도** -- "실패한 이벤트를 다시 생성합니다."
+3. **중단** -- "팩 생성을 취소합니다."
+
+### 8단계: 검증 + 팩 등록
+
+#### 8-a. manifest.json 업데이트
+
+생성된 WAV 파일에 맞게 manifest.json을 업데이트합니다.
+`results`에서 `ok: true`인 이벤트만 등록합니다:
+
+각 성공 이벤트에 대해:
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" copy-sound 'PACK_DIR/OUTPUT_FILE' 'PACK_NAME' 'EVENT_TYPE' 'OUTPUT_FILE'
+```
+
+> 참고: generate-tts.py가 이미 PACK_DIR에 직접 저장하므로, copy-sound는 manifest 업데이트 역할만 합니다.
+> copy-sound가 동일 경로 복사를 지원하지 않으면, manifest.json을 직접 Read → 수정 → Write합니다.
+
+#### 8-b. 매니페스트 검증
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate-manifest 'PACK_NAME'
+```
+
+- `valid: true` 시: 다음 단계로 진행
+- `valid: false` 시: `errors` 배열의 각 항목을 표시하고, manifest.json을 Read하여 문제 확인 후 수정
+
+#### 8-c. 파일 검증
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate 'PACK_NAME'
+```
+
+결과를 아래 형식으로 사용자에게 표시합니다:
+
+```
+TTS 사운드 팩이 생성되었습니다!
+
+이름: PACK_NAME
+표시 이름: DISPLAY_NAME
+작성자: AUTHOR
+모드: 보이스 클로닝 / CustomVoice (SPEAKER)
+위치: ~/.config/dding-dong/packs/PACK_NAME/
+
+이벤트           파일                상태
+─────────────────────────────────────────
+task.complete    complete.wav        ✓
+task.error       error.wav           ✓
+input.required   input-required.wav  ✓
+session.start    session-start.wav   ✓
+session.end      session-end.wav     ✓
+
+등록된 이벤트: 5/5
+```
+
+상태 표시:
+- `ok` → `✓`
+- `skipped` → `-` (파일 열에 "(없음)" 표시)
+- `missing` → `✗ 파일 없음`
+- `invalid_format` → `✗ WAV 아님`
+
+`missing` 또는 `invalid_format`이 있으면 경고를 표시합니다:
+"일부 파일에 문제가 있습니다. 팩이 정상 동작하지 않을 수 있습니다."
+
+### 9단계: 적용 + 미리듣기 + 완료
+
+#### 9-a. 적용 여부 확인
+
+AskUserQuestion으로 질문합니다:
+
+"이 팩을 지금 바로 적용하시겠습니까?"
+
+선택지:
+1. **바로 적용 (Recommended)** -- "현재 설정의 사운드 팩을 변경합니다."
+2. **나중에 적용** -- "팩만 생성하고 종료합니다. 나중에 `/dding-dong:dd-sounds use PACK_NAME`으로 적용할 수 있습니다."
+
+**"바로 적용" 선택 시:**
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" apply 'PACK_NAME'
+```
+
+적용 성공 시: "사운드 팩이 'PACK_NAME'으로 변경되었습니다." 안내
+
+**"나중에 적용" 선택 시:**
+
+```
+팩이 생성되었습니다. 아래 명령어로 나중에 적용할 수 있습니다:
+  /dding-dong:dd-sounds use PACK_NAME
+```
+
+#### 9-b. 미리듣기
+
+9-a에서 "바로 적용"을 선택한 경우에만 미리듣기를 제안합니다.
+
+AskUserQuestion으로 질문합니다:
+
+"사운드를 미리 들어보시겠습니까?"
+
+선택지:
+1. **예 (Recommended)** -- "task.complete 사운드를 재생합니다."
+2. **아니오** -- "바로 종료합니다."
+
+**"예" 선택 시:**
+
+```bash
+DDING_DONG_PACK='PACK_NAME' node "${CLAUDE_PLUGIN_ROOT}/scripts/notify.mjs" test task.complete
+```
+
+재생 실패 시: "미리듣기에 실패했습니다. `/dding-dong:dd-test`로 다시 시도해보세요." 안내
+
+#### 9-c. 완료 메시지
+
+```
+TTS 사운드 팩 생성이 완료되었습니다!
+
+관련 명령어:
+  사운드 팩 관리  → /dding-dong:dd-sounds list
+  팩 미리듣기    → /dding-dong:dd-sounds preview PACK_NAME
+  팩 변경       → /dding-dong:dd-sounds use PACK_NAME
+  설정 확인     → /dding-dong:dd-config show
+  TTS 재생성    → .tts-config.json이 팩 디렉토리에 저장되어 있습니다.
+```
+
+preview.wav가 팩 디렉토리에 남아있으면 삭제합니다:
+
+```bash
+rm -f 'PACK_DIR/preview.wav'
+```

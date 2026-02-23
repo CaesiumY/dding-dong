@@ -83,12 +83,14 @@ AskUserQuestion으로 질문합니다:
 
 사용자가 선택지를 선택하거나 Other로 직접 입력합니다.
 
-**이름 검증 규칙:**
-- 정규식: `/^[a-z][a-z0-9-]*[a-z0-9]$/` (최소 2자, 최대 50자)
-- 선행/후행 하이픈 금지
-- 숫자로 시작 금지
+**이름 형식 검증:**
 
-검증 실패 시 규칙을 안내하고 다시 입력을 요청합니다.
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate-name 'PACK_NAME'
+```
+
+- `valid: true` 시: 중복 검사로 진행
+- `valid: false` 시: `errors` 배열의 각 항목을 사용자에게 표시하고 다시 이름 입력을 요청합니다.
 
 **이름 중복 검사:**
 
