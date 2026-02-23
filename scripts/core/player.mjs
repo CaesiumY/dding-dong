@@ -2,23 +2,31 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync, spawn } from 'node:child_process';
 import { detectPlatform, detectAudioPlayer } from './platform.mjs';
-import { getPacksDir } from './config.mjs';
+import { getPacksDir, findProjectRoot, getProjectPacksDir } from './config.mjs';
 
 /**
  * 사운드 팩 manifest에서 이벤트에 해당하는 파일 경로 반환
  * @param {string} eventType
  * @param {string} packName
+ * @param {string|null} cwd
  * @returns {string|null}
  */
-function resolveSound(eventType, packName = 'default') {
-  const packsDir = getPacksDir();
-  const manifestPath = join(packsDir, packName, 'manifest.json');
+function resolveSound(eventType, packName = 'default', cwd = null) {
+  const searchPaths = [];
 
-  // 사용자 팩 → 내장 팩 순서로 탐색
-  const searchPaths = [
-    manifestPath,
-    join(process.env.CLAUDE_PLUGIN_ROOT || '', 'sounds', packName, 'manifest.json')
-  ];
+  // 1. 프로젝트 팩 (최우선)
+  if (cwd) {
+    const projectRoot = findProjectRoot(cwd);
+    if (projectRoot) {
+      searchPaths.push(join(getProjectPacksDir(projectRoot), packName, 'manifest.json'));
+    }
+  }
+
+  // 2. 사용자 글로벌 팩
+  searchPaths.push(join(getPacksDir(), packName, 'manifest.json'));
+
+  // 3. 내장 팩
+  searchPaths.push(join(process.env.CLAUDE_PLUGIN_ROOT || '', 'sounds', packName, 'manifest.json'));
 
   let manifest = null;
   let foundManifestPath = null;
@@ -58,7 +66,7 @@ function resolveSound(eventType, packName = 'default') {
  * @param {string} eventType
  * @param {object} config
  */
-export async function playSound(eventType, config) {
+export async function playSound(eventType, config, cwd = null) {
   try {
     const platform = detectPlatform();
     const player = detectAudioPlayer(platform);
@@ -67,7 +75,7 @@ export async function playSound(eventType, config) {
     const packName = config?.sound?.pack || 'default';
     const volume = config?.sound?.volume ?? 0.7;
 
-    const filePath = resolveSound(eventType, packName);
+    const filePath = resolveSound(eventType, packName, cwd);
     if (!filePath) return;
 
     if (platform === 'macos') {

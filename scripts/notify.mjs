@@ -54,7 +54,7 @@ export async function notify(eventType, context = {}) {
 
   // 사운드 재생
   if (config.sound?.enabled && config.sound?.events?.[eventType] !== false) {
-    tasks.push(playSound(eventType, config));
+    tasks.push(playSound(eventType, config, context.cwd));
   }
 
   // OS 알림

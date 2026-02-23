@@ -94,6 +94,7 @@ scripts/
 sounds/default/        # Built-in sound pack (WAV + manifest.json)
 sounds/retro/          # 8-bit retro sound pack
 sounds/musical/        # Piano chord sound pack
+.dding-dong/packs/     # Project-level sound packs (에디터에서 보임)
 .claude-plugin/        # Plugin metadata (plugin.json, marketplace.json)
 ```
 
@@ -125,6 +126,7 @@ Config is loaded via 5-stage merge (later stages override earlier):
 
 Other paths:
 - State: `~/.config/dding-dong/.state.json` (global, no scope split)
+- Project sound packs: `.dding-dong/packs/<pack-name>/manifest.json` (project-level, 에디터에서 보임)
 - User sound packs: `~/.config/dding-dong/packs/<pack-name>/manifest.json`
 - Backup files: `<config-path>.backup.<YYYYMMDD_HHMMSS>` (max 3, auto-rotated)
 
@@ -165,7 +167,7 @@ The `_meta` field in the global config (`~/.config/dding-dong/config.json`) stor
 - **ESM only**: All scripts use `.mjs` extension with `import`/`export` syntax.
 - **No npm dependencies**: Only Node.js built-in modules (`node:fs`, `node:path`, `node:child_process`, `node:os`, `node:url`).
 - **Env var overrides**: `DDING_DONG_ENABLED`, `DDING_DONG_VOLUME`, `DDING_DONG_LANG`, `DDING_DONG_PACK` override config values.
-- **Sound pack resolution order**: User packs (`~/.config/dding-dong/packs/`) → built-in packs (`sounds/`).
+- **Sound pack resolution order**: Project packs (`.dding-dong/packs/`) → User packs (`~/.config/dding-dong/packs/`) → built-in packs (`sounds/`).
 - **SKILL.md description convention**: Format as `"<English description>. <한글 요약>. Use when the user says '<trigger1>', '<trigger2>'."` — dd-help dynamically extracts the Korean portion for display. Trigger phrases enable automatic skill matching.
 - **Version management**: `plugin.json` is the single source of truth. Use `node scripts/sync-version.mjs bump <patch|minor|major>` to bump and auto-sync to `marketplace.json` (root version + plugins[0].version). Use `verify` subcommand to check consistency (exit 1 on mismatch). Follow semver: `feat:` → **minor**, `fix:` → **patch**. **When committing**: if the commit type is `feat:` or `fix:`, first run the appropriate bump command, then create the feature/fix commit first, followed by the version bump as a separate `chore:` commit. (기능 커밋 → 버전 범프 순서)
 

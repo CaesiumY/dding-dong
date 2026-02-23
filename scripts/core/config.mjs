@@ -53,6 +53,7 @@ export function getStateFile() { return STATE_FILE; }
 export function getProjectConfigDir(projectRoot) { return join(projectRoot, '.dding-dong'); }
 export function getProjectConfigFile(projectRoot) { return join(projectRoot, '.dding-dong', 'config.json'); }
 export function getProjectLocalConfigFile(projectRoot) { return join(projectRoot, '.dding-dong', 'config.local.json'); }
+export function getProjectPacksDir(projectRoot) { return join(projectRoot, '.dding-dong', 'packs'); }
 
 /**
  * 프로젝트 루트 탐지 (3단 폴백, 깊이 상한 10단계)

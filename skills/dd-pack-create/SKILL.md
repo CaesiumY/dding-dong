@@ -142,7 +142,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" detect-author
 **새로 만들기 모드:**
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" create 'PACK_NAME' 'DISPLAY_NAME' 'AUTHOR' 'DESCRIPTION'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" create 'PACK_NAME' 'DISPLAY_NAME' 'AUTHOR' 'DESCRIPTION' --project --cwd "$(pwd)"
 ```
 
 `PACK_NAME`, `DISPLAY_NAME`, `AUTHOR`, `DESCRIPTION`을 수집된 값으로 대체합니다.
@@ -150,14 +150,14 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" create 'PACK_NAME' 'DISPLAY
 **복제 모드:**
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" clone 'SOURCE_DIR' 'PACK_NAME' 'DISPLAY_NAME' 'AUTHOR' 'DESCRIPTION'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" clone 'SOURCE_DIR' 'PACK_NAME' 'DISPLAY_NAME' 'AUTHOR' 'DESCRIPTION' --project --cwd "$(pwd)"
 ```
 
 `SOURCE_DIR`은 1단계에서 선택한 복제 원본 팩의 디렉토리 경로, 나머지는 수집된 값으로 대체합니다.
 
 생성 결과를 사용자에게 안내합니다:
 ```
-팩 디렉토리가 생성되었습니다: ~/.config/dding-dong/packs/PACK_NAME/
+팩 디렉토리가 생성되었습니다: .dding-dong/packs/PACK_NAME/
 ```
 
 ### 3단계: 사운드 파일 등록
@@ -229,7 +229,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate-file 'FILE_PATH'
 검증 통과 후 즉시 실행합니다:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" copy-sound 'SRC_PATH' 'PACK_NAME' 'EVENT_TYPE' 'DEST_FILENAME'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" copy-sound 'SRC_PATH' 'PACK_NAME' 'EVENT_TYPE' 'DEST_FILENAME' --project --cwd "$(pwd)"
 ```
 
 `SRC_PATH`는 사용자 파일 경로, `PACK_NAME`은 팩 이름, `EVENT_TYPE`은 이벤트 타입, `DEST_FILENAME`은 기본 파일명(위 표 참조)으로 대체합니다.
@@ -239,7 +239,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" copy-sound 'SRC_PATH' 'PACK
 "제거"를 선택한 경우:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" remove-event 'PACK_NAME' 'EVENT_TYPE'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" remove-event 'PACK_NAME' 'EVENT_TYPE' --cwd "$(pwd)"
 ```
 
 ### 4단계: 최종 검증 + 적용
@@ -249,7 +249,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" remove-event 'PACK_NAME' 'E
 모든 이벤트 등록이 완료되면 먼저 매니페스트 구조를 검증합니다:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate-manifest 'PACK_NAME'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate-manifest 'PACK_NAME' --cwd "$(pwd)"
 ```
 
 - `valid: true` 시: 다음 단계(파일 검증)로 진행
@@ -261,7 +261,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate-manifest 'PACK_NAM
 매니페스트 검증을 통과하면 WAV 파일 검증을 실행합니다:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate 'PACK_NAME'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate 'PACK_NAME' --cwd "$(pwd)"
 ```
 
 결과를 아래 형식으로 사용자에게 표시합니다:
@@ -272,7 +272,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate 'PACK_NAME'
 이름: PACK_NAME
 표시 이름: DISPLAY_NAME
 작성자: AUTHOR
-위치: ~/.config/dding-dong/packs/PACK_NAME/
+위치: .dding-dong/packs/PACK_NAME/
 
 이벤트           파일                상태
 ─────────────────────────────────────────
@@ -309,7 +309,7 @@ AskUserQuestion으로 질문합니다:
 기존 설정을 로드하고 `sound.pack`만 변경하여 저장합니다:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" apply 'PACK_NAME'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" apply 'PACK_NAME' --cwd "$(pwd)"
 ```
 
 적용 성공 시: "사운드 팩이 'PACK_NAME'으로 변경되었습니다." 안내

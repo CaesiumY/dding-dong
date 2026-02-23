@@ -5,3 +5,4 @@ __pycache__/
 *.log
 .state.json
 .dding-dong/config.local.json
+.dding-dong/packs/

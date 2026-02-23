@@ -44,6 +44,37 @@ function jsonError(msg) {
   process.exit(0);
 }
 
+// --- 공통 헬퍼 (프로젝트 팩 지원) ---
+
+function parseCwd() {
+  const cwdIdx = args.indexOf('--cwd');
+  return (cwdIdx !== -1 && args[cwdIdx + 1]) ? args[cwdIdx + 1] : process.cwd();
+}
+
+function hasFlag(flag) { return args.includes(flag); }
+
+async function resolvePackDir(packName, cwd) {
+  const { findProjectRoot, getProjectPacksDir } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
+  const projectRoot = findProjectRoot(cwd);
+  if (projectRoot) {
+    const projDir = join(getProjectPacksDir(projectRoot), packName);
+    if (existsSync(join(projDir, 'manifest.json'))) return projDir;
+  }
+  const userDir = join(PACKS_DIR, packName);
+  if (existsSync(join(userDir, 'manifest.json'))) return userDir;
+  const builtinDir = join(BUILTIN_DIR, packName);
+  if (existsSync(join(builtinDir, 'manifest.json'))) return builtinDir;
+  return null;
+}
+
+async function getTargetPacksDir(cwd) {
+  if (!hasFlag('--project')) return PACKS_DIR;
+  const { findProjectRoot, getProjectPacksDir } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
+  const projectRoot = findProjectRoot(cwd);
+  if (!projectRoot) jsonError('프로젝트 루트를 찾을 수 없습니다. .dding-dong/ 또는 .git/ 디렉토리가 필요합니다.');
+  return getProjectPacksDir(projectRoot);
+}
+
 // ─── discover ───────────────────────────────────
 if (cmd === 'discover') {
   // --cwd 옵션으로 프로젝트 기준 활성 팩 판별
@@ -58,14 +89,24 @@ if (cmd === 'discover') {
     currentPack = config.sound?.pack || 'default';
   } catch {}
 
-  const packs = [];
-  for (const [dir, type] of [[BUILTIN_DIR, 'built-in'], [PACKS_DIR, 'user']]) {
+  const sources = [[BUILTIN_DIR, 'built-in'], [PACKS_DIR, 'user']];
+  try {
+    const { findProjectRoot, getProjectPacksDir } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
+    const projectRoot = findProjectRoot(cwd);
+    if (projectRoot) {
+      sources.push([getProjectPacksDir(projectRoot), 'project']);
+    }
+  } catch {}
+
+  // 전체 팩 수집 (project > user > built-in 순으로 중복 제거)
+  const allPacks = [];
+  for (const [dir, type] of [...sources].reverse()) {
     try {
       for (const name of readdirSync(dir)) {
         const mf = join(dir, name, 'manifest.json');
         if (existsSync(mf)) {
           const m = JSON.parse(readFileSync(mf, 'utf8'));
-          packs.push({
+          allPacks.push({
             name: m.name,
             displayName: m.displayName,
             type,
@@ -76,6 +117,11 @@ if (cmd === 'discover') {
         }
       }
     } catch {}
+  }
+  const seen = new Set();
+  const packs = [];
+  for (const pack of allPacks) {
+    if (!seen.has(pack.name)) { seen.add(pack.name); packs.push(pack); }
   }
   json(packs);
   process.exit(0);
@@ -106,7 +152,16 @@ if (cmd === 'check-exists') {
   if (!name) jsonError('팩 이름이 필요합니다.');
   const builtinExists = existsSync(join(BUILTIN_DIR, name, 'manifest.json'));
   const userExists = existsSync(join(PACKS_DIR, name, 'manifest.json'));
-  json({ builtinExists, userExists });
+  const cwd = parseCwd();
+  let projectExists = false;
+  try {
+    const { findProjectRoot, getProjectPacksDir } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
+    const projectRoot = findProjectRoot(cwd);
+    if (projectRoot) {
+      projectExists = existsSync(join(getProjectPacksDir(projectRoot), name, 'manifest.json'));
+    }
+  } catch {}
+  json({ builtinExists, userExists, projectExists });
   process.exit(0);
 }
 
@@ -124,7 +179,9 @@ if (cmd === 'detect-author') {
 if (cmd === 'create') {
   const [, name, displayName, author, description] = args;
   if (!name) jsonError('팩 이름이 필요합니다.');
-  const packDir = join(PACKS_DIR, name);
+  const cwd = parseCwd();
+  const targetDir = await getTargetPacksDir(cwd);
+  const packDir = join(targetDir, name);
   mkdirSync(packDir, { recursive: true });
   const manifest = {
     name,
@@ -144,7 +201,9 @@ if (cmd === 'clone') {
   const [, sourceDir, name, displayName, author, description] = args;
   if (!sourceDir || !name) jsonError('sourceDir와 name이 필요합니다.');
   if (!existsSync(sourceDir)) jsonError('원본 디렉토리를 찾을 수 없습니다: ' + sourceDir);
-  const packDir = join(PACKS_DIR, name);
+  const cwd = parseCwd();
+  const targetDir = await getTargetPacksDir(cwd);
+  const packDir = join(targetDir, name);
   mkdirSync(packDir, { recursive: true });
   for (const file of readdirSync(sourceDir)) {
     copyFileSync(join(sourceDir, file), join(packDir, file));
@@ -186,7 +245,8 @@ if (cmd === 'validate-file') {
 if (cmd === 'copy-sound') {
   const [, srcPath, packName, eventType, destFileName] = args;
   if (!srcPath || !packName || !eventType || !destFileName) jsonError('src, packName, eventType, destFile이 필요합니다.');
-  const packDir = join(PACKS_DIR, packName);
+  const cwd = parseCwd();
+  const packDir = await resolvePackDir(packName, cwd) || join(await getTargetPacksDir(cwd), packName);
   const destPath = join(packDir, destFileName);
   copyFileSync(srcPath, destPath);
   const manifestPath = join(packDir, 'manifest.json');
@@ -201,7 +261,8 @@ if (cmd === 'copy-sound') {
 if (cmd === 'remove-event') {
   const [, packName, eventType] = args;
   if (!packName || !eventType) jsonError('packName과 eventType이 필요합니다.');
-  const packDir = join(PACKS_DIR, packName);
+  const cwd = parseCwd();
+  const packDir = await resolvePackDir(packName, cwd) || join(PACKS_DIR, packName);
   const manifestPath = join(packDir, 'manifest.json');
   if (!existsSync(manifestPath)) jsonError('manifest.json을 찾을 수 없습니다.');
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
@@ -221,9 +282,11 @@ if (cmd === 'remove-event') {
 if (cmd === 'validate-manifest') {
   const packName = args[1];
   if (!packName) jsonError('팩 이름이 필요합니다.');
-  let packDir = join(PACKS_DIR, packName);
-  if (!existsSync(join(packDir, 'manifest.json'))) {
-    packDir = join(BUILTIN_DIR, packName);
+  const cwd = parseCwd();
+  const packDir = await resolvePackDir(packName, cwd);
+  if (!packDir) {
+    json({ valid: false, errors: ['manifest.json이 없습니다.'] });
+    process.exit(0);
   }
   const manifestPath = join(packDir, 'manifest.json');
   if (!existsSync(manifestPath)) {
@@ -272,16 +335,13 @@ if (cmd === 'validate-manifest') {
 if (cmd === 'validate') {
   const packName = args[1];
   if (!packName) jsonError('팩 이름이 필요합니다.');
-  // 사용자 팩 → 내장 팩 순서로 탐색
-  let packDir = join(PACKS_DIR, packName);
-  if (!existsSync(join(packDir, 'manifest.json'))) {
-    packDir = join(BUILTIN_DIR, packName);
-  }
-  const manifestPath = join(packDir, 'manifest.json');
-  if (!existsSync(manifestPath)) {
+  const cwd = parseCwd();
+  const packDir = await resolvePackDir(packName, cwd);
+  if (!packDir) {
     json({ valid: false, error: 'manifest.json이 없습니다.' });
     process.exit(0);
   }
+  const manifestPath = join(packDir, 'manifest.json');
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
   const results = [];
   for (const evt of ALL_EVENTS) {
@@ -313,9 +373,9 @@ if (cmd === 'validate') {
 if (cmd === 'apply') {
   const packName = args[1];
   if (!packName) jsonError('팩 이름이 필요합니다.');
-  // 팩 존재 확인
-  const found = [join(PACKS_DIR, packName), join(BUILTIN_DIR, packName)]
-    .some(d => existsSync(join(d, 'manifest.json')));
+  // 팩 존재 확인 (프로젝트 → 사용자 → 내장 순)
+  const cwd = parseCwd();
+  const found = await resolvePackDir(packName, cwd);
   if (!found) jsonError('팩을 찾을 수 없습니다: ' + packName);
   // raw 글로벌 config만 수정 (병합된 config를 저장하면 기본값까지 평탄화됨)
   const { getConfigFile, ensureConfigDir, saveConfig } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
@@ -336,7 +396,7 @@ if (cmd === 'apply') {
 // ─── 도움말 ─────────────────────────────────────
 console.log('dding-dong pack-wizard');
 console.log('');
-console.log('사용법: node pack-wizard.mjs <command> [args...]');
+console.log('사용법: node pack-wizard.mjs <command> [args...] [--project] [--cwd <path>]');
 console.log('');
 console.log('커맨드:');
 console.log('  discover                                          설치된 팩 목록');
@@ -353,3 +413,7 @@ console.log('  remove-event <packName> <eventType>               이벤트 제�
 console.log('  validate-manifest <packName>                      매니페스트 스키마 검증');
 console.log('  validate <packName>                               팩 전체 검증 (WAV 파일)');
 console.log('  apply <packName>                                  팩 적용 (config 변경)');
+console.log('');
+console.log('글로벌 옵션:');
+console.log('  --project    쓰기 대상을 .dding-dong/packs/로 변경 (프로젝트 레벨)');
+console.log('  --cwd <path> 프로젝트 루트 탐색 시작 디렉토리 지정');

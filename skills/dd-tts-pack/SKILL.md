@@ -279,15 +279,15 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" detect-author
 #### 4-e. 보일러플레이트 생성
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" create 'PACK_NAME' 'DISPLAY_NAME' 'AUTHOR' 'DESCRIPTION'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" create 'PACK_NAME' 'DISPLAY_NAME' 'AUTHOR' 'DESCRIPTION' --project --cwd "$(pwd)"
 ```
 
 생성 결과를 사용자에게 안내합니다:
 ```
-팩 디렉토리가 생성되었습니다: ~/.config/dding-dong/packs/PACK_NAME/
+팩 디렉토리가 생성되었습니다: .dding-dong/packs/PACK_NAME/
 ```
 
-`PACK_DIR`을 `~/.config/dding-dong/packs/PACK_NAME`으로 설정합니다.
+`PACK_DIR`을 `.dding-dong/packs/PACK_NAME`으로 설정합니다 (CWD 기준 상대경로).
 
 ### 5단계: 음성 설정
 
@@ -640,7 +640,7 @@ AskUserQuestion:
 
 각 성공 이벤트에 대해:
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" copy-sound 'PACK_DIR/OUTPUT_FILE' 'PACK_NAME' 'EVENT_TYPE' 'OUTPUT_FILE'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" copy-sound 'PACK_DIR/OUTPUT_FILE' 'PACK_NAME' 'EVENT_TYPE' 'OUTPUT_FILE' --project --cwd "$(pwd)"
 ```
 
 > 참고: generate-tts.py가 이미 PACK_DIR에 직접 저장하므로, copy-sound는 manifest 업데이트 역할만 합니다.
@@ -649,7 +649,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" copy-sound 'PACK_DIR/OUTPUT
 #### 9-b. 매니페스트 검증
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate-manifest 'PACK_NAME'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate-manifest 'PACK_NAME' --cwd "$(pwd)"
 ```
 
 - `valid: true` 시: 다음 단계로 진행
@@ -658,7 +658,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate-manifest 'PACK_NAM
 #### 9-c. 파일 검증
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate 'PACK_NAME'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate 'PACK_NAME' --cwd "$(pwd)"
 ```
 
 결과를 아래 형식으로 사용자에게 표시합니다:
@@ -670,7 +670,7 @@ TTS 사운드 팩이 생성되었습니다!
 표시 이름: DISPLAY_NAME
 작성자: AUTHOR
 모드: 보이스 클로닝 / CustomVoice (SPEAKER)
-위치: ~/.config/dding-dong/packs/PACK_NAME/
+위치: .dding-dong/packs/PACK_NAME/
 
 이벤트           파일                상태
 ─────────────────────────────────────────
@@ -707,7 +707,7 @@ AskUserQuestion으로 질문합니다:
 **"바로 적용" 선택 시:**
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" apply 'PACK_NAME'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" apply 'PACK_NAME' --cwd "$(pwd)"
 ```
 
 적용 성공 시: "사운드 팩이 'PACK_NAME'으로 변경되었습니다." 안내
