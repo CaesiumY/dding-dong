@@ -14,7 +14,8 @@
  *   validate-file <filePath>                          WAV 파일 검증
  *   copy-sound <src> <packName> <eventType> <destFile>  사운드 복사 + manifest 업데이트
  *   remove-event <packName> <eventType>               이벤트 제거
- *   validate <packName>                               팩 전체 검증
+ *   validate-manifest <packName>                      매니페스트 스키마 검증
+ *   validate <packName>                               팩 전체 검증 (WAV 파일)
  *   apply <packName>                                  팩 적용 (config 변경)
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync, readdirSync, unlinkSync } from 'node:fs';
@@ -196,6 +197,57 @@ if (cmd === 'remove-event') {
   process.exit(0);
 }
 
+// ─── validate-manifest ──────────────────────────
+if (cmd === 'validate-manifest') {
+  const packName = args[1];
+  if (!packName) jsonError('팩 이름이 필요합니다.');
+  let packDir = join(PACKS_DIR, packName);
+  if (!existsSync(join(packDir, 'manifest.json'))) {
+    packDir = join(BUILTIN_DIR, packName);
+  }
+  const manifestPath = join(packDir, 'manifest.json');
+  if (!existsSync(manifestPath)) {
+    json({ valid: false, errors: ['manifest.json이 없습니다.'] });
+    process.exit(0);
+  }
+  let manifest;
+  try { manifest = JSON.parse(readFileSync(manifestPath, 'utf8')); }
+  catch { json({ valid: false, errors: ['manifest.json 파싱 실패'] }); process.exit(0); }
+
+  const errors = [];
+  // 필수 필드 존재
+  for (const f of ['name', 'displayName', 'version', 'events']) {
+    if (manifest[f] === undefined) errors.push(`필수 필드가 없습니다: ${f}`);
+  }
+  // 타입 검증 (필드가 존재할 때만)
+  if (manifest.name !== undefined && typeof manifest.name !== 'string')
+    errors.push('name의 타입이 올바르지 않습니다');
+  if (manifest.displayName !== undefined && typeof manifest.displayName !== 'string')
+    errors.push('displayName의 타입이 올바르지 않습니다');
+  if (manifest.version !== undefined && typeof manifest.version !== 'string')
+    errors.push('version의 타입이 올바르지 않습니다');
+  if (manifest.events !== undefined && (typeof manifest.events !== 'object' || manifest.events === null || Array.isArray(manifest.events)))
+    errors.push('events의 타입이 올바르지 않습니다');
+  // name 형식
+  if (typeof manifest.name === 'string' && !/^[a-z][a-z0-9-]*[a-z0-9]$/.test(manifest.name))
+    errors.push('name 형식이 올바르지 않습니다');
+  if (typeof manifest.name === 'string' && (manifest.name.length < 2 || manifest.name.length > 50))
+    errors.push('name은 2~50자여야 합니다');
+  // version 형식
+  if (typeof manifest.version === 'string' && !/^\d+\.\d+\.\d+$/.test(manifest.version))
+    errors.push('version은 semver 형식이어야 합니다 (예: 1.0.0)');
+  // 이벤트 검증
+  if (typeof manifest.events === 'object' && manifest.events !== null && !Array.isArray(manifest.events)) {
+    for (const [key, val] of Object.entries(manifest.events)) {
+      if (!ALL_EVENTS.includes(key)) errors.push(`알 수 없는 이벤트: ${key}`);
+      if (!val || !Array.isArray(val.files) || !val.files.every(f => typeof f === 'string'))
+        errors.push(`이벤트 '${key}'의 files가 올바르지 않습니다`);
+    }
+  }
+  json({ valid: errors.length === 0, errors, packDir });
+  process.exit(0);
+}
+
 // ─── validate ───────────────────────────────────
 if (cmd === 'validate') {
   const packName = args[1];
@@ -277,5 +329,6 @@ console.log('  validate-file <filePath>                          WAV 파일 검�
 console.log('  copy-sound <src> <packName> <eventType> <destFile>');
 console.log('                                                    사운드 복사 + manifest 업데이트');
 console.log('  remove-event <packName> <eventType>               이벤트 제거');
-console.log('  validate <packName>                               팩 전체 검증');
+console.log('  validate-manifest <packName>                      매니페스트 스키마 검증');
+console.log('  validate <packName>                               팩 전체 검증 (WAV 파일)');
 console.log('  apply <packName>                                  팩 적용 (config 변경)');

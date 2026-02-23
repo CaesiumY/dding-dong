@@ -14,37 +14,12 @@ allowed-tools: [Bash, Read, Write, AskUserQuestion]
 
 ## 사운드 팩 구조 참고
 
-```
-~/.config/dding-dong/packs/<pack-name>/
-  manifest.json      # 팩 메타데이터
-  complete.wav       # task.complete 이벤트
-  error.wav          # task.error 이벤트
-  input-required.wav # input.required 이벤트
-  session-start.wav  # session.start 이벤트
-  session-end.wav    # session.end 이벤트
-```
+매니페스트 스키마, 디렉토리 구조, WAV 사양 상세는 [`references/manifest-spec.md`](references/manifest-spec.md) 참조.
 
-manifest.json 형식:
-```json
-{
-  "name": "pack-id",
-  "displayName": "표시 이름",
-  "version": "1.0.0",
-  "author": "작성자",
-  "description": "팩 설명",
-  "events": {
-    "task.complete": { "files": ["complete.wav"] },
-    "task.error": { "files": ["error.wav"] },
-    "input.required": { "files": ["input-required.wav"] },
-    "session.start": { "files": ["session-start.wav"] },
-    "session.end": { "files": ["session-end.wav"] }
-  }
-}
-```
-
-- 이벤트 엔트리는 반드시 `{ "files": ["filename.wav"] }` 형식을 사용합니다.
-- 건너뛴 이벤트는 `events` 객체에서 키를 **생략**합니다 (null이 아님).
-- WAV 권장 사양: 16-bit PCM, 44100Hz, mono, 1~3초 길이.
+**핵심 규칙:**
+- 이벤트 엔트리는 반드시 `{ "files": ["filename.wav"] }` 형식
+- 미등록 이벤트는 `events`에서 키를 생략 (null 아님)
+- WAV 권장: 16-bit PCM, 44100Hz, mono, 1~3초
 
 ## 플래그 파싱
 
@@ -267,9 +242,21 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" remove-event 'PACK_NAME' 'E
 
 ### 4단계: 최종 검증 + 적용
 
-#### 4-a. 최종 검증
+#### 4-a. 매니페스트 검증
 
-모든 이벤트 등록이 완료되면 최종 검증을 실행합니다:
+모든 이벤트 등록이 완료되면 먼저 매니페스트 구조를 검증합니다:
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate-manifest 'PACK_NAME'
+```
+
+- `valid: true` 시: 다음 단계(파일 검증)로 진행
+- `valid: false` 시: `errors` 배열의 각 항목을 표시하고, 수정이 필요하다고 안내
+  (이 시점에서 manifest가 손상되었다면 pack-wizard의 create/clone이 정상 작동하지 않은 것이므로, 직접 manifest.json을 Read하여 문제를 확인)
+
+#### 4-b. 파일 검증
+
+매니페스트 검증을 통과하면 WAV 파일 검증을 실행합니다:
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate 'PACK_NAME'
@@ -305,7 +292,7 @@ session.end      session-end.wav     ✓
 `missing` 또는 `invalid_format`이 있으면 경고를 표시합니다:
 "일부 파일에 문제가 있습니다. 팩이 정상 동작하지 않을 수 있습니다."
 
-#### 4-b. 적용 여부 확인
+#### 4-c. 적용 여부 확인
 
 AskUserQuestion으로 질문합니다:
 
