@@ -9,7 +9,7 @@ Voice Cloning 모드와 CustomVoice 모드를 지원합니다.
   # 미리듣기 (클로닝)
   python3 generate-tts.py --voice-mode clone --mode preview \
     --ref-audio ref.wav --ref-text "참조 텍스트" \
-    --text "작업이 완료되었습니다" --instruct "밝은 어조로" \
+    --text "작업이 완료되었습니다" \
     --language Korean --output preview.wav
 
   # 미리듣기 (CustomVoice)
@@ -175,7 +175,7 @@ def load_model(voice_mode, model_name=None):
     return model
 
 
-def generate_clone(model, text, language, ref_audio, ref_text, instruct=None, voice_clone_prompt=None):
+def generate_clone(model, text, language, ref_audio, ref_text, voice_clone_prompt=None):
     """Voice Cloning 모드 생성"""
     kwargs = {
         'text': text,
@@ -219,7 +219,7 @@ def run_preview(args):
     if args.voice_mode == 'clone':
         audio, sr = generate_clone(
             model, args.text, args.language,
-            args.ref_audio, args.ref_text, args.instruct
+            args.ref_audio, args.ref_text
         )
     else:
         audio, sr = generate_custom(
@@ -272,7 +272,7 @@ def run_batch(args):
             if args.voice_mode == 'clone':
                 audio, sr = generate_clone(
                     model, text, language,
-                    args.ref_audio, args.ref_text, instruct,
+                    args.ref_audio, args.ref_text,
                     voice_clone_prompt=voice_clone_prompt
                 )
             else:

@@ -272,7 +272,7 @@ AskUserQuestion으로 질문합니다:
 
 ### 5단계: 이벤트별 TTS 설정
 
-5개 이벤트에 대해 텍스트와 감정/스타일을 설정합니다.
+5개 이벤트에 대해 텍스트(및 CustomVoice 모드에서는 감정/스타일)를 설정합니다.
 
 **기본 한국어 텍스트 및 감정:**
 
@@ -284,12 +284,42 @@ AskUserQuestion으로 질문합니다:
 | `session.start` | "세션을 시작합니다" | "차분하고 환영하는 어조로" |
 | `session.end` | "세션이 종료됩니다" | "차분하고 마무리하는 어조로" |
 
+> **참고**: 감정(instruct)은 **CustomVoice 모드에서만 적용**됩니다.
+> 보이스 클로닝 모드는 참조 음성의 음색만 복제하며, 감정 제어를 지원하지 않습니다.
+
 먼저 안내를 표시합니다:
+
+**클로닝 모드:**
+```
+이벤트별 TTS 텍스트를 설정합니다.
+각 이벤트에 대해 읽어줄 텍스트를 지정할 수 있습니다.
+(보이스 클로닝 모드에서는 감정/스타일 제어가 지원되지 않습니다.)
+기본값은 한국어 텍스트입니다.
+```
+
+**CustomVoice 모드:**
 ```
 이벤트별 TTS 텍스트를 설정합니다.
 각 이벤트에 대해 읽어줄 텍스트와 감정/스타일을 지정할 수 있습니다.
 기본값은 한국어 텍스트입니다.
 ```
+
+#### 클로닝 모드 (`clone`)
+
+각 이벤트(5개)에 대해 순서대로 AskUserQuestion으로 질문합니다:
+
+"[이벤트 설명] (`EVENT_TYPE`) — 기본: 「DEFAULT_TEXT」"
+
+선택지:
+1. **기본 텍스트 사용 (Recommended)** -- "「DEFAULT_TEXT」"
+2. **직접 입력** -- "텍스트를 직접 설정합니다."
+3. **건너뛰기** -- "이 이벤트에 사운드를 할당하지 않습니다."
+
+**"직접 입력" 선택 시:** 사용자가 Other로 입력한 텍스트를 저장합니다.
+
+> 보이스 클로닝 모드에서는 감정/스타일 제어가 지원되지 않으므로 instruct를 수집하지 않습니다.
+
+#### CustomVoice 모드 (`custom`)
 
 각 이벤트(5개)에 대해 순서대로 AskUserQuestion으로 질문합니다:
 
@@ -313,14 +343,31 @@ AskUserQuestion으로 질문합니다:
 2. **직접 입력** -- "원하는 감정/스타일을 자연어로 입력합니다. (예: '화난 어조로', '속삭이듯이')"
 3. **없음** -- "감정 지정 없이 기본 톤으로 생성합니다."
 
-모든 이벤트 설정이 끝나면 `.tts-config.json`을 팩 디렉토리에 저장합니다:
+#### `.tts-config.json` 저장
 
+모든 이벤트 설정이 끝나면 `.tts-config.json`을 팩 디렉토리에 저장합니다.
+
+**클로닝 모드** (instruct 없음):
 ```json
 {
-  "voice_mode": "clone 또는 custom",
-  "speaker": "Sohee (custom 모드 시)",
-  "ref_audio": "/path/to/ref.wav (clone 모드 시)",
-  "ref_text": "참조 텍스트 (clone 모드 시)",
+  "voice_mode": "clone",
+  "ref_audio": "/path/to/ref.wav",
+  "ref_text": "참조 텍스트",
+  "events": {
+    "task.complete": {
+      "text": "작업이 완료되었습니다",
+      "language": "Korean",
+      "output_file": "complete.wav"
+    }
+  }
+}
+```
+
+**CustomVoice 모드** (instruct 포함):
+```json
+{
+  "voice_mode": "custom",
+  "speaker": "Sohee",
   "events": {
     "task.complete": {
       "text": "작업이 완료되었습니다",
@@ -350,7 +397,7 @@ AskUserQuestion으로 질문합니다:
 
 **"미리듣기" 선택 시:**
 
-설정된 첫 번째 이벤트의 텍스트와 감정을 사용합니다.
+설정된 첫 번째 이벤트의 텍스트(및 CustomVoice 모드에서는 감정)를 사용합니다.
 
 **클로닝 모드:**
 ```bash
@@ -360,7 +407,6 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
   --ref-audio 'REF_AUDIO' \
   --ref-text 'REF_TEXT' \
   --text 'PREVIEW_TEXT' \
-  --instruct 'PREVIEW_INSTRUCT' \
   --language Korean \
   --output 'PACK_DIR/preview.wav'
 ```
