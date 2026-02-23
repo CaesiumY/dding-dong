@@ -85,6 +85,7 @@ TTS 사운드 팩 생성에는 다음 환경이 필요합니다:
   {venv.exists ? "✓" : "✗"} TTS 전용 환경     {venv.exists ? venv.path : "— 미설치 (자동 설치 가능)"}
   {python.ok ? "✓" : "✗"} Python 3.10+        {python.ok ? python.version + " (" + python.source + ")" : "— 미설치"}
   {qwen_tts.ok ? "✓" : "✗"} qwen-tts 패키지   {qwen_tts.ok ? qwen_tts.version : "— 미설치"}
+  {sox.ok ? "✓" : "✗"} SoX 오디오 도구      {sox.ok ? sox.version : "— 미설치 (자동 설치 가능)"}
   {GPU 상태에 따른 3가지 분기 — 아래 참조}
 ```
 
@@ -110,7 +111,31 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/setup-tts-venv.mjs" creat
 타임아웃: 900초 (venv 생성 + PyTorch + qwen-tts 다운로드)
 
 - **성공 (`ok: true`)**: `check-env.mjs`를 재실행하여 `all_ok: true` 확인 후 `PYTHON_PATH`에 `python_path` 저장, 2단계로 진행
-- **실패 (`ok: false`)**: 에러 메시지를 표시하고 종료합니다.
+- **venv 모듈 미설치 (`error: 'venv_module_missing'`)**: Ubuntu/Debian에서 `python3-venv` 패키지가 필요합니다.
+  사용자에게 안내합니다:
+  ```
+  Python venv 모듈이 설치되어 있지 않습니다.
+  시스템 패키지를 설치해야 합니다: {install_hint}
+  ```
+  Bash로 직접 설치합니다 (Claude Code가 사용자에게 승인을 요청합니다):
+  ```bash
+  sudo apt install -y {install_pkg}
+  ```
+  설치 성공 시 `setup-tts-venv.mjs create`를 재실행합니다.
+  설치 실패 시 수동 설치 안내를 표시하고 종료합니다.
+- **SoX 미설치 (`error: 'sox_missing'`)**: qwen-tts가 필요로 하는 SoX 오디오 도구가 없습니다.
+  사용자에게 안내합니다:
+  ```
+  SoX 오디오 처리 도구가 설치되어 있지 않습니다.
+  qwen-tts가 내부적으로 SoX를 사용하므로 시스템 패키지 설치가 필요합니다.
+  ```
+  Bash로 직접 설치합니다 (Claude Code가 사용자에게 승인을 요청합니다):
+  ```bash
+  sudo apt install -y sox libsox-fmt-all
+  ```
+  설치 성공 시 `setup-tts-venv.mjs create`를 재실행합니다.
+  설치 실패 시 수동 설치 안내를 표시하고 종료합니다.
+- **기타 실패 (`ok: false`)**: 에러 메시지를 표시하고 종료합니다.
   ```
   자동 설치에 실패했습니다: {error}
   수동 설치 안내:

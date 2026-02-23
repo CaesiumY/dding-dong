@@ -45,6 +45,16 @@ function run(cmd, timeoutMs = 30_000) {
   }
 }
 
+/** Run command and capture specific stream output (stdout or stderr). */
+function runCapture(cmd, stream = 'stderr', timeoutMs = 30_000) {
+  try {
+    execSync(cmd, { encoding: 'utf8', timeout: timeoutMs, stdio: ['pipe', 'pipe', 'pipe'] });
+    return null; // success means no error
+  } catch (e) {
+    return stream === 'stderr' ? (e.stderr || '').trim() : (e.stdout || '').trim();
+  }
+}
+
 /** Run a command showing stderr progress to the user. stdout is captured (not mixed with JSON output). */
 function runVisible(cmd, timeoutMs = 600_000) {
   try {
@@ -125,8 +135,24 @@ function createCmd() {
     return jsonError(`Python 3.10+ required (found ${pyVer.trim()})`);
   }
 
-  // 2. Create venv if it doesn't exist
+  // 2. Check venv module availability (Ubuntu requires python3-venv package)
   if (!existsSync(VENV_PYTHON)) {
+    const venvModuleCheck = run(`${SYS_PYTHON} -c "import ensurepip; import venv"`);
+    if (venvModuleCheck === null) {
+      // Detect the exact package name needed (python3.XX-venv)
+      const installPkg = (major === 3 && minor >= 10)
+        ? `python3.${minor}-venv`
+        : 'python3-venv';
+      return json({
+        ok: false,
+        error: 'venv_module_missing',
+        install_hint: `sudo apt install ${installPkg}`,
+        install_pkg: installPkg,
+        python_version: `${major}.${minor}`,
+      });
+    }
+
+    // 3. Create venv
     mkdirSync(dirname(VENV_DIR), { recursive: true });
     if (!runVisible(`${SYS_PYTHON} -m venv "${VENV_DIR}"`, 120_000)) {
       return jsonError('venv creation failed');
@@ -136,10 +162,10 @@ function createCmd() {
     }
   }
 
-  // 3. Upgrade pip
+  // 4. Upgrade pip
   runVisible(`"${VENV_PIP}" install --upgrade pip`, 120_000);
 
-  // 4. Install PyTorch with CUDA support (if CUDA detected)
+  // 5. Install PyTorch with CUDA support (if CUDA detected)
   //    pip install qwen-tts alone installs CPU-only torch from PyPI.
   //    We install torch from PyTorch's CUDA index first to get GPU acceleration.
   const indexUrl = selectTorchIndexUrl();
@@ -156,14 +182,24 @@ function createCmd() {
     }
   }
 
-  // 5. Install qwen-tts
+  // 6. Install qwen-tts
   if (!runVisible(`"${VENV_PIP}" install -U qwen-tts`, 600_000)) {
     return jsonError('qwen-tts installation failed');
   }
 
-  // 6. Verify installation
+  // 7. Verify installation
   const qwenVer = run(`"${VENV_PYTHON}" -c "import qwen_tts; print(qwen_tts.__version__)"`);
   if (!qwenVer) {
+    // Check if failure is due to missing sox
+    const stderr = runCapture(`"${VENV_PYTHON}" -c "import qwen_tts"`, 'stderr');
+    if (stderr && /sox/i.test(stderr)) {
+      return json({
+        ok: false,
+        error: 'sox_missing',
+        install_hint: 'sudo apt install sox libsox-fmt-all',
+        install_pkg: 'sox libsox-fmt-all',
+      });
+    }
     const alt = run(`"${VENV_PYTHON}" -c "import qwen_tts; print('installed')"`);
     if (alt !== 'installed') return jsonError('qwen-tts installed but import failed');
   }
