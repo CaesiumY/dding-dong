@@ -377,19 +377,42 @@ if (cmd === 'apply') {
   const cwd = parseCwd();
   const found = await resolvePackDir(packName, cwd);
   if (!found) jsonError('팩을 찾을 수 없습니다: ' + packName);
-  // raw 글로벌 config만 수정 (병합된 config를 저장하면 기본값까지 평탄화됨)
-  const { getConfigFile, ensureConfigDir, saveConfig } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
-  ensureConfigDir();
-  const configFile = getConfigFile();
-  let globalConfig = {};
-  try { globalConfig = JSON.parse(readFileSync(configFile, 'utf8')); } catch {}
-  const meta = globalConfig._meta;
-  delete globalConfig._meta;
-  if (!globalConfig.sound) globalConfig.sound = {};
-  globalConfig.sound.pack = packName;
-  if (meta) globalConfig._meta = meta;
-  saveConfig(globalConfig, 'global');
-  json({ applied: true, pack: packName });
+
+  // --scope 파싱 (기본: global — 하위 호환)
+  const scopeIdx = args.indexOf('--scope');
+  const scope = (scopeIdx !== -1 && args[scopeIdx + 1]) ? args[scopeIdx + 1] : 'global';
+  if (!['global', 'project', 'local'].includes(scope)) jsonError('유효하지 않은 스코프: ' + scope);
+
+  const { getConfigFile, getProjectConfigFile, getProjectLocalConfigFile,
+          findProjectRoot, ensureConfigDir, saveConfig } = await import(resolve(PLUGIN_ROOT, 'scripts/core/config.mjs'));
+
+  // 프로젝트 루트 탐지 (project/local 스코프 시 필수)
+  let projectRoot = null;
+  if (scope !== 'global') {
+    projectRoot = findProjectRoot(cwd);
+    if (!projectRoot) jsonError('프로젝트 루트를 찾을 수 없습니다. --scope global을 사용하거나 프로젝트 디렉토리에서 실행하세요.');
+  }
+
+  // 스코프별 config 파일 로드 (raw config만 수정 — 병합된 config를 저장하면 기본값까지 평탄화됨)
+  let configFile;
+  if (scope === 'local') configFile = getProjectLocalConfigFile(projectRoot);
+  else if (scope === 'project') configFile = getProjectConfigFile(projectRoot);
+  else configFile = getConfigFile();
+
+  ensureConfigDir(scope, projectRoot);
+  let config = {};
+  try { config = JSON.parse(readFileSync(configFile, 'utf8')); } catch {}
+
+  // _meta 보존 (global에서만 존재)
+  const meta = (scope === 'global') ? config._meta : undefined;
+  if (config._meta) delete config._meta;
+
+  if (!config.sound) config.sound = {};
+  config.sound.pack = packName;
+  if (meta) config._meta = meta;
+
+  saveConfig(config, scope, projectRoot);
+  json({ applied: true, pack: packName, scope });
   process.exit(0);
 }
 

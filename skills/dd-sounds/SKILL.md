@@ -24,17 +24,24 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" discover --cwd "$(pwd)"
 |---------|----------|------|------|:------:|
 | `name` | `displayName` | 내장/사용자 | `version` | ✓/- |
 
-### use [팩 이름]
+### use [팩 이름] [--scope global|project|local]
 사운드 팩을 변경합니다.
 
+`--scope` 옵션으로 대상 스코프를 지정할 수 있습니다:
+- `--scope global` -- 전역 설정에 반영 (기본값)
+- `--scope project` -- 프로젝트 설정에 반영 (팀 공유, 커밋됨)
+- `--scope local` -- 내 설정에 반영 (개인 오버라이드, 커밋 제외)
+
+`$ARGUMENTS`에서 팩 이름과 `--scope` 플래그를 추출하여 `${PACK_NAME}`, `${SCOPE}`로 치환합니다.
+`${SCOPE}`가 없으면 `global`을 기본값으로 사용합니다.
+
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" apply '${PACK_NAME}'
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" apply '${PACK_NAME}' --scope '${SCOPE}' --cwd "$(pwd)"
 ```
 
-`${PACK_NAME}`은 사용자가 지정한 팩 이름으로 치환합니다.
-
-- 성공 시 (`applied: true`): "`[팩 이름]` 사운드 팩으로 변경했습니다."
-- 에러 시 (`error` 필드): "팩을 찾을 수 없습니다: `[팩 이름]`. `/dding-dong:dd-sounds list`로 설치된 팩을 확인하세요."
+- 성공 시 (`applied: true`): "`[팩 이름]` 사운드 팩으로 변경했습니다. (스코프: `[scope]`)"
+- 팩 없음 에러: "팩을 찾을 수 없습니다: `[팩 이름]`. `/dding-dong:dd-sounds list`로 설치된 팩을 확인하세요."
+- 프로젝트 루트 없음 에러: "프로젝트 루트를 찾을 수 없습니다. `--scope global`을 사용하거나 프로젝트 디렉토리에서 실행하세요."
 
 ### preview [팩 이름]
 팩의 각 이벤트 사운드를 순서대로 재생합니다.

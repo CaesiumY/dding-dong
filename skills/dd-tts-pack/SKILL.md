@@ -321,22 +321,26 @@ AskUserQuestion으로 질문합니다:
 node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/validate-ref-audio.mjs" 'FILE_PATH'
 ```
 
-- **`ok: true`**: `REF_AUDIO` 변수에 경로를 저장합니다. 포맷 정보를 표시합니다.
+- **`ok: true`**: 포맷 정보를 표시합니다. 참조 음성을 팩 디렉토리에 복사합니다:
+  ```bash
+  cp 'FILE_PATH' 'PACK_DIR/ref-audio.EXT'
+  ```
+  (EXT는 원본 파일의 확장자를 유지: .wav, .mp3 등)
+  `REF_AUDIO`를 `PACK_DIR/ref-audio.EXT`로 설정합니다.
 - **`ok: false`**: 에러 메시지를 표시하고 다시 파일 경로 입력을 요청합니다.
 
 ##### 5-A-b. 참조 텍스트(트랜스크립트)
 
-프로젝트 디렉토리에 트랜스크립트 템플릿 파일을 생성합니다 (에디터에서 바로 편집 가능):
+팩 디렉토리에 트랜스크립트 템플릿 파일을 생성합니다 (에디터에서 바로 편집 가능):
 
 ```bash
-mkdir -p .dding-dong
-node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/ref-text.mjs" create '.dding-dong/ref-text.txt'
+node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/ref-text.mjs" create 'PACK_DIR/ref-text.txt'
 ```
 
 사용자에게 안내합니다:
 ```
 참조 음성의 트랜스크립트 파일이 생성되었습니다:
-  .dding-dong/ref-text.txt
+  PACK_DIR/ref-text.txt
 
 파일을 열어 참조 음성에서 말하는 내용을 입력해주세요.
 트랜스크립트가 정확할수록 클로닝 품질이 높아집니다.
@@ -354,21 +358,13 @@ AskUserQuestion으로 질문합니다:
 **"작성 완료" 선택 시:**
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/ref-text.mjs" read '.dding-dong/ref-text.txt'
+node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/ref-text.mjs" read 'PACK_DIR/ref-text.txt'
 ```
 
 결과 JSON의 `text` 필드를 `REF_TEXT`에 저장합니다.
 `empty: true`이면 "없이 진행"과 동일하게 처리합니다.
 
-임시 파일을 삭제합니다:
-```bash
-rm -f .dding-dong/ref-text.txt
-```
-
-**"없이 진행" 선택 시:** `REF_TEXT`를 빈 문자열로 설정합니다. 임시 파일을 삭제합니다:
-```bash
-rm -f .dding-dong/ref-text.txt
-```
+**"없이 진행" 선택 시:** `REF_TEXT`를 빈 문자열로 설정합니다. `PACK_DIR/ref-text.txt`는 삭제하지 않고 보존합니다 (x-vector 모드임을 기록).
 
 #### 5-B. CustomVoice 모드 (`custom`)
 
@@ -469,7 +465,7 @@ AskUserQuestion으로 질문합니다:
 {
   "voice_mode": "clone",
   "model": "MODEL_NAME",
-  "ref_audio": "/path/to/ref.wav",
+  "ref_audio": "ref-audio.EXT",
   "ref_text": "참조 텍스트",
   "events": {
     "task.complete": {
@@ -706,17 +702,29 @@ AskUserQuestion으로 질문합니다:
 
 **"바로 적용" 선택 시:**
 
+AskUserQuestion으로 스코프를 질문합니다:
+
+"사운드 팩 설정을 어디에 저장하시겠습니까?"
+
+선택지:
+1. **프로젝트 로컬 (Recommended)** -- "이 프로젝트에서만 적용, 개인 설정 (.dding-dong/config.local.json). 글로벌·프로젝트 설정보다 우선합니다. gitignored."
+2. **프로젝트 (팀 공유)** -- "이 프로젝트의 팀 전체에 적용 (.dding-dong/config.json). 글로벌 설정보다 우선합니다. 커밋됩니다."
+3. **글로벌** -- "모든 프로젝트에 적용 (~/.config/dding-dong/config.json). 프로젝트/로컬 설정이 있으면 그쪽이 우선합니다."
+
+선택 결과를 `SCOPE`로 저장합니다 ("프로젝트 로컬" → `local`, "프로젝트" → `project`, "글로벌" → `global`).
+
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" apply 'PACK_NAME' --cwd "$(pwd)"
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" apply 'PACK_NAME' --scope '${SCOPE}' --cwd "$(pwd)"
 ```
 
-적용 성공 시: "사운드 팩이 'PACK_NAME'으로 변경되었습니다." 안내
+적용 성공 시: "사운드 팩이 'PACK_NAME'으로 변경되었습니다. (스코프: SCOPE)" 안내
 
 **"나중에 적용" 선택 시:**
 
 ```
 팩이 생성되었습니다. 아래 명령어로 나중에 적용할 수 있습니다:
-  /dding-dong:dd-sounds use PACK_NAME
+  /dding-dong:dd-sounds use PACK_NAME               # 글로벌 (기본)
+  /dding-dong:dd-sounds use PACK_NAME --scope local  # 프로젝트 로컬
 ```
 
 #### 10-b. 미리듣기
