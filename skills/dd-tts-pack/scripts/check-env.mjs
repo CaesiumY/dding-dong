@@ -1,13 +1,24 @@
 #!/usr/bin/env node
 /**
  * TTS 환경 검사 스크립트
- * Python 3.12+, qwen-tts 패키지, NVIDIA GPU(CUDA) 가용성을 검사합니다.
+ * venv Python(우선) 또는 시스템 Python, qwen-tts 패키지, NVIDIA GPU(CUDA) 가용성을 검사합니다.
  *
  * 사용법: node check-env.mjs
- * 출력: JSON { python, qwen_tts, gpu, all_ok }
+ * 출력: JSON { python, venv, qwen_tts, gpu, python_path, all_ok }
  */
 
 import { execSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { homedir } from 'node:os';
+
+// --- Constants (must match setup-tts-venv.mjs) ---
+const IS_WIN = process.platform === 'win32';
+const VENV_DIR = join(homedir(), '.config', 'dding-dong', 'tts-venv');
+const VENV_PYTHON = IS_WIN
+  ? join(VENV_DIR, 'Scripts', 'python.exe')
+  : join(VENV_DIR, 'bin', 'python3');
+const SYS_PYTHON = IS_WIN ? 'python' : 'python3';
 
 function run(cmd, timeoutMs = 10_000) {
   try {
@@ -17,34 +28,63 @@ function run(cmd, timeoutMs = 10_000) {
   }
 }
 
-function checkPython() {
-  const raw = run('python3 --version');
-  if (!raw) return { ok: false, version: null, error: 'python3 not found' };
-
+function parsePythonVersion(raw) {
+  if (!raw) return null;
   const match = raw.match(/Python\s+(\d+)\.(\d+)\.(\d+)/);
-  if (!match) return { ok: false, version: raw, error: 'cannot parse version' };
-
-  const [, major, minor] = match.map(Number);
-  const version = `${major}.${minor}.${match[3]}`;
-
-  if (major < 3 || (major === 3 && minor < 10)) {
-    return { ok: false, version, error: `Python 3.10+ required (found ${version})` };
-  }
-  return { ok: true, version };
+  if (!match) return null;
+  return { major: parseInt(match[1]), minor: parseInt(match[2]), patch: match[3], full: `${match[1]}.${match[2]}.${match[3]}` };
 }
 
-function checkQwenTts() {
-  const version = run('python3 -c "import qwen_tts; print(qwen_tts.__version__)"');
+function checkPython() {
+  // Priority 1: venv Python
+  if (existsSync(VENV_PYTHON)) {
+    const raw = run(`"${VENV_PYTHON}" --version`);
+    const ver = parsePythonVersion(raw);
+    if (ver && (ver.major > 3 || (ver.major === 3 && ver.minor >= 10))) {
+      return { ok: true, version: ver.full, path: VENV_PYTHON, source: 'venv' };
+    }
+    if (ver) {
+      return { ok: false, version: ver.full, path: VENV_PYTHON, source: 'venv', error: `Python 3.10+ required (found ${ver.full})` };
+    }
+    // venv python exists but broken
+    return { ok: false, version: null, path: VENV_PYTHON, source: 'venv', error: 'venv python is broken' };
+  }
+
+  // Priority 2: system python (fallback, for venv creation feasibility check)
+  const raw = run(`${SYS_PYTHON} --version`);
+  if (!raw) return { ok: false, version: null, path: null, source: null, error: `${SYS_PYTHON} not found` };
+
+  const ver = parsePythonVersion(raw);
+  if (!ver) return { ok: false, version: raw, path: null, source: null, error: 'cannot parse version' };
+
+  // Resolve absolute path of system python
+  const absPath = IS_WIN
+    ? run(`where ${SYS_PYTHON}`)?.split('\n')[0] || SYS_PYTHON
+    : run(`which ${SYS_PYTHON}`) || run(`command -v ${SYS_PYTHON}`) || SYS_PYTHON;
+
+  if (ver.major < 3 || (ver.major === 3 && ver.minor < 10)) {
+    return { ok: false, version: ver.full, path: absPath, source: 'system', error: `Python 3.10+ required (found ${ver.full})` };
+  }
+  return { ok: true, version: ver.full, path: absPath, source: 'system' };
+}
+
+function checkVenv() {
+  return { exists: existsSync(VENV_PYTHON), path: VENV_DIR };
+}
+
+function checkQwenTts(pythonPath) {
+  if (!pythonPath) return { ok: false, version: null, error: 'no python available' };
+
+  const version = run(`"${pythonPath}" -c "import qwen_tts; print(qwen_tts.__version__)"`);
   if (!version) {
-    // try alternate import
-    const alt = run('python3 -c "import qwen_tts; print(\'installed\')"');
+    const alt = run(`"${pythonPath}" -c "import qwen_tts; print('installed')"`);
     if (alt === 'installed') return { ok: true, version: 'unknown' };
     return { ok: false, version: null, error: 'qwen-tts not installed' };
   }
   return { ok: true, version };
 }
 
-function checkGpu() {
+function checkGpu(pythonPath) {
   let name = null;
   let vram_gb = null;
   let hwDetected = false;
@@ -61,19 +101,20 @@ function checkGpu() {
     }
   }
 
-  // Step 2: torch CUDA readiness check
+  // Step 2: torch CUDA readiness check (requires Python)
   let cuda_ready = false;
-  const torchResult = run('python3 -c "import torch; print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else \'\')"');
-  if (torchResult) {
-    const lines = torchResult.split('\n');
-    cuda_ready = lines[0] === 'True';
-    // Fill in name/vram from torch if nvidia-smi missed them
-    if (cuda_ready && !name && lines[1]) name = lines[1];
-    if (cuda_ready && vram_gb === null) {
-      const vram = run('python3 -c "import torch; print(round(torch.cuda.get_device_properties(0).total_mem / 1024**3, 1))"');
-      if (vram) vram_gb = parseFloat(vram);
+  if (pythonPath) {
+    const torchResult = run(`"${pythonPath}" -c "import torch; print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else '')"`);
+    if (torchResult) {
+      const lines = torchResult.split('\n');
+      cuda_ready = lines[0] === 'True';
+      if (cuda_ready && !name && lines[1]) name = lines[1];
+      if (cuda_ready && vram_gb === null) {
+        const vram = run(`"${pythonPath}" -c "import torch; print(round(torch.cuda.get_device_properties(0).total_mem / 1024**3, 1))"`);
+        if (vram) vram_gb = parseFloat(vram);
+      }
+      if (cuda_ready) hwDetected = true;
     }
-    if (cuda_ready) hwDetected = true;
   }
 
   if (!hwDetected) return { ok: false, name: null, vram_gb: null, cuda_ready: false, error: 'CUDA GPU not available' };
@@ -82,12 +123,14 @@ function checkGpu() {
 
 try {
   const python = checkPython();
-  const qwen_tts = python.ok ? checkQwenTts() : { ok: false, version: null, error: 'python check failed first' };
-  const gpu = checkGpu();
+  const venv = checkVenv();
+  const pythonPath = python.ok ? python.path : null;
+  const qwen_tts = pythonPath ? checkQwenTts(pythonPath) : { ok: false, version: null, error: 'python check failed first' };
+  const gpu = checkGpu(pythonPath);
 
   const all_ok = python.ok && qwen_tts.ok && gpu.ok;
 
-  console.log(JSON.stringify({ python, qwen_tts, gpu, all_ok }, null, 2));
+  console.log(JSON.stringify({ python, venv, qwen_tts, gpu, python_path: pythonPath, all_ok }, null, 2));
   process.exit(0);
 } catch (err) {
   console.log(JSON.stringify({ error: err.message, all_ok: false }));

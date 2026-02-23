@@ -41,9 +41,9 @@ Qwen3-TTS를 사용하여 음성 합성 기반 사운드 팩을 생성합니다.
     --help           이 도움말 표시
 
   필요 환경:
-    - Python 3.10+
-    - pip install -U qwen-tts
     - NVIDIA GPU (8GB+ VRAM)
+    - Python 3.10+ (자동 venv 설치 지원)
+    - qwen-tts (venv에 자동 설치)
 
   예시:
     /dding-dong:dd-tts-pack
@@ -64,35 +64,92 @@ Qwen3-TTS를 사용하여 음성 합성 기반 사운드 팩을 생성합니다.
 node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/check-env.mjs"
 ```
 
-결과 JSON의 `all_ok` 필드를 확인합니다.
+결과 JSON에서 `all_ok`, `python_path`, `venv`, `gpu` 필드를 확인합니다.
 
-**모두 통과 (`all_ok: true`)**: 2단계로 진행합니다.
+**모두 통과 (`all_ok: true`)**:
+`PYTHON_PATH` 변수에 `python_path` 값을 저장하고 2단계로 진행합니다.
 
-**실패 시**: 누락 항목별 안내를 표시합니다.
+**GPU 없음 (`gpu.ok: false`)**:
+GPU 없이는 TTS를 실행할 수 없으므로 즉시 종료합니다.
+```
+CUDA GPU가 필요합니다. 이 스킬은 NVIDIA GPU(CUDA)가 있는 환경에서만 사용 가능합니다.
+기존 WAV 파일로 팩을 만들려면: /dding-dong:dd-pack-create
+```
 
-GPU 상태는 `gpu.ok`(하드웨어 존재)와 `gpu.cuda_ready`(torch+CUDA 동작)를 구분하여 3가지로 표시합니다:
-- `gpu.ok && gpu.cuda_ready` → `✓ NVIDIA GPU (CUDA)       {gpu.name} ({gpu.vram_gb}GB)`
-- `gpu.ok && !gpu.cuda_ready` → `✓ NVIDIA GPU (CUDA)       {gpu.name} ({gpu.vram_gb}GB) (torch 미설치 — pip install qwen-tts로 해결)`
-- `!gpu.ok` → `✗ NVIDIA GPU (CUDA)       — CUDA 지원 GPU 필요`
+**GPU 있고 venv 없음 (`gpu.ok: true && venv.exists: false`)**:
+환경 상태를 표시한 후 자동 설치를 제안합니다.
 
 ```
 TTS 사운드 팩 생성에는 다음 환경이 필요합니다:
 
-  {python.ok ? "✓" : "✗"} Python 3.10+         {python.ok ? python.version : "— 미설치"}
-  {qwen_tts.ok ? "✓" : "✗"} qwen-tts 패키지    {qwen_tts.ok ? qwen_tts.version : "— pip install -U qwen-tts"}
-  {GPU 상태에 따른 3가지 분기 — 위 참조}
-
-설치 안내:
-  conda create -n qwen3-tts python=3.12 -y
-  conda activate qwen3-tts
-  pip install -U qwen-tts
+  {venv.exists ? "✓" : "✗"} TTS 전용 환경     {venv.exists ? venv.path : "— 미설치 (자동 설치 가능)"}
+  {python.ok ? "✓" : "✗"} Python 3.10+        {python.ok ? python.version + " (" + python.source + ")" : "— 미설치"}
+  {qwen_tts.ok ? "✓" : "✗"} qwen-tts 패키지   {qwen_tts.ok ? qwen_tts.version : "— 미설치"}
+  {GPU 상태에 따른 3가지 분기 — 아래 참조}
 ```
 
-하단 안내 메시지도 GPU 상태에 따라 분기합니다:
-- `gpu.ok`인 경우: `"pip install -U qwen-tts 한 줄이면 환경이 완성됩니다.\n기존 WAV 파일로 팩을 만들려면: /dding-dong:dd-pack-create"`
-- `!gpu.ok`인 경우: `"GPU가 없는 경우 이 스킬을 사용할 수 없습니다.\n기존 WAV 파일로 팩을 만들려면: /dding-dong:dd-pack-create"`
+GPU 상태는 `gpu.ok`와 `gpu.cuda_ready`를 구분하여 3가지로 표시합니다:
+- `gpu.ok && gpu.cuda_ready` → `✓ NVIDIA GPU (CUDA)       {gpu.name} ({gpu.vram_gb}GB)`
+- `gpu.ok && !gpu.cuda_ready` → `✓ NVIDIA GPU (CUDA)       {gpu.name} ({gpu.vram_gb}GB) (torch 미설치 — 자동 설치로 해결)`
+- `!gpu.ok` → `✗ NVIDIA GPU (CUDA)       — CUDA 지원 GPU 필요`
 
-환경 미충족 시 여기서 종료합니다.
+AskUserQuestion으로 질문합니다:
+
+"TTS 환경(Python venv + qwen-tts)을 자동으로 설치하시겠습니까?"
+
+선택지:
+1. **자동 설치 (Recommended)** -- "~/.config/dding-dong/tts-venv/에 전용 Python 환경을 생성하고 필요 패키지를 설치합니다. (수 분 소요)"
+2. **수동 설치** -- "직접 환경을 구성합니다."
+
+**"자동 설치" 선택 시:**
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/setup-tts-venv.mjs" create
+```
+
+타임아웃: 900초 (venv 생성 + PyTorch + qwen-tts 다운로드)
+
+- **성공 (`ok: true`)**: `check-env.mjs`를 재실행하여 `all_ok: true` 확인 후 `PYTHON_PATH`에 `python_path` 저장, 2단계로 진행
+- **실패 (`ok: false`)**: 에러 메시지를 표시하고 종료합니다.
+  ```
+  자동 설치에 실패했습니다: {error}
+  수동 설치 안내:
+    python3 -m venv ~/.config/dding-dong/tts-venv
+    ~/.config/dding-dong/tts-venv/bin/pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121
+    ~/.config/dding-dong/tts-venv/bin/pip install -U qwen-tts
+  ```
+
+**"수동 설치" 선택 시:**
+```
+수동 설치 안내:
+  python3 -m venv ~/.config/dding-dong/tts-venv
+  ~/.config/dding-dong/tts-venv/bin/pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121
+  ~/.config/dding-dong/tts-venv/bin/pip install -U qwen-tts
+설치 후 다시 실행해주세요: /dding-dong:dd-tts-pack
+```
+여기서 종료합니다.
+
+**venv 존재하지만 qwen-tts 없음 (`venv.exists: true && qwen_tts.ok: false`)**:
+
+환경 상태를 표시한 후:
+```
+venv는 존재하지만 qwen-tts가 설치되지 않았습니다.
+```
+
+AskUserQuestion으로 질문합니다:
+
+"패키지 재설치를 시도하시겠습니까?"
+
+선택지:
+1. **재설치 시도 (Recommended)** -- "기존 venv에 qwen-tts를 다시 설치합니다."
+2. **종료** -- "스킬을 종료합니다."
+
+**"재설치 시도" 선택 시:**
+`setup-tts-venv.mjs create`를 실행합니다 (기존 venv에 pip install만 재실행).
+성공 시 `check-env.mjs` 재실행 → `PYTHON_PATH` 저장 → 2단계 진행.
+실패 시 에러 표시 후 종료.
+
+**"종료" 선택 시:** 종료합니다.
 
 ### 2단계: 모드 선택
 
@@ -442,7 +499,7 @@ AskUserQuestion으로 질문합니다:
 
 **클로닝 모드:**
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
+'PYTHON_PATH' "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
   --voice-mode clone \
   --mode preview \
   --model 'MODEL_NAME' \
@@ -455,7 +512,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
 
 **CustomVoice 모드:**
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
+'PYTHON_PATH' "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
   --voice-mode custom \
   --mode preview \
   --model 'MODEL_NAME' \
@@ -494,7 +551,7 @@ AskUserQuestion으로 질문합니다:
 
 **클로닝 모드:**
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
+'PYTHON_PATH' "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
   --voice-mode clone \
   --mode batch \
   --model 'MODEL_NAME' \
@@ -506,7 +563,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
 
 **CustomVoice 모드:**
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
+'PYTHON_PATH' "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
   --voice-mode custom \
   --mode batch \
   --model 'MODEL_NAME' \
