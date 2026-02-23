@@ -20,10 +20,9 @@
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
 
+## 빠른 시작
 
-## 설치
-
-### 마켓플레이스에서 설치 (권장)
+### Step 1. 설치
 
 Claude Code에서 아래 명령어를 실행합니다:
 
@@ -32,29 +31,7 @@ Claude Code에서 아래 명령어를 실행합니다:
 /plugin install dding-dong
 ```
 
-### 직접 설치
-
-```bash
-claude plugin add https://github.com/CaesiumY/dding-dong
-```
-
-### 로컬 설치 (개발/테스트)
-
-```bash
-git clone https://github.com/CaesiumY/dding-dong
-cd dding-dong
-claude plugin add .
-```
-
-## 업데이트
-
-```
-/plugin marketplace update dding-dong
-```
-
-## 빠른 시작
-
-### Step 1. 환경 설정
+### Step 2. 환경 설정
 
 ```
 /dding-dong:dd-setup
@@ -62,7 +39,7 @@ claude plugin add .
 
 플랫폼을 자동 감지하고 오디오 플레이어와 알림 도구를 확인합니다.
 
-### Step 2. 테스트
+### Step 3. 테스트
 
 ```
 /dding-dong:dd-test
@@ -70,19 +47,51 @@ claude plugin add .
 
 모든 이벤트 타입의 알림을 순서대로 테스트합니다. 소리가 들리면 설정 완료!
 
+<details>
+<summary>다른 설치 방법 / 업데이트</summary>
+
+#### 직접 설치
+
+```bash
+claude plugin add https://github.com/CaesiumY/dding-dong
+```
+
+#### 로컬 설치 (개발/테스트)
+
+```bash
+git clone https://github.com/CaesiumY/dding-dong
+cd dding-dong
+claude plugin add .
+```
+
+#### 업데이트
+
+```
+/plugin marketplace update dding-dong
+```
+
+</details>
+
 ## 스킬 목록
 
-| 스킬                          | 설명                              |
-| ----------------------------- | --------------------------------- |
-| `/dding-dong:dd-setup`        | 환경 감지 및 초기 설정            |
-| `/dding-dong:dd-test`         | 모든 이벤트 알림 테스트           |
-| `/dding-dong:dd-config`       | 설정 보기/변경                    |
-| `/dding-dong:dd-sounds`       | 사운드 팩 관리                    |
-| `/dding-dong:dd-doctor`       | 알림 문제 자동 진단               |
-| `/dding-dong:dd-feedback`     | 피드백/버그 리포트 자동 생성      |
-| `/dding-dong:dd-help`         | 도움말 및 기능 가이드             |
-| `/dding-dong:dd-pack-create`  | 커스텀 사운드 팩 생성 마법사      |
-| `/dding-dong:dd-tts-pack`     | TTS 음성 합성 사운드 팩 생성      |
+### 기본 스킬
+
+| 스킬                          | 설명                    |
+| ----------------------------- | ----------------------- |
+| `/dding-dong:dd-setup`        | 환경 감지 및 초기 설정  |
+| `/dding-dong:dd-test`         | 모든 이벤트 알림 테스트 |
+| `/dding-dong:dd-config`       | 설정 보기/변경          |
+| `/dding-dong:dd-sounds`       | 사운드 팩 관리          |
+| `/dding-dong:dd-doctor`       | 알림 문제 자동 진단     |
+
+### 고급 스킬
+
+| 스킬                          | 설명                         |
+| ----------------------------- | ---------------------------- |
+| `/dding-dong:dd-feedback`     | 피드백/버그 리포트 자동 생성 |
+| `/dding-dong:dd-help`         | 도움말 및 기능 가이드        |
+| `/dding-dong:dd-pack-create`  | 커스텀 사운드 팩 생성 마법사 |
+| `/dding-dong:dd-tts-pack`     | TTS 음성 합성 사운드 팩 생성 |
 
 ## 설정
 
@@ -95,6 +104,18 @@ claude plugin add .
 | Project | `.dding-dong/config.json`          | 프로젝트 공유 (커밋 대상)           |
 | Local   | `.dding-dong/config.local.json`    | 개인 오버라이드 (`.gitignore` 권장) |
 | Env     | 환경변수                           | 최종 오버라이드                     |
+
+### 환경변수
+
+| 변수                       | 설명               |
+| -------------------------- | ------------------ |
+| `DDING_DONG_ENABLED=false` | 플러그인 비활성화  |
+| `DDING_DONG_VOLUME=0.5`    | 볼륨 오버라이드    |
+| `DDING_DONG_LANG=en`       | 언어 오버라이드    |
+| `DDING_DONG_PACK=retro`    | 사운드팩 오버라이드 |
+
+<details>
+<summary>전체 설정 예시 및 옵션 상세</summary>
 
 ```json
 {
@@ -138,7 +159,7 @@ claude plugin add .
 }
 ```
 
-### 설정 옵션
+#### 설정 옵션
 
 | 옵션                   | 기본값            | 설명                                                    |
 | ---------------------- | ----------------- | ------------------------------------------------------- |
@@ -154,14 +175,7 @@ claude plugin add .
 | `quiet_hours.end`      | `"08:00"`         | 야간 모드 종료 시간                                     |
 | `cooldown_seconds`     | `3`               | 알림 간 최소 간격(초)                                   |
 
-### 환경변수
-
-| 변수                       | 설명               |
-| -------------------------- | ------------------ |
-| `DDING_DONG_ENABLED=false` | 플러그인 비활성화  |
-| `DDING_DONG_VOLUME=0.5`    | 볼륨 오버라이드    |
-| `DDING_DONG_LANG=en`       | 언어 오버라이드    |
-| `DDING_DONG_PACK=retro`    | 사운드팩 오버라이드 |
+</details>
 
 ## 크로스 플랫폼 지원
 
@@ -193,7 +207,10 @@ claude plugin add .
 | `retro`   | 8-bit 칩튠 스타일 게임기 효과음 |
 | `musical` | 피아노 코드 기반 화성적 알림음  |
 
-### manifest.json 구조
+<details>
+<summary>manifest.json 구조 및 사운드 팩 적용 방법</summary>
+
+#### manifest.json 구조
 
 ```json
 {
@@ -223,14 +240,16 @@ claude plugin add .
 | `description` | 아니오 | 팩 설명                          |
 | `events`      | 예     | 이벤트별 사운드 매핑             |
 
-### rotation 모드
+#### rotation 모드
 
 | 모드              | 동작                       |
 | ----------------- | -------------------------- |
 | `"random"`        | `files` 배열에서 랜덤 선택 |
 | 그 외 또는 미지정 | 첫 번째 파일 재생          |
 
-### 사운드 팩 적용
+#### 사운드 팩 적용
+
+설정 파일에서 팩 이름을 지정합니다:
 
 ```json
 {
@@ -239,6 +258,8 @@ claude plugin add .
   }
 }
 ```
+
+</details>
 
 ## 문제 해결
 
