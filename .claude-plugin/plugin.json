@@ -1,6 +1,6 @@
 {
   "name": "dding-dong",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Claude Code 알림 플러그인 - 작업 완료, 오류, 입력 필요 시 소리와 OS 알림으로 알려줍니다",
   "author": {
     "name": "ChangSik Yoon"
