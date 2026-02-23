@@ -72,16 +72,24 @@ function checkVenv() {
   return { exists: existsSync(VENV_PYTHON), path: VENV_DIR };
 }
 
+function lastLine(str) {
+  if (!str) return '';
+  const lines = str.split('\n').map(l => l.trim()).filter(Boolean);
+  return lines.length ? lines[lines.length - 1] : '';
+}
+
 function checkQwenTts(pythonPath) {
   if (!pythonPath) return { ok: false, version: null, error: 'no python available' };
 
-  const version = run(`"${pythonPath}" -c "import qwen_tts; print(qwen_tts.__version__)"`);
-  if (!version) {
-    const alt = run(`"${pythonPath}" -c "import qwen_tts; print('installed')"`);
-    if (alt === 'installed') return { ok: true, version: 'unknown' };
-    return { ok: false, version: null, error: 'qwen-tts not installed' };
-  }
-  return { ok: true, version };
+  // Use importlib.metadata to avoid import side-effects (SoX/flash-attn warnings on stdout)
+  const metaVer = run(`"${pythonPath}" -c "from importlib.metadata import version; print(version('qwen-tts'))"`);
+  const ver = lastLine(metaVer);
+  if (ver && /^\d+\.\d+/.test(ver)) return { ok: true, version: ver };
+
+  // Fallback: try actual import, check last line only (stdout may contain warnings)
+  const alt = run(`"${pythonPath}" -c "import qwen_tts; print('installed')"`);
+  if (lastLine(alt) === 'installed') return { ok: true, version: 'unknown' };
+  return { ok: false, version: null, error: 'qwen-tts not installed' };
 }
 
 function checkGpu(pythonPath) {
