@@ -84,12 +84,6 @@ function checkQwenTts(pythonPath) {
   return { ok: true, version };
 }
 
-function checkSox() {
-  const version = run('sox --version');
-  if (!version) return { ok: false, error: 'sox not found' };
-  return { ok: true, version: version.replace(/^.*sox\s*/i, '').trim() || 'unknown' };
-}
-
 function checkGpu(pythonPath) {
   let name = null;
   let vram_gb = null;
@@ -133,11 +127,9 @@ try {
   const pythonPath = python.ok ? python.path : null;
   const qwen_tts = pythonPath ? checkQwenTts(pythonPath) : { ok: false, version: null, error: 'python check failed first' };
   const gpu = checkGpu(pythonPath);
-  const sox = checkSox();
+  const all_ok = python.ok && qwen_tts.ok && gpu.ok;
 
-  const all_ok = python.ok && qwen_tts.ok && gpu.ok && sox.ok;
-
-  console.log(JSON.stringify({ python, venv, qwen_tts, gpu, sox, python_path: pythonPath, all_ok }, null, 2));
+  console.log(JSON.stringify({ python, venv, qwen_tts, gpu, python_path: pythonPath, all_ok }, null, 2));
   process.exit(0);
 } catch (err) {
   console.log(JSON.stringify({ error: err.message, all_ok: false }));

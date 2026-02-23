@@ -45,16 +45,6 @@ function run(cmd, timeoutMs = 30_000) {
   }
 }
 
-/** Run command and capture specific stream output (stdout or stderr). */
-function runCapture(cmd, stream = 'stderr', timeoutMs = 30_000) {
-  try {
-    execSync(cmd, { encoding: 'utf8', timeout: timeoutMs, stdio: ['pipe', 'pipe', 'pipe'] });
-    return null; // success means no error
-  } catch (e) {
-    return stream === 'stderr' ? (e.stderr || '').trim() : (e.stdout || '').trim();
-  }
-}
-
 /** Run a command showing stderr progress to the user. stdout is captured (not mixed with JSON output). */
 function runVisible(cmd, timeoutMs = 600_000) {
   try {
@@ -190,16 +180,6 @@ function createCmd() {
   // 7. Verify installation
   const qwenVer = run(`"${VENV_PYTHON}" -c "import qwen_tts; print(qwen_tts.__version__)"`);
   if (!qwenVer) {
-    // Check if failure is due to missing sox
-    const stderr = runCapture(`"${VENV_PYTHON}" -c "import qwen_tts"`, 'stderr');
-    if (stderr && /sox/i.test(stderr)) {
-      return json({
-        ok: false,
-        error: 'sox_missing',
-        install_hint: 'sudo apt install sox libsox-fmt-all',
-        install_pkg: 'sox libsox-fmt-all',
-      });
-    }
     const alt = run(`"${VENV_PYTHON}" -c "import qwen_tts; print('installed')"`);
     if (alt !== 'installed') return jsonError('qwen-tts installed but import failed');
   }
