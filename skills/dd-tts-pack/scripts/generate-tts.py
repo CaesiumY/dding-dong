@@ -151,9 +151,9 @@ def load_model(voice_mode, model_name=None):
 
     if model_name is None:
         if voice_mode == 'clone':
-            model_name = 'Qwen/Qwen3-TTS-12Hz-0.6B-Base'
+            model_name = 'Qwen/Qwen3-TTS-12Hz-1.7B-Base'
         else:
-            model_name = 'Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice'
+            model_name = 'Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice'
 
     print(f'[INFO] 모델 로딩 중: {model_name}', file=sys.stderr, flush=True)
 

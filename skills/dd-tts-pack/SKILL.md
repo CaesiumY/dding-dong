@@ -104,9 +104,42 @@ AskUserQuestion으로 질문합니다:
 - "보이스 클로닝" → `clone`
 - "내장 음성" → `custom`
 
-### 3단계: 팩 정보 수집 + 보일러플레이트 생성
+### 3단계: 모델 크기 선택
 
-#### 3-a. 팩 이름 입력
+1단계 환경 검사에서 얻은 `gpu.vram_gb` 값을 기준으로 적절한 모델을 추천합니다.
+
+| 크기 | 모델명 (클로닝) | 모델명 (CustomVoice) | VRAM 요구 |
+|------|---------------|---------------------|----------|
+| 0.6B | `Qwen/Qwen3-TTS-12Hz-0.6B-Base` | `Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice` | ~2GB |
+| 1.7B | `Qwen/Qwen3-TTS-12Hz-1.7B-Base` | `Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice` | ~4GB |
+
+AskUserQuestion으로 질문합니다:
+
+"TTS 모델 크기를 선택해주세요."
+
+**VRAM >= 8GB인 경우:**
+
+선택지:
+1. **1.7B — 고품질 (Recommended)** -- "더 자연스럽고 정확한 음성. VRAM ~4GB 사용. (GPU: {gpu.name}, {gpu.vram_gb}GB)"
+2. **0.6B — 경량** -- "빠른 생성, 낮은 VRAM 사용. 품질은 다소 낮음."
+
+**VRAM < 8GB인 경우:**
+
+선택지:
+1. **0.6B — 경량 (Recommended)** -- "GPU 메모리에 적합한 경량 모델. (GPU: {gpu.name}, {gpu.vram_gb}GB)"
+2. **1.7B — 고품질** -- "⚠ GPU 메모리가 부족할 수 있습니다 ({gpu.vram_gb}GB). 시도는 가능하나 OOM 위험."
+
+선택 결과를 `MODEL_SIZE` 변수로 저장합니다 (`0.6B` 또는 `1.7B`).
+
+`MODEL_NAME`을 `VOICE_MODE` + `MODEL_SIZE` 조합으로 결정합니다:
+- clone + 0.6B → `Qwen/Qwen3-TTS-12Hz-0.6B-Base`
+- clone + 1.7B → `Qwen/Qwen3-TTS-12Hz-1.7B-Base`
+- custom + 0.6B → `Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice`
+- custom + 1.7B → `Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice`
+
+### 4단계: 팩 정보 수집 + 보일러플레이트 생성
+
+#### 4-a. 팩 이름 입력
 
 AskUserQuestion으로 질문합니다:
 
@@ -135,9 +168,9 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" check-exists 'PACK_NAME'
 - **기존 사용자 팩과 동일 시**: "이미 'PACK_NAME' 사용자 팩이 존재합니다." 안내 후, AskUserQuestion으로 덮어쓰기 여부를 확인합니다.
   1. **덮어쓰기** -- "기존 팩을 대체합니다."
   2. **다른 이름 사용** -- "다시 이름을 입력합니다."
-  "다른 이름 사용" 선택 시 3-a로 돌아갑니다.
+  "다른 이름 사용" 선택 시 4-a로 돌아갑니다.
 
-#### 3-b. 표시 이름 입력
+#### 4-b. 표시 이름 입력
 
 AskUserQuestion으로 질문합니다:
 
@@ -147,7 +180,7 @@ AskUserQuestion으로 질문합니다:
 1. **나의 TTS 사운드** -- "예시입니다. 원하는 이름을 직접 입력해주세요."
 2. **My Voice Pack** -- "예시입니다. 원하는 이름을 직접 입력해주세요."
 
-#### 3-c. 설명 입력
+#### 4-c. 설명 입력
 
 AskUserQuestion으로 질문합니다:
 
@@ -159,7 +192,7 @@ AskUserQuestion으로 질문합니다:
 
 "건너뛰기" 선택 시 description을 빈 문자열로 설정합니다.
 
-#### 3-d. 자동 설정 필드 감지
+#### 4-d. 자동 설정 필드 감지
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" detect-author
@@ -168,7 +201,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" detect-author
 - `version`: 항상 `"1.0.0"`
 - `author`: `git config user.name` → 실패 시 `os.userInfo().username`
 
-#### 3-e. 보일러플레이트 생성
+#### 4-e. 보일러플레이트 생성
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" create 'PACK_NAME' 'DISPLAY_NAME' 'AUTHOR' 'DESCRIPTION'
@@ -181,13 +214,13 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" create 'PACK_NAME' 'DISPLAY
 
 `PACK_DIR`을 `~/.config/dding-dong/packs/PACK_NAME`으로 설정합니다.
 
-### 4단계: 음성 설정
+### 5단계: 음성 설정
 
 `VOICE_MODE`에 따라 분기합니다.
 
-#### 4-A. 보이스 클로닝 모드 (`clone`)
+#### 5-A. 보이스 클로닝 모드 (`clone`)
 
-##### 4-A-a. 참조 음성 파일
+##### 5-A-a. 참조 음성 파일
 
 AskUserQuestion으로 질문합니다:
 
@@ -216,7 +249,7 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/validate-ref-audio.mjs" '
 - **`ok: true`**: `REF_AUDIO` 변수에 경로를 저장합니다. 포맷 정보를 표시합니다.
 - **`ok: false`**: 에러 메시지를 표시하고 다시 파일 경로 입력을 요청합니다.
 
-##### 4-A-b. 참조 텍스트(트랜스크립트)
+##### 5-A-b. 참조 텍스트(트랜스크립트)
 
 팩 디렉토리에 트랜스크립트 템플릿 파일을 생성합니다:
 
@@ -253,7 +286,7 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/ref-text.mjs" read 'PACK_
 
 **"없이 진행" 선택 시:** `REF_TEXT`를 빈 문자열로 설정합니다.
 
-#### 4-B. CustomVoice 모드 (`custom`)
+#### 5-B. CustomVoice 모드 (`custom`)
 
 AskUserQuestion으로 질문합니다:
 
@@ -270,7 +303,7 @@ AskUserQuestion으로 질문합니다:
 
 선택 결과를 `SPEAKER` 변수에 저장합니다.
 
-### 5단계: 이벤트별 TTS 설정
+### 6단계: 이벤트별 TTS 설정
 
 5개 이벤트에 대해 텍스트(및 CustomVoice 모드에서는 감정/스타일)를 설정합니다.
 
@@ -351,6 +384,7 @@ AskUserQuestion으로 질문합니다:
 ```json
 {
   "voice_mode": "clone",
+  "model": "MODEL_NAME",
   "ref_audio": "/path/to/ref.wav",
   "ref_text": "참조 텍스트",
   "events": {
@@ -367,6 +401,7 @@ AskUserQuestion으로 질문합니다:
 ```json
 {
   "voice_mode": "custom",
+  "model": "MODEL_NAME",
   "speaker": "Sohee",
   "events": {
     "task.complete": {
@@ -383,7 +418,7 @@ Write 도구로 `PACK_DIR/.tts-config.json`에 저장합니다.
 
 **건너뛴 이벤트는 `events` 객체에 포함하지 않습니다.**
 
-### 6단계: 음성 미리듣기
+### 7단계: 음성 미리듣기
 
 최소 1개 이벤트가 설정된 경우에만 진행합니다.
 
@@ -404,6 +439,7 @@ AskUserQuestion으로 질문합니다:
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
   --voice-mode clone \
   --mode preview \
+  --model 'MODEL_NAME' \
   --ref-audio 'REF_AUDIO' \
   --ref-text 'REF_TEXT' \
   --text 'PREVIEW_TEXT' \
@@ -416,6 +452,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
   --voice-mode custom \
   --mode preview \
+  --model 'MODEL_NAME' \
   --speaker 'SPEAKER' \
   --text 'PREVIEW_TEXT' \
   --instruct 'PREVIEW_INSTRUCT' \
@@ -423,7 +460,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
   --output 'PACK_DIR/preview.wav'
 ```
 
-타임아웃: 300초 (모델 로딩 + 생성 시간 고려)
+타임아웃: 600초 (모델 로딩 + 생성 시간 고려)
 
 생성 성공 시 미리듣기 재생:
 ```bash
@@ -444,16 +481,17 @@ AskUserQuestion으로 질문합니다:
 2. **다시 시도** -- "설정을 변경하고 다시 시도합니다."
 3. **중단** -- "TTS 팩 생성을 취소합니다."
 
-"다시 시도" 선택 시: 4단계(음성 설정)로 돌아갑니다.
+"다시 시도" 선택 시: 5단계(음성 설정)로 돌아갑니다.
 "중단" 선택 시: "TTS 팩 생성이 취소되었습니다." 안내 후 종료합니다.
 
-### 7단계: 전체 생성
+### 8단계: 전체 생성
 
 **클로닝 모드:**
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
   --voice-mode clone \
   --mode batch \
+  --model 'MODEL_NAME' \
   --ref-audio 'REF_AUDIO' \
   --ref-text 'REF_TEXT' \
   --config 'PACK_DIR/.tts-config.json' \
@@ -465,6 +503,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
   --voice-mode custom \
   --mode batch \
+  --model 'MODEL_NAME' \
   --speaker 'SPEAKER' \
   --config 'PACK_DIR/.tts-config.json' \
   --output-dir 'PACK_DIR'
@@ -508,9 +547,9 @@ AskUserQuestion:
 2. **다시 시도** -- "실패한 이벤트를 다시 생성합니다."
 3. **중단** -- "팩 생성을 취소합니다."
 
-### 8단계: 검증 + 팩 등록
+### 9단계: 검증 + 팩 등록
 
-#### 8-a. manifest.json 업데이트
+#### 9-a. manifest.json 업데이트
 
 생성된 WAV 파일에 맞게 manifest.json을 업데이트합니다.
 `results`에서 `ok: true`인 이벤트만 등록합니다:
@@ -523,7 +562,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" copy-sound 'PACK_DIR/OUTPUT
 > 참고: generate-tts.py가 이미 PACK_DIR에 직접 저장하므로, copy-sound는 manifest 업데이트 역할만 합니다.
 > copy-sound가 동일 경로 복사를 지원하지 않으면, manifest.json을 직접 Read → 수정 → Write합니다.
 
-#### 8-b. 매니페스트 검증
+#### 9-b. 매니페스트 검증
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate-manifest 'PACK_NAME'
@@ -532,7 +571,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate-manifest 'PACK_NAM
 - `valid: true` 시: 다음 단계로 진행
 - `valid: false` 시: `errors` 배열의 각 항목을 표시하고, manifest.json을 Read하여 문제 확인 후 수정
 
-#### 8-c. 파일 검증
+#### 9-c. 파일 검증
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" validate 'PACK_NAME'
@@ -569,9 +608,9 @@ session.end      session-end.wav     ✓
 `missing` 또는 `invalid_format`이 있으면 경고를 표시합니다:
 "일부 파일에 문제가 있습니다. 팩이 정상 동작하지 않을 수 있습니다."
 
-### 9단계: 적용 + 미리듣기 + 완료
+### 10단계: 적용 + 미리듣기 + 완료
 
-#### 9-a. 적용 여부 확인
+#### 10-a. 적용 여부 확인
 
 AskUserQuestion으로 질문합니다:
 
@@ -596,9 +635,9 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" apply 'PACK_NAME'
   /dding-dong:dd-sounds use PACK_NAME
 ```
 
-#### 9-b. 미리듣기
+#### 10-b. 미리듣기
 
-9-a에서 "바로 적용"을 선택한 경우에만 미리듣기를 제안합니다.
+10-a에서 "바로 적용"을 선택한 경우에만 미리듣기를 제안합니다.
 
 AskUserQuestion으로 질문합니다:
 
@@ -616,7 +655,7 @@ DDING_DONG_PACK='PACK_NAME' node "${CLAUDE_PLUGIN_ROOT}/scripts/notify.mjs" test
 
 재생 실패 시: "미리듣기에 실패했습니다. `/dding-dong:dd-test`로 다시 시도해보세요." 안내
 
-#### 9-c. 완료 메시지
+#### 10-c. 완료 메시지
 
 ```
 TTS 사운드 팩 생성이 완료되었습니다!
