@@ -326,16 +326,17 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/validate-ref-audio.mjs" '
 
 ##### 5-A-b. 참조 텍스트(트랜스크립트)
 
-팩 디렉토리에 트랜스크립트 템플릿 파일을 생성합니다:
+프로젝트 디렉토리에 트랜스크립트 템플릿 파일을 생성합니다 (에디터에서 바로 편집 가능):
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/ref-text.mjs" create 'PACK_DIR/ref-text.txt'
+mkdir -p .dding-dong
+node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/ref-text.mjs" create '.dding-dong/ref-text.txt'
 ```
 
 사용자에게 안내합니다:
 ```
 참조 음성의 트랜스크립트 파일이 생성되었습니다:
-  PACK_DIR/ref-text.txt
+  .dding-dong/ref-text.txt
 
 파일을 열어 참조 음성에서 말하는 내용을 입력해주세요.
 트랜스크립트가 정확할수록 클로닝 품질이 높아집니다.
@@ -353,13 +354,21 @@ AskUserQuestion으로 질문합니다:
 **"작성 완료" 선택 시:**
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/ref-text.mjs" read 'PACK_DIR/ref-text.txt'
+node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/ref-text.mjs" read '.dding-dong/ref-text.txt'
 ```
 
 결과 JSON의 `text` 필드를 `REF_TEXT`에 저장합니다.
 `empty: true`이면 "없이 진행"과 동일하게 처리합니다.
 
-**"없이 진행" 선택 시:** `REF_TEXT`를 빈 문자열로 설정합니다.
+임시 파일을 삭제합니다:
+```bash
+rm -f .dding-dong/ref-text.txt
+```
+
+**"없이 진행" 선택 시:** `REF_TEXT`를 빈 문자열로 설정합니다. 임시 파일을 삭제합니다:
+```bash
+rm -f .dding-dong/ref-text.txt
+```
 
 #### 5-B. CustomVoice 모드 (`custom`)
 
