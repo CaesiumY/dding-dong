@@ -760,8 +760,4 @@ TTS 사운드 팩 생성이 완료되었습니다!
   TTS 재생성    → .tts-config.json이 팩 디렉토리에 저장되어 있습니다.
 ```
 
-preview.wav가 팩 디렉토리에 남아있으면 삭제합니다:
-
-```bash
-rm -f 'PACK_DIR/preview.wav'
-```
+preview.wav는 팩 디렉토리에 보존합니다 (미리듣기 샘플 기록용).
