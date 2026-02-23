@@ -1,5 +1,7 @@
 .omc/
 node_modules/
+__pycache__/
+*.pyc
 *.log
 .state.json
 .dding-dong/config.local.json
