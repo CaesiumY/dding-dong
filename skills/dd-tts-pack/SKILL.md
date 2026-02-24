@@ -391,11 +391,11 @@ AskUserQuestion으로 질문합니다:
 
 | 이벤트 | 기본 텍스트 | 기본 감정(instruct) |
 |--------|-----------|---------------------|
-| `task.complete` | "작업이 완료되었습니다" | "밝고 활기찬 어조로" |
-| `task.error` | "오류가 발생했습니다" | "긴급하고 주의를 끄는 어조로" |
-| `input.required` | "입력이 필요합니다" | "부드럽고 안내하는 어조로" |
-| `session.start` | "세션을 시작합니다" | "차분하고 환영하는 어조로" |
-| `session.end` | "세션이 종료됩니다" | "차분하고 마무리하는 어조로" |
+| `task.complete` | "작업이 완료되었습니다!" | "밝고 활기찬 어조로" |
+| `task.error` | "오류가 발생했습니다." | "긴급하고 주의를 끄는 어조로" |
+| `input.required` | "입력이 필요합니다." | "부드럽고 안내하는 어조로" |
+| `session.start` | "세션을 시작합니다." | "차분하고 환영하는 어조로" |
+| `session.end` | "세션이 종료됩니다." | "차분하고 마무리하는 어조로" |
 
 > **참고**: 감정(instruct)은 **CustomVoice 모드에서만 적용**됩니다.
 > 보이스 클로닝 모드는 참조 음성의 음색만 복제하며, 감정 제어를 지원하지 않습니다.
@@ -469,7 +469,7 @@ AskUserQuestion으로 질문합니다:
   "ref_text": "참조 텍스트",
   "events": {
     "task.complete": {
-      "text": "작업이 완료되었습니다",
+      "text": "작업이 완료되었습니다!",
       "language": "Korean",
       "output_file": "complete.wav"
     }
@@ -485,7 +485,7 @@ AskUserQuestion으로 질문합니다:
   "speaker": "Sohee",
   "events": {
     "task.complete": {
-      "text": "작업이 완료되었습니다",
+      "text": "작업이 완료되었습니다!",
       "instruct": "밝고 활기찬 어조로",
       "language": "Korean",
       "output_file": "complete.wav"

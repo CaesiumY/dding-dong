@@ -9,13 +9,13 @@ Voice Cloning 모드와 CustomVoice 모드를 지원합니다.
   # 미리듣기 (클로닝)
   python3 generate-tts.py --voice-mode clone --mode preview \
     --ref-audio ref.wav --ref-text "참조 텍스트" \
-    --text "작업이 완료되었습니다" \
+    --text "작업이 완료되었습니다." \
     --language Korean --output preview.wav
 
   # 미리듣기 (CustomVoice)
   python3 generate-tts.py --voice-mode custom --mode preview \
     --speaker Sohee \
-    --text "작업이 완료되었습니다" --instruct "밝은 어조로" \
+    --text "작업이 완료되었습니다." --instruct "밝은 어조로" \
     --language Korean --output preview.wav
 
   # 배치 생성
@@ -48,6 +48,19 @@ FADE_MS = 30            # 페이드 인/아웃 (ms)
 SILENCE_THRESHOLD = 0.003  # 무음 판정 진폭 기준
 TAIL_PAD_MS = 150       # 뒤쪽 무음 트림 후 여유 (ms)
 END_PAD_MS = 100        # 최종 출력 끝에 추가할 무음 (ms, 재생기 호환성)
+
+# TTS 텍스트 종결 부호 (한중일 + 서양)
+SENTENCE_ENDINGS = '.!?。！？…'
+
+
+def ensure_punctuation(text):
+    """텍스트 끝에 종결 부호가 없으면 마침표를 추가한다. 앞뒤 공백도 제거."""
+    text = text.strip()
+    if not text:
+        return text
+    if text[-1] in SENTENCE_ENDINGS:
+        return text
+    return text + '.'
 
 # ─── 오디오 후처리 ───────────────────────────────────
 
@@ -221,16 +234,18 @@ def run_preview(args):
     """단일 샘플 미리듣기"""
     model = load_model(args.voice_mode, args.model)
 
-    print(f'[INFO] 미리듣기 생성 중: "{args.text}"', file=sys.stderr, flush=True)
+    text = ensure_punctuation(args.text)
+    print(f'[INFO] 미리듣기 생성 중: "{text}"', file=sys.stderr, flush=True)
 
     if args.voice_mode == 'clone':
         audio, sr = generate_clone(
-            model, args.text, args.language,
+            model, text, args.language,
             args.ref_audio, args.ref_text
         )
     else:
+        # instruct는 감정/스타일 제어 지시문이므로 종결 부호를 추가하지 않음
         audio, sr = generate_custom(
-            model, args.text, args.language,
+            model, text, args.language,
             args.speaker, args.instruct
         )
 
@@ -267,8 +282,9 @@ def run_batch(args):
     total = len(events)
 
     for idx, (event_type, event_cfg) in enumerate(events.items(), 1):
-        text = event_cfg.get('text', '')
+        text = ensure_punctuation(event_cfg.get('text', ''))
         language = event_cfg.get('language', 'Korean')
+        # instruct는 감정/스타일 제어 지시문이므로 종결 부호를 추가하지 않음
         instruct = event_cfg.get('instruct', None)
         output_file = event_cfg.get('output_file', f'{event_type.replace(".", "-")}.wav')
         output_path = os.path.join(args.output_dir, output_file)
