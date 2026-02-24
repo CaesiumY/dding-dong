@@ -126,6 +126,55 @@ $p.Close()
   }
 }
 
+/**
+ * 임의의 WAV 파일을 동기적으로 재생 (CLI 미리듣기용)
+ * detached+unref 없이 완료까지 대기합니다.
+ * @param {string} filePath - 재생할 파일의 절대 경로
+ * @param {number} [volume=1.0] - 볼륨 (0.0~1.0)
+ */
+export function playFile(filePath, volume = 1.0) {
+  try {
+    const platform = detectPlatform();
+    const player = detectAudioPlayer(platform);
+    if (!player) return;
+
+    if (platform === 'macos') {
+      execFileSync('afplay', ['-v', String(volume), filePath], { stdio: 'ignore' });
+      return;
+    }
+
+    if (platform === 'wsl') {
+      let winPath;
+      try {
+        winPath = execFileSync('wslpath', ['-w', filePath], {
+          stdio: ['pipe', 'pipe', 'ignore']
+        }).toString().trim();
+      } catch { return; }
+
+      const ps = `
+Add-Type -AssemblyName PresentationCore
+$p = New-Object System.Windows.Media.MediaPlayer
+$p.Open([Uri]::new('${winPath.replace(/\\/g, '\\\\')}'))
+$p.Volume = ${volume}
+$p.Play()
+Start-Sleep -Milliseconds 3000
+$p.Close()
+`.trim();
+
+      execFileSync('powershell.exe', ['-NoProfile', '-Command', ps], { stdio: 'ignore' });
+      return;
+    }
+
+    if (platform === 'linux') {
+      const args = _linuxArgs(player.name, filePath, volume);
+      execFileSync(player.path, args, { stdio: 'ignore' });
+      return;
+    }
+  } catch {
+    // 재생 실패는 무시
+  }
+}
+
 function _linuxArgs(playerName, filePath, volume) {
   switch (playerName) {
     case 'pw-play':

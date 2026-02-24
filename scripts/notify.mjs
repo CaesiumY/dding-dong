@@ -1,7 +1,7 @@
 import { loadConfig, loadState, saveState } from './core/config.mjs';
 import { getMessage } from './core/messages.mjs';
 import { sendNotification } from './core/notifier.mjs';
-import { playSound } from './core/player.mjs';
+import { playSound, playFile } from './core/player.mjs';
 import { detectPlatform } from './core/platform.mjs';
 
 /**
@@ -99,4 +99,18 @@ if (process.argv[2] === 'test-sound') {
     await new Promise(r => setTimeout(r, 1500));
   }
   console.log('미리듣기 완료.');
+}
+
+// CLI 파일 직접 재생: node notify.mjs play <파일경로>
+if (process.argv[2] === 'play') {
+  const filePath = process.argv[3];
+  if (!filePath) {
+    console.error('사용법: node notify.mjs play <파일경로>');
+    process.exit(1);
+  }
+  try {
+    playFile(filePath);
+  } catch {
+    // 재생 실패는 조용히 무시
+  }
 }
