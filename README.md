@@ -1,62 +1,64 @@
 # dding-dong 띵동 🔔
 
+**English** | [한국어](README.ko.md)
+
 [![GitHub stars](https://img.shields.io/github/stars/CaesiumY/dding-dong?style=flat&color=yellow)](https://github.com/CaesiumY/dding-dong/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-> Claude Code 알림 플러그인 — 작업 완료·오류·입력 필요 시 소리와 OS 알림으로 알려줍니다. AI 음성 합성으로 나만의 알림음도 만들 수 있습니다.
+> Claude Code notification plugin — Alerts you with sounds and OS notifications on task completion, errors, and input requests. Create custom notification sounds with AI voice synthesis.
 
-**띵동(dding-dong)** 은 한국어로 초인종 소리를 나타냅니다. Claude Code가 작업을 마쳤을 때, 당신의 주의가 필요할 때 알려드립니다.
+**dding-dong (띵동)** is a Korean onomatopoeia for a doorbell chime. It notifies you when Claude Code finishes a task or needs your attention.
 
-## 특징
+## Features
 
-- 작업 완료, 오류 발생, 입력 필요 시 즉시 알림
-- macOS, Linux, WSL(Windows) 크로스 플랫폼 지원
-- 사운드 팩 시스템으로 알림음 커스터마이즈
-- **AI 음성 합성** — Qwen3-TTS로 나만의 목소리 알림 생성 (보이스 클로닝 & 감정 제어)
-- 한국어/영어 메시지 지원
-- 야간 모드, 쿨다운, 환경변수 제어
+- Instant alerts on task completion, errors, and input requests
+- Cross-platform support: macOS, Linux, WSL (Windows)
+- Customizable notification sounds with the sound pack system
+- **AI voice synthesis** — Generate your own voice notifications with Qwen3-TTS (voice cloning & emotion control)
+- Korean/English message support
+- Quiet hours, cooldown, and environment variable overrides
 
-## 요구사항
+## Requirements
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
 
-## 빠른 시작
+## Quick Start
 
-### Step 1. 설치
+### Step 1. Install
 
-Claude Code에서 아래 명령어를 실행합니다:
+Run the following command in Claude Code:
 
 ```
 /plugin marketplace add https://github.com/CaesiumY/dding-dong
 /plugin install dding-dong
 ```
 
-### Step 2. 환경 설정
+### Step 2. Setup
 
 ```
 /dding-dong:dd-setup
 ```
 
-플랫폼을 자동 감지하고 오디오 플레이어와 알림 도구를 확인합니다.
+Automatically detects your platform and checks for audio players and notification tools.
 
-### Step 3. 테스트
+### Step 3. Test
 
 ```
 /dding-dong:dd-test
 ```
 
-모든 이벤트 타입의 알림을 순서대로 테스트합니다. 소리가 들리면 설정 완료!
+Cycles through all event types to test notifications. If you hear sounds, you're all set!
 
 <details>
-<summary>다른 설치 방법 / 업데이트</summary>
+<summary>Alternative installation / Update</summary>
 
-#### 직접 설치
+#### Direct install
 
 ```bash
 claude plugin add https://github.com/CaesiumY/dding-dong
 ```
 
-#### 로컬 설치 (개발/테스트)
+#### Local install (development/testing)
 
 ```bash
 git clone https://github.com/CaesiumY/dding-dong
@@ -64,7 +66,7 @@ cd dding-dong
 claude plugin add .
 ```
 
-#### 업데이트
+#### Update
 
 ```
 /plugin marketplace update dding-dong
@@ -72,50 +74,50 @@ claude plugin add .
 
 </details>
 
-## 스킬 목록
+## Skills
 
-### 기본 스킬
+### Basic Skills
 
-| 스킬                          | 설명                    |
-| ----------------------------- | ----------------------- |
-| `/dding-dong:dd-setup`        | 환경 감지 및 초기 설정  |
-| `/dding-dong:dd-test`         | 모든 이벤트 알림 테스트 |
-| `/dding-dong:dd-config`       | 설정 보기/변경          |
-| `/dding-dong:dd-sounds`       | 사운드 팩 관리          |
-| `/dding-dong:dd-doctor`       | 알림 문제 자동 진단     |
+| Skill                         | Description                    |
+| ----------------------------- | ------------------------------ |
+| `/dding-dong:dd-setup`        | Environment detection & setup  |
+| `/dding-dong:dd-test`         | Test all event notifications   |
+| `/dding-dong:dd-config`       | View/modify settings           |
+| `/dding-dong:dd-sounds`       | Manage sound packs             |
+| `/dding-dong:dd-doctor`       | Auto-diagnose notification issues |
 
-### 고급 스킬
+### Advanced Skills
 
-| 스킬                          | 설명                         |
-| ----------------------------- | ---------------------------- |
-| `/dding-dong:dd-feedback`     | 피드백/버그 리포트 자동 생성 |
-| `/dding-dong:dd-help`         | 도움말 및 기능 가이드        |
-| `/dding-dong:dd-pack-create`  | 커스텀 사운드 팩 생성 마법사 |
-| `/dding-dong:dd-tts-pack`     | TTS 음성 합성 사운드 팩 생성 |
+| Skill                         | Description                         |
+| ----------------------------- | ----------------------------------- |
+| `/dding-dong:dd-feedback`     | Auto-generate feedback/bug reports  |
+| `/dding-dong:dd-help`         | Help and feature guide              |
+| `/dding-dong:dd-pack-create`  | Custom sound pack creation wizard   |
+| `/dding-dong:dd-tts-pack`     | TTS voice synthesis sound pack      |
 
-## 설정
+## Configuration
 
-설정은 5단계로 병합됩니다 (아래로 갈수록 우선):
+Configuration is merged in 5 stages (later stages take priority):
 
-| 단계    | 경로                               | 설명                                |
-| ------- | ---------------------------------- | ----------------------------------- |
-| Default | *(내장 기본값)*                    | 플러그인 하드코딩                   |
-| Global  | `~/.config/dding-dong/config.json` | 전역 설정                           |
-| Project | `.dding-dong/config.json`          | 프로젝트 공유 (커밋 대상)           |
-| Local   | `.dding-dong/config.local.json`    | 개인 오버라이드 (`.gitignore` 권장) |
-| Env     | 환경변수                           | 최종 오버라이드                     |
+| Stage   | Path                               | Description                            |
+| ------- | ---------------------------------- | -------------------------------------- |
+| Default | *(built-in defaults)*              | Plugin hardcoded values                |
+| Global  | `~/.config/dding-dong/config.json` | Global settings                        |
+| Project | `.dding-dong/config.json`          | Shared per project (committed to repo) |
+| Local   | `.dding-dong/config.local.json`    | Personal override (`.gitignore` recommended) |
+| Env     | Environment variables              | Final override                         |
 
-### 환경변수
+### Environment Variables
 
-| 변수                       | 설명               |
-| -------------------------- | ------------------ |
-| `DDING_DONG_ENABLED=false` | 플러그인 비활성화  |
-| `DDING_DONG_VOLUME=0.5`    | 볼륨 오버라이드    |
-| `DDING_DONG_LANG=en`       | 언어 오버라이드    |
-| `DDING_DONG_PACK=retro`    | 사운드팩 오버라이드 |
+| Variable                   | Description              |
+| -------------------------- | ------------------------ |
+| `DDING_DONG_ENABLED=false` | Disable the plugin       |
+| `DDING_DONG_VOLUME=0.5`    | Override volume           |
+| `DDING_DONG_LANG=en`       | Override language          |
+| `DDING_DONG_PACK=retro`    | Override sound pack        |
 
 <details>
-<summary>전체 설정 예시 및 옵션 상세</summary>
+<summary>Full configuration example & option details</summary>
 
 ```json
 {
@@ -159,93 +161,93 @@ claude plugin add .
 }
 ```
 
-#### 설정 옵션
+#### Configuration Options
 
-| 옵션                   | 기본값            | 설명                                                    |
-| ---------------------- | ----------------- | ------------------------------------------------------- |
-| `enabled`              | `true`            | 플러그인 전체 활성화                                    |
-| `language`             | `"ko"`            | 메시지 언어 (`ko` / `en`)                               |
-| `sound.enabled`        | `true`            | 사운드 알림 활성화                                      |
-| `sound.pack`           | `"default"`       | 사용할 사운드 팩 이름                                   |
-| `sound.volume`         | `0.7`             | 볼륨 (0.0 ~ 1.0)                                        |
-| `notification.enabled` | `true`            | OS 알림 활성화                                          |
-| `messages.<event>`     | *(언어별 기본값)* | 이벤트별 커스텀 메시지 (설정 시 언어 기본값 오버라이드) |
-| `quiet_hours.enabled`  | `false`           | 야간 모드 활성화                                        |
-| `quiet_hours.start`    | `"22:00"`         | 야간 모드 시작 시간                                     |
-| `quiet_hours.end`      | `"08:00"`         | 야간 모드 종료 시간                                     |
-| `cooldown_seconds`     | `3`               | 알림 간 최소 간격(초)                                   |
+| Option                 | Default           | Description                                              |
+| ---------------------- | ----------------- | -------------------------------------------------------- |
+| `enabled`              | `true`            | Enable/disable the entire plugin                         |
+| `language`             | `"ko"`            | Message language (`ko` / `en`)                           |
+| `sound.enabled`        | `true`            | Enable sound notifications                               |
+| `sound.pack`           | `"default"`       | Sound pack name to use                                   |
+| `sound.volume`         | `0.7`             | Volume (0.0 – 1.0)                                       |
+| `notification.enabled` | `true`            | Enable OS notifications                                  |
+| `messages.<event>`     | *(language default)* | Custom message per event (overrides language default)  |
+| `quiet_hours.enabled`  | `false`           | Enable quiet hours                                       |
+| `quiet_hours.start`    | `"22:00"`         | Quiet hours start time                                   |
+| `quiet_hours.end`      | `"08:00"`         | Quiet hours end time                                     |
+| `cooldown_seconds`     | `3`               | Minimum interval between notifications (seconds)         |
 
 </details>
 
-## 크로스 플랫폼 지원
+## Cross-Platform Support
 
 ### macOS
-- 사운드: `afplay`
-- 알림: `osascript` (네이티브 알림 센터)
+- Sound: `afplay`
+- Notification: `osascript` (native Notification Center)
 
 ### Linux
-- 사운드: `pw-play` → `paplay` → `ffplay` → `mpv` → `aplay` (순서대로 탐색)
-- 알림: `notify-send` (libnotify)
+- Sound: `pw-play` → `paplay` → `ffplay` → `mpv` → `aplay` (searched in order)
+- Notification: `notify-send` (libnotify)
 
 ### WSL (Windows Subsystem for Linux)
-- 사운드: PowerShell `System.Windows.Media.MediaPlayer`
-- 알림: `wsl-notify-send` (설치된 경우) → WinRT PowerShell Toast → 터미널 벨
+- Sound: PowerShell `System.Windows.Media.MediaPlayer`
+- Notification: `wsl-notify-send` (if installed) → WinRT PowerShell Toast → terminal bell
 
-## 사운드 팩 시스템
+## Sound Pack System
 
-사운드 팩은 세 위치에서 순서대로 탐색됩니다:
+Sound packs are resolved from three locations in order:
 
-1. **프로젝트 팩**: `.dding-dong/packs/<팩이름>/`
-2. **사용자 팩**: `~/.config/dding-dong/packs/<팩이름>/`
-3. **내장 팩**: `{플러그인 설치 경로}/sounds/<팩이름>/`
+1. **Project packs**: `.dding-dong/packs/<pack-name>/`
+2. **User packs**: `~/.config/dding-dong/packs/<pack-name>/`
+3. **Built-in packs**: `{plugin install path}/sounds/<pack-name>/`
 
-### 내장 사운드 팩
+### Built-in Sound Packs
 
-| 팩        | 설명                            |
-| --------- | ------------------------------- |
-| `default` | 기본 효과음                     |
-| `retro`   | 8-bit 칩튠 스타일 게임기 효과음 |
-| `musical` | 피아노 코드 기반 화성적 알림음  |
+| Pack      | Description                          |
+| --------- | ------------------------------------ |
+| `default` | Standard notification sounds         |
+| `retro`   | 8-bit chiptune arcade-style effects  |
+| `musical` | Piano chord-based harmonic alerts    |
 
-### TTS 사운드 팩 생성
+### TTS Sound Pack Creation
 
-Qwen3-TTS를 활용하여 음성 합성 기반 사운드 팩을 만들 수 있습니다.
+Create voice-synthesized sound packs using Qwen3-TTS:
 
 ```
 /dding-dong:dd-tts-pack
 ```
 
-| 모드 | 설명 |
-|------|------|
-| 보이스 클로닝 | 내 목소리(참조 음성)를 복제하여 알림음 생성. 3초 이상 음성 샘플 필요 |
-| CustomVoice | 9개 내장 화자 중 선택. 감정/스타일을 자연어로 제어 가능 (예: "밝고 활기찬 어조로") |
+| Mode           | Description |
+|----------------|-------------|
+| Voice Cloning  | Clone your own voice from a reference audio sample (3+ seconds required) |
+| CustomVoice    | Choose from 9 built-in speakers. Control emotion/style with natural language (e.g., "bright and energetic tone") |
 
-**필요 환경:** NVIDIA GPU (CUDA) · Python 3.10+ (자동 venv 설치 지원)
+**Requirements:** NVIDIA GPU (CUDA) · Python 3.10+ (automatic venv setup supported)
 
 <details>
-<summary>TTS 팩 생성 흐름</summary>
+<summary>TTS pack creation flow</summary>
 
-1. 환경 자동 검사 (GPU, Python, qwen-tts)
-2. 모드 선택 → 모델 크기 선택 (0.6B / 1.7B)
-3. 팩 이름·정보 입력 → 보일러플레이트 생성
-4. 음성 설정 (참조 음성 또는 화자 선택)
-5. 이벤트별 텍스트·감정 설정
-6. 미리듣기 → 전체 생성 → 검증 → 적용
+1. Automatic environment check (GPU, Python, qwen-tts)
+2. Mode selection → model size selection (0.6B / 1.7B)
+3. Pack name/info input → boilerplate generation
+4. Voice configuration (reference audio or speaker selection)
+5. Per-event text & emotion settings
+6. Preview → full generation → validation → apply
 
 </details>
 
 <details>
-<summary>manifest.json 구조 및 사운드 팩 적용 방법</summary>
+<summary>manifest.json structure & how to apply a sound pack</summary>
 
-#### manifest.json 구조
+#### manifest.json structure
 
 ```json
 {
   "name": "my-pack",
-  "displayName": "나만의 사운드 팩",
+  "displayName": "My Custom Sound Pack",
   "version": "1.0.0",
-  "author": "작성자",
-  "description": "사운드 팩 설명",
+  "author": "Author",
+  "description": "Sound pack description",
   "events": {
     "task.complete": {
       "files": ["complete1.wav", "complete2.wav"],
@@ -258,25 +260,25 @@ Qwen3-TTS를 활용하여 음성 합성 기반 사운드 팩을 만들 수 있�
 }
 ```
 
-| 필드          | 필수   | 설명                             |
-| ------------- | ------ | -------------------------------- |
-| `name`        | 예     | 팩 식별자 (디렉터리 이름과 일치) |
-| `displayName` | 아니오 | 사용자에게 표시되는 이름         |
-| `version`     | 아니오 | 시맨틱 버전                      |
-| `author`      | 아니오 | 팩 작성자                        |
-| `description` | 아니오 | 팩 설명                          |
-| `events`      | 예     | 이벤트별 사운드 매핑             |
+| Field         | Required | Description                              |
+| ------------- | -------- | ---------------------------------------- |
+| `name`        | Yes      | Pack identifier (must match directory name) |
+| `displayName` | No       | Human-readable display name              |
+| `version`     | No       | Semantic version                         |
+| `author`      | No       | Pack author                              |
+| `description` | No       | Pack description                         |
+| `events`      | Yes      | Event-to-sound mapping                   |
 
-#### rotation 모드
+#### Rotation Modes
 
-| 모드              | 동작                       |
-| ----------------- | -------------------------- |
-| `"random"`        | `files` 배열에서 랜덤 선택 |
-| 그 외 또는 미지정 | 첫 번째 파일 재생          |
+| Mode                     | Behavior                            |
+| ------------------------ | ----------------------------------- |
+| `"random"`               | Random selection from `files` array |
+| Other or not specified   | Play first file                     |
 
-#### 사운드 팩 적용
+#### Applying a Sound Pack
 
-설정 파일에서 팩 이름을 지정합니다:
+Specify the pack name in your config file:
 
 ```json
 {
@@ -288,24 +290,24 @@ Qwen3-TTS를 활용하여 음성 합성 기반 사운드 팩을 만들 수 있�
 
 </details>
 
-## 문제 해결
+## Troubleshooting
 
-소리가 나지 않거나 알림이 표시되지 않을 때:
+If sounds aren't playing or notifications aren't showing:
 
 ```
 /dding-dong:dd-doctor
 ```
 
-자동으로 환경을 점검하고 문제 원인과 해결 방법을 안내합니다.
+Automatically inspects your environment and provides diagnosis with suggested fixes.
 
-## 기여 방법
+## Contributing
 
-1. 이 저장소를 포크합니다
-2. 기능 브랜치를 만듭니다 (`git checkout -b feature/새기능`)
-3. 변경사항을 커밋합니다 (`git commit -m 'feat: 새기능 추가'`)
-4. 브랜치에 푸시합니다 (`git push origin feature/새기능`)
-5. Pull Request를 엽니다
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/my-feature`)
+3. Commit your changes (`git commit -m 'feat: add my feature'`)
+4. Push to the branch (`git push origin feature/my-feature`)
+5. Open a Pull Request
 
-## 라이선스
+## License
 
-MIT License — 자세한 내용은 [LICENSE](LICENSE) 파일을 참고하세요.
+MIT License — See the [LICENSE](LICENSE) file for details.
