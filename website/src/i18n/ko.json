@@ -67,11 +67,27 @@
       "session.end": "세션 종료"
     },
     "onomatopoeia": {
-      "task.complete": "딩동!",
-      "task.error": "삐빅!",
-      "input.required": "띵-",
-      "session.start": "뚜둣",
-      "session.end": "뚜뚜-"
+      "default": {
+        "task.complete": "딩동!",
+        "task.error": "삐빅!",
+        "input.required": "띵-",
+        "session.start": "뚜둣",
+        "session.end": "뚜뚜-"
+      },
+      "retro": {
+        "task.complete": "띠리릿!",
+        "task.error": "뾰-뾱",
+        "input.required": "팅팅!",
+        "session.start": "뷔이잉~",
+        "session.end": "뷔우움.."
+      },
+      "musical": {
+        "task.complete": "짠~♪",
+        "task.error": "뚜웅..",
+        "input.required": "띵따랑~",
+        "session.start": "따다단♪",
+        "session.end": "랄랄라~"
+      }
     },
     "packs": {
       "default": {

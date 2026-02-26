@@ -17,7 +17,7 @@ const eventKeys = ['task.complete', 'task.error', 'input.required', 'session.sta
 // t()는 점(.)으로 키를 분할하므로 "task.complete" 같은 키를 처리할 수 없음
 // tData()로 객체를 통째로 가져와서 직접 인덱싱
 const eventLabels = tData<Record<string, string>>('gallery.events', lang) ?? {};
-const eventOnomatopoeia = tData<Record<string, string>>('gallery.onomatopoeia', lang) ?? {};
+const allOnomatopoeia = tData<Record<string, Record<string, string>>>('gallery.onomatopoeia', lang) ?? {};
 const packNames = tData<Record<string, { displayName: string; description: string }>>('gallery.packs', lang) ?? {};
 
 const packs = [
@@ -88,7 +88,7 @@ const packs = [
                 <AudioPlayer
                   soundUrl={url}
                   packColor={pack.color}
-                  onomatopoeia={eventOnomatopoeia[eventKey] ?? eventKey}
+                  onomatopoeia={allOnomatopoeia[pack.id]?.[eventKey] ?? eventKey}
                   eventLabel={eventLabels[eventKey] ?? eventKey}
                 />
               );
@@ -102,7 +102,7 @@ const packs = [
     <div class="hidden lg:grid lg:grid-cols-3 gap-6">
       {packs.map((pack) => (
         <div
-          class="pack-card-desktop rounded-2xl bg-hanji dark:bg-misaek border border-changho border-l-4 transition-all duration-200 hover:border-l-[6px] hover:-translate-y-0.5 group"
+          class="pack-card-desktop rounded-2xl bg-hanji dark:bg-misaek border border-changho border-l-4"
           style={`border-left-color: ${pack.color};`}
           data-pack={pack.id}
           data-color={pack.color}
@@ -128,7 +128,7 @@ const packs = [
                 <AudioPlayer
                   soundUrl={url}
                   packColor={pack.color}
-                  onomatopoeia={eventOnomatopoeia[eventKey] ?? eventKey}
+                  onomatopoeia={allOnomatopoeia[pack.id]?.[eventKey] ?? eventKey}
                   eventLabel={eventLabels[eventKey] ?? eventKey}
                 />
               );
@@ -167,12 +167,3 @@ const packs = [
   });
 </script>
 
-<style>
-  .pack-card-desktop:hover {
-    background-color: color-mix(in srgb, var(--pack-color, transparent) 5%, transparent);
-  }
-
-  .pack-card-desktop {
-    --pack-color: transparent;
-  }
-</style>

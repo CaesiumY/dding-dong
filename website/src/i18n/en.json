@@ -67,11 +67,27 @@
       "session.end": "Session End"
     },
     "onomatopoeia": {
-      "task.complete": "ding-dong!",
-      "task.error": "beep!",
-      "input.required": "ting-",
-      "session.start": "tu-dut",
-      "session.end": "tu-tu-"
+      "default": {
+        "task.complete": "ding-dong!",
+        "task.error": "beep!",
+        "input.required": "ting-",
+        "session.start": "tu-dut",
+        "session.end": "tu-tu-"
+      },
+      "retro": {
+        "task.complete": "tiri-rit!",
+        "task.error": "bwo-bwop",
+        "input.required": "ting-ting!",
+        "session.start": "vweeem~",
+        "session.end": "vwoom.."
+      },
+      "musical": {
+        "task.complete": "chan~♪",
+        "task.error": "dwung..",
+        "input.required": "ting-ta-rang~",
+        "session.start": "ta-da-dan♪",
+        "session.end": "ran-la-la~"
+      }
     },
     "packs": {
       "default": {
