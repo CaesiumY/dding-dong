@@ -17,7 +17,7 @@
     "logo": "dding-dong",
     "doorbell": "Ring the doorbell",
     "subtitle": "When code is done, the doorbell rings.",
-    "description": "Claude Code notification plugin — alerts you with sounds and OS notifications on task completion, errors, and input requests.",
+    "description": "A Claude Code plugin that alerts you with sounds and OS notifications on task completion, errors, and input requests.",
     "cta": "Get Started",
     "listen": "Listen below",
     "onomatopoeia": "dding-dong!",
