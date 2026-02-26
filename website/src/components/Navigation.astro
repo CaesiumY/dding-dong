@@ -16,7 +16,6 @@ const navLinks = [
   { key: 'platform', href: '#platform' },
 ];
 
-const altLang = lang === 'ko' ? 'en' : 'ko';
 const altHref = lang === 'ko' ? `${import.meta.env.BASE_URL}` : `${import.meta.env.BASE_URL}ko/`;
 const altLabel = lang === 'ko' ? 'EN' : 'KO';
 ---
@@ -88,34 +87,49 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
     </div>
   </nav>
 
-  <!-- 모바일 풀스크린 오버레이 -->
+  <!-- 모바일 드롭다운 메뉴 -->
   <div
     id="mobile-menu"
-    class="md:hidden hidden fixed inset-0 top-16 z-40 bg-hanji/95 backdrop-blur-md flex flex-col items-center justify-center gap-8"
+    class="md:hidden absolute left-0 right-0 opacity-0 pointer-events-none -translate-y-2 [transition:opacity_150ms_ease-out,translate_150ms_ease-out] bg-misaek border-t border-changho"
     aria-hidden="true"
   >
-    <ul class="flex flex-col items-center gap-6 text-xl font-medium text-meok">
+    <div class="px-6 py-4 space-y-1">
       {navLinks.map(({ key, href }) => (
-        <li>
-          <a
-            href={href}
-            class="mobile-nav-link hover:text-hobak transition-colors duration-200"
-          >
-            {t(`nav.${key}`, lang)}
-          </a>
-        </li>
+        <a
+          href={href}
+          class="mobile-nav-link block px-4 py-3 rounded-lg text-base font-medium text-onggi hover:text-meok hover:bg-changho/50 active:scale-95 transition-all duration-200"
+        >
+          {t(`nav.${key}`, lang)}
+        </a>
       ))}
-    </ul>
 
-    <!-- 언어 토글 (모바일) -->
-    <a
-      href={altHref}
-      class="mt-2 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-changho text-base font-medium text-onggi hover:border-hobak hover:text-hobak transition-colors duration-200"
-      aria-label={t('nav.switchTo', lang)}
-    >
-      <Icon name="ph:globe" class="w-5 h-5" />
-      {t('nav.viewInAlt', lang)}
-    </a>
+      <div class="flex justify-center py-2">
+        <div class="w-16 h-px bg-changho"></div>
+      </div>
+
+      <div class="flex items-center justify-center gap-3 py-2">
+        <!-- 다크모드 토글 (모바일) -->
+        <button
+          id="theme-toggle-mobile"
+          type="button"
+          aria-label={t('nav.themeToggle', lang)}
+          class="flex w-10 h-10 items-center justify-center rounded-full text-onggi hover:text-hobak hover:bg-changho/60 transition-colors duration-200"
+        >
+          <Icon name="ph:sun" id="icon-light-mobile" class="hidden w-5 h-5" />
+          <Icon name="ph:moon" id="icon-dark-mobile" class="w-5 h-5" />
+        </button>
+
+        <!-- 언어 토글 (모바일) -->
+        <a
+          href={altHref}
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-changho text-sm font-medium text-onggi hover:border-hobak hover:text-hobak transition-colors duration-200"
+          aria-label={t('nav.switchTo', lang)}
+        >
+          <Icon name="ph:globe" class="w-4 h-4" />
+          {altLabel}
+        </a>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -127,7 +141,8 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
   const closeIcon = document.getElementById('close-icon');
 
   function openMenu() {
-    mobileMenu?.classList.remove('hidden');
+    mobileMenu?.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
+    mobileMenu?.classList.add('opacity-100', 'pointer-events-auto', 'translate-y-0');
     hamburgerIcon?.classList.add('hidden');
     closeIcon?.classList.remove('hidden');
     menuBtn?.setAttribute('aria-expanded', 'true');
@@ -136,7 +151,8 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
   }
 
   function closeMenu() {
-    mobileMenu?.classList.add('hidden');
+    mobileMenu?.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
+    mobileMenu?.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
     hamburgerIcon?.classList.remove('hidden');
     closeIcon?.classList.add('hidden');
     menuBtn?.setAttribute('aria-expanded', 'false');
@@ -146,7 +162,7 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
 
   menuBtn?.addEventListener('click', () => {
     const isOpen = menuBtn.getAttribute('aria-expanded') === 'true';
-    isOpen ? closeMenu() : openMenu();
+    if (isOpen) { closeMenu(); } else { openMenu(); }
   });
 
   // 모바일 링크 클릭 시 닫기
@@ -177,5 +193,27 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
     document.documentElement.classList.toggle('dark', !isDark);
     localStorage.setItem('theme', isDark ? 'light' : 'dark');
     updateThemeIcons();
+    updateMobileThemeIcons();
+  });
+
+  // 모바일 다크 모드 토글
+  const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+  const iconLightMobile = document.getElementById('icon-light-mobile');
+  const iconDarkMobile = document.getElementById('icon-dark-mobile');
+
+  function updateMobileThemeIcons() {
+    const isDark = document.documentElement.classList.contains('dark');
+    iconLightMobile?.classList.toggle('hidden', !isDark);
+    iconDarkMobile?.classList.toggle('hidden', isDark);
+  }
+
+  updateMobileThemeIcons();
+
+  themeToggleMobile?.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.contains('dark');
+    document.documentElement.classList.toggle('dark', !isDark);
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    updateThemeIcons();
+    updateMobileThemeIcons();
   });
 </script>
