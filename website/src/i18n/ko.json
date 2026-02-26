@@ -4,6 +4,7 @@
     "features": "기능",
     "sounds": "소리",
     "quickstart": "시작하기",
+    "skills": "스킬",
     "config": "설정",
     "platform": "플랫폼",
     "logoLabel": "띵동 홈",
@@ -126,9 +127,7 @@
         "description": "/dd-tts-pack 실행 후 안내를 따라가세요. Qwen3-TTS 모델은 첫 사용 시 자동 다운로드."
       }
     ],
-    "ctaPrimary": "시작하기",
-    "ctaSecondary": "/dd-tts-pack",
-    "ctaSecondaryLabel": "명령어 복사"
+    "ctaPrimary": "스킬 둘러보기"
   },
   "quickstart": {
     "heading": "30초면 됩니다",
@@ -152,6 +151,26 @@
         "description": "모든 알림 소리를 순서대로 재생합니다.",
         "code": "/dding-dong:dd-test"
       }
+    ]
+  },
+  "skills": {
+    "heading": "필요한 모든 스킬",
+    "description": "띵동을 설정하고, 커스터마이즈하고, 문제를 해결하는 모든 슬래시 명령어.",
+    "categories": {
+      "gettingStarted": "시작하기",
+      "soundManagement": "사운드 관리",
+      "utilities": "유틸리티"
+    },
+    "items": [
+      { "name": "dd-setup", "icon": "ph:magic-wand-duotone", "command": "/dding-dong:dd-setup", "description": "플랫폼과 오디오 도구를 자동 감지하고 알림을 설정합니다.", "category": "gettingStarted" },
+      { "name": "dd-test", "icon": "ph:play-circle-duotone", "command": "/dding-dong:dd-test", "description": "모든 알림 소리를 순서대로 재생하여 설정을 확인합니다.", "category": "gettingStarted" },
+      { "name": "dd-help", "icon": "ph:question-duotone", "command": "/dding-dong:dd-help", "description": "스킬, 설정, 이벤트, 사운드 팩 등 전체 레퍼런스를 표시합니다.", "category": "gettingStarted" },
+      { "name": "dd-sounds", "icon": "ph:speaker-high-duotone", "command": "/dding-dong:dd-sounds", "description": "설치된 사운드 팩을 조회, 전환, 미리듣기합니다.", "category": "soundManagement" },
+      { "name": "dd-pack-create", "icon": "ph:paint-brush-duotone", "command": "/dding-dong:dd-pack-create", "description": "WAV 파일로 나만의 커스텀 사운드 팩을 만듭니다.", "category": "soundManagement" },
+      { "name": "dd-tts-pack", "icon": "ph:microphone-duotone", "command": "/dding-dong:dd-tts-pack", "description": "Qwen3-TTS와 보이스 클로닝으로 음성 알림을 생성합니다.", "category": "soundManagement" },
+      { "name": "dd-config", "icon": "ph:gear-duotone", "command": "/dding-dong:dd-config", "description": "알림 설정을 조회, 변경, 초기화합니다.", "category": "utilities" },
+      { "name": "dd-doctor", "icon": "ph:stethoscope-duotone", "command": "/dding-dong:dd-doctor", "description": "플랫폼, 설정, 오디오 도구를 점검하여 알림 문제를 진단합니다.", "category": "utilities" },
+      { "name": "dd-feedback", "icon": "ph:chat-circle-text-duotone", "command": "/dding-dong:dd-feedback", "description": "버그 리포트와 기능 요청을 GitHub 이슈로 제출합니다.", "category": "utilities" }
     ]
   },
   "config": {

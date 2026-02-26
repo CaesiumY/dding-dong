@@ -4,6 +4,7 @@
     "features": "Features",
     "sounds": "Sounds",
     "quickstart": "Quick Start",
+    "skills": "Skills",
     "config": "Config",
     "platform": "Platform",
     "logoLabel": "dding-dong home",
@@ -126,9 +127,7 @@
         "description": "Run /dd-tts-pack and follow the prompts. Auto-downloads Qwen3-TTS model on first use."
       }
     ],
-    "ctaPrimary": "Get Started",
-    "ctaSecondary": "/dd-tts-pack",
-    "ctaSecondaryLabel": "Copy command"
+    "ctaPrimary": "Explore Skills"
   },
   "quickstart": {
     "heading": "30 seconds to start",
@@ -152,6 +151,26 @@
         "description": "Hear all notification sounds in sequence.",
         "code": "/dding-dong:dd-test"
       }
+    ]
+  },
+  "skills": {
+    "heading": "All the skills you need",
+    "description": "Every slash command to configure, customize, and troubleshoot dding-dong.",
+    "categories": {
+      "gettingStarted": "Getting Started",
+      "soundManagement": "Sound Management",
+      "utilities": "Utilities"
+    },
+    "items": [
+      { "name": "dd-setup", "icon": "ph:magic-wand-duotone", "command": "/dding-dong:dd-setup", "description": "Auto-detect your platform and audio tools. Interactive setup wizard.", "category": "gettingStarted" },
+      { "name": "dd-test", "icon": "ph:play-circle-duotone", "command": "/dding-dong:dd-test", "description": "Play all notification sounds in sequence to verify your setup.", "category": "gettingStarted" },
+      { "name": "dd-help", "icon": "ph:question-duotone", "command": "/dding-dong:dd-help", "description": "Show the complete plugin reference — skills, config, events, and packs.", "category": "gettingStarted" },
+      { "name": "dd-sounds", "icon": "ph:speaker-high-duotone", "command": "/dding-dong:dd-sounds", "description": "List, switch, and preview installed sound packs.", "category": "soundManagement" },
+      { "name": "dd-pack-create", "icon": "ph:paint-brush-duotone", "command": "/dding-dong:dd-pack-create", "description": "Create custom sound packs with your own WAV files.", "category": "soundManagement" },
+      { "name": "dd-tts-pack", "icon": "ph:microphone-duotone", "command": "/dding-dong:dd-tts-pack", "description": "Generate voice notifications with Qwen3-TTS and voice cloning.", "category": "soundManagement" },
+      { "name": "dd-config", "icon": "ph:gear-duotone", "command": "/dding-dong:dd-config", "description": "View, modify, and reset notification settings.", "category": "utilities" },
+      { "name": "dd-doctor", "icon": "ph:stethoscope-duotone", "command": "/dding-dong:dd-doctor", "description": "Diagnose notification issues — checks platform, config, and audio tools.", "category": "utilities" },
+      { "name": "dd-feedback", "icon": "ph:chat-circle-text-duotone", "command": "/dding-dong:dd-feedback", "description": "Submit bug reports and feature requests as GitHub issues.", "category": "utilities" }
     ]
   },
   "config": {
