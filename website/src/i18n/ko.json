@@ -256,8 +256,6 @@
   },
   "footer": {
     "license": "MIT 라이선스",
-    "github": "GitHub",
-    "madeWith": "Made with",
-    "byAuthor": "by ChangSik Yoon"
+    "github": "GitHub"
   }
 }

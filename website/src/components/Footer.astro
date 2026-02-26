@@ -15,13 +15,6 @@ const { lang } = Astro.props;
       <!-- 로고 -->
       <span class="font-gmarket text-lg text-meok">{t('hero.logo', lang)}</span>
 
-      <!-- 크레딧 -->
-      <p class="text-sm text-onggi flex items-center justify-center gap-1">
-        {t('footer.madeWith', lang)}
-        <Icon name="ph:heart-fill" class="w-4 h-4 text-onggi-red" />
-        {t('footer.byAuthor', lang)}
-      </p>
-
       <!-- 링크들 -->
       <div class="flex items-center justify-center md:justify-end gap-4">
         <a
