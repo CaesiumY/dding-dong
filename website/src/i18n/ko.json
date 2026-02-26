@@ -127,7 +127,48 @@
         "description": "/dd-tts-pack 실행 후 안내를 따라가세요. Qwen3-TTS 모델은 첫 사용 시 자동 다운로드."
       }
     ],
-    "ctaPrimary": "스킬 둘러보기"
+    "preview": {
+      "heading": "샘플 음성 들어보기",
+      "description": "Qwen3-TTS로 생성한 보이스 클론 — 한국어와 영어 모두 들어보세요",
+      "packs": [
+        {
+          "packName": "지하철 안내 보이스 (한국어)",
+          "packDescription": "지하철 안내방송 보이스 클론 — Qwen3-TTS",
+          "events": {
+            "task.complete": "\"작업이 완료되었습니다!\"",
+            "task.error": "\"오류가 발생했습니다.\"",
+            "input.required": "\"입력이 필요합니다.\"",
+            "session.start": "\"세션을 시작합니다.\"",
+            "session.end": "\"세션이 종료됩니다.\""
+          },
+          "onomatopoeia": {
+            "task.complete": "작업이 완료되었습니다!",
+            "task.error": "오류가 발생했습니다.",
+            "input.required": "입력이 필요합니다.",
+            "session.start": "세션을 시작합니다.",
+            "session.end": "세션이 종료됩니다."
+          }
+        },
+        {
+          "packName": "지하철 안내 보이스 (English)",
+          "packDescription": "지하철 안내방송 보이스 클론 (영어) — Qwen3-TTS",
+          "events": {
+            "task.complete": "\"Task complete!\"",
+            "task.error": "\"An error occurred.\"",
+            "input.required": "\"Input needed.\"",
+            "session.start": "\"Starting session.\"",
+            "session.end": "\"Session ending.\""
+          },
+          "onomatopoeia": {
+            "task.complete": "Task complete!",
+            "task.error": "An error occurred.",
+            "input.required": "Input needed.",
+            "session.start": "Starting session.",
+            "session.end": "Session ending."
+          }
+        }
+      ]
+    }
   },
   "quickstart": {
     "heading": "30초면 됩니다",

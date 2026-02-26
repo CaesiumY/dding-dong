@@ -127,7 +127,48 @@
         "description": "Run /dd-tts-pack and follow the prompts. Auto-downloads Qwen3-TTS model on first use."
       }
     ],
-    "ctaPrimary": "Explore Skills"
+    "preview": {
+      "heading": "Listen to a sample",
+      "description": "Voice clones generated with Qwen3-TTS — try both Korean and English",
+      "packs": [
+        {
+          "packName": "Metro Voice (Korean)",
+          "packDescription": "Subway announcement voice clone — Qwen3-TTS",
+          "events": {
+            "task.complete": "\"작업이 완료되었습니다!\"",
+            "task.error": "\"오류가 발생했습니다.\"",
+            "input.required": "\"입력이 필요합니다.\"",
+            "session.start": "\"세션을 시작합니다.\"",
+            "session.end": "\"세션이 종료됩니다.\""
+          },
+          "onomatopoeia": {
+            "task.complete": "작업이 완료되었습니다!",
+            "task.error": "오류가 발생했습니다.",
+            "input.required": "입력이 필요합니다.",
+            "session.start": "세션을 시작합니다.",
+            "session.end": "세션이 종료됩니다."
+          }
+        },
+        {
+          "packName": "Metro Voice (English)",
+          "packDescription": "Subway announcement voice clone (English) — Qwen3-TTS",
+          "events": {
+            "task.complete": "\"Task complete!\"",
+            "task.error": "\"An error occurred.\"",
+            "input.required": "\"Input needed.\"",
+            "session.start": "\"Starting session.\"",
+            "session.end": "\"Session ending.\""
+          },
+          "onomatopoeia": {
+            "task.complete": "Task complete!",
+            "task.error": "An error occurred.",
+            "input.required": "Input needed.",
+            "session.start": "Starting session.",
+            "session.end": "Session ending."
+          }
+        }
+      ]
+    }
   },
   "quickstart": {
     "heading": "30 seconds to start",

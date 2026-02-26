@@ -1,6 +1,7 @@
 ---
 import { Icon } from 'astro-icon/components';
-import { t, tData } from '../i18n/utils';
+import { t, tData, soundUrl } from '../i18n/utils';
+import AudioPlayer from './AudioPlayer.astro';
 
 interface Props {
   lang: string;
@@ -15,6 +16,31 @@ interface TtsCard {
 }
 
 const cards = tData<TtsCard[]>('ttsVoice.cards', lang);
+
+// TTS 프리뷰 팩 배열 — 두 카드 모두 metro-voice WAV 사용 (향후 영어 팩 추가 시 id만 교체)
+const ttsPreviews = [
+  { id: 'metro-voice', color: '#8B5CF6' },  // 한국어 — 보라
+  { id: 'metro-voice', color: '#3B82F6' },  // 영어 — 파랑 (시각적 구분)
+];
+
+// 두 팩 모두 동일 WAV 파일 참조
+const metroManifestEvents: Record<string, { files: string[] }> = {
+  'task.complete': { files: ['complete.wav'] },
+  'task.error': { files: ['error.wav'] },
+  'input.required': { files: ['input-required.wav'] },
+  'session.start': { files: ['session-start.wav'] },
+  'session.end': { files: ['session-end.wav'] },
+};
+
+const eventKeys = ['task.complete', 'task.error', 'input.required', 'session.start', 'session.end'] as const;
+
+interface PreviewPack {
+  packName: string;
+  packDescription: string;
+  events: Record<string, string>;
+  onomatopoeia: Record<string, string>;
+}
+const previewPacks = tData<PreviewPack[]>('ttsVoice.preview.packs', lang) ?? [];
 ---
 
 <section id="tts-voice" class="bg-misaek">
@@ -36,14 +62,60 @@ const cards = tData<TtsCard[]>('ttsVoice.cards', lang);
       ))}
     </div>
 
-    <div class="mt-10 flex justify-center md:justify-start">
-      <a
-        href="#skills"
-        class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-hobak hover:bg-hobak-deep text-hanji font-semibold transition-colors duration-200"
-      >
-        <Icon name="ph:book-open" class="w-5 h-5" />
-        {t('ttsVoice.ctaPrimary', lang)}
-      </a>
+    <!-- TTS Voice Preview -->
+    <div class="mt-12">
+      <h3 class="text-xl font-semibold text-meok mb-2">
+        {t('ttsVoice.preview.heading', lang)}
+      </h3>
+      <p class="text-onggi text-sm mb-6">
+        {t('ttsVoice.preview.description', lang)}
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        {ttsPreviews.map((pack, index) => {
+          const packI18n = previewPacks[index];
+          if (!packI18n) return null;
+          return (
+            <div
+              class="rounded-2xl bg-hanji border border-changho border-l-4"
+              style={`border-left-color: ${pack.color};`}
+            >
+              <div class="p-5 pb-0">
+                <div class="flex items-center gap-2.5 mb-1">
+                  <span
+                    class="w-3 h-3 rounded-full shrink-0"
+                    style={`background-color: ${pack.color};`}
+                  ></span>
+                  <span class="font-semibold text-meok">
+                    {packI18n.packName}
+                  </span>
+                </div>
+                <p class="text-sm text-onggi pl-5">
+                  {packI18n.packDescription}
+                </p>
+              </div>
+              <div class="border-t border-changho/50 mx-5 my-3"></div>
+              <div class="px-3 pb-3">
+                {eventKeys.map((eventKey) => {
+                  const file = metroManifestEvents[eventKey]?.files?.[0];
+                  const url = file ? soundUrl(pack.id, file) : '';
+                  return (
+                    <AudioPlayer
+                      soundUrl={url}
+                      packColor={pack.color}
+                      onomatopoeia={packI18n.onomatopoeia[eventKey] ?? eventKey}
+                      eventLabel={packI18n.events[eventKey] ?? eventKey}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
+
   </div>
 </section>
+
+<script src="../scripts/audio-player.ts"></script>
