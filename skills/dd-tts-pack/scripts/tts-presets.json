@@ -1,0 +1,47 @@
+{
+  "ko": {
+    "label": "Korean",
+    "ttsLanguage": "Korean",
+    "speakers": {
+      "recommended": "Sohee",
+      "options": ["Sohee"]
+    },
+    "events": {
+      "task.complete": { "text": "작업이 완료되었습니다!", "instruct": "밝고 활기찬 어조로" },
+      "task.error": { "text": "오류가 발생했습니다.", "instruct": "긴급하고 주의를 끄는 어조로" },
+      "input.required": { "text": "입력이 필요합니다.", "instruct": "부드럽고 안내하는 어조로" },
+      "session.start": { "text": "세션을 시작합니다.", "instruct": "차분하고 환영하는 어조로" },
+      "session.end": { "text": "세션이 종료됩니다.", "instruct": "차분하고 마무리하는 어조로" }
+    }
+  },
+  "en": {
+    "label": "English",
+    "ttsLanguage": "English",
+    "speakers": {
+      "recommended": "Ryan",
+      "options": ["Ryan", "Aiden"]
+    },
+    "events": {
+      "task.complete": { "text": "Task completed!", "instruct": "in a bright and cheerful tone" },
+      "task.error": { "text": "An error occurred.", "instruct": "in an urgent, attention-grabbing tone" },
+      "input.required": { "text": "Your input is needed.", "instruct": "in a gentle, guiding tone" },
+      "session.start": { "text": "Session started.", "instruct": "in a calm, welcoming tone" },
+      "session.end": { "text": "Session ended.", "instruct": "in a calm, wrapping-up tone" }
+    }
+  },
+  "ja": {
+    "label": "Japanese",
+    "ttsLanguage": "Japanese",
+    "speakers": {
+      "recommended": "Ono_Anna",
+      "options": ["Ono_Anna"]
+    },
+    "events": {
+      "task.complete": { "text": "タスクが完了しました!", "instruct": "明るく元気な口調で" },
+      "task.error": { "text": "エラーが発生しました。", "instruct": "緊急で注意を引く口調で" },
+      "input.required": { "text": "入力が必要です。", "instruct": "優しく案内する口調で" },
+      "session.start": { "text": "セッションを開始します。", "instruct": "落ち着いた歓迎の口調で" },
+      "session.end": { "text": "セッションを終了します。", "instruct": "落ち着いたまとめの口調で" }
+    }
+  }
+}

@@ -163,6 +163,40 @@ AskUserQuestion으로 질문합니다:
 
 **"종료" 선택 시:** 종료합니다.
 
+### 1.5단계: 언어 감지
+
+1단계 환경 검사를 통과한 후, TTS 출력 언어를 자동 감지합니다.
+별도 스크립트 없이 아래 절차를 직접 수행합니다.
+
+1. Read 도구로 다국어 프리셋을 읽습니다:
+   ```
+   ${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/tts-presets.json
+   ```
+
+2. 현재 프로젝트의 `config.language` 값을 확인합니다:
+   ```bash
+   node -e "import('${CLAUDE_PLUGIN_ROOT}/scripts/core/config.mjs').then(m => console.log(m.loadConfig(process.cwd()).language))"
+   ```
+
+3. **로케일 정규화**: 얻어진 값에서 하이픈(`-`) 앞부분만 소문자로 추출합니다.
+   - `'ko'` → `'ko'`, `'en-US'` → `'en'`, `'ja-JP'` → `'ja'`, `'ko-KR'` → `'ko'`
+   - 규칙: `langCode = rawValue.split('-')[0].toLowerCase()`
+
+4. 정규화된 코드로 `tts-presets.json`에서 매칭 키를 찾습니다:
+   - **매칭 성공**: 해당 프리셋의 값을 변수로 저장
+   - **매칭 실패**: `ko`로 폴백하고 사용자에게 안내:
+     ```
+     감지된 언어 '{원래 값}'는 TTS에서 아직 지원되지 않습니다.
+     한국어(Korean)로 진행합니다.
+     ```
+
+5. 다음 변수를 저장합니다:
+   - `DETECTED_LANG`: 정규화된 2글자 코드 (예: `ko`, `en`, `ja`)
+   - `TTS_LANGUAGE`: Qwen3-TTS language 파라미터 값 (예: `Korean`, `English`, `Japanese`)
+   - `RECOMMENDED_SPEAKER`: 추천 화자 (예: `Sohee`, `Ryan`, `Ono_Anna`)
+   - `SPEAKER_OPTIONS`: 화자 목록 (예: `["Ryan", "Aiden"]`)
+   - `PRESETS`: 이벤트별 텍스트/감정 데이터 (프리셋의 `events` 객체)
+
 ### 2단계: 모드 선택
 
 `--clone` 또는 `--custom` 플래그가 있으면 이 단계를 건너뜁니다.
@@ -372,13 +406,28 @@ AskUserQuestion으로 질문합니다:
 
 "내장 음성을 선택해주세요."
 
-선택지:
+선택지는 `DETECTED_LANG`에 따라 추천 화자가 변경됩니다:
+
+**`DETECTED_LANG = ko` (한국어):**
 1. **Sohee (Recommended)** -- "한국어 여성 음성. 따뜻하고 감성이 풍부합니다."
 2. **Ryan** -- "영어 남성 음성."
 3. **Aiden** -- "영어 남성 음성."
 4. **Ono_Anna** -- "일본어 여성 음성."
 
-> 참고: 중국어 음성(Vivian, Serena, Uncle_Fu, Dylan, Eric)은 한국어 텍스트에 적합하지 않아 기본 선택지에서 제외합니다.
+**`DETECTED_LANG = en` (영어):**
+1. **Ryan (Recommended)** -- "영어 남성 음성."
+2. **Aiden** -- "영어 남성 음성."
+3. **Sohee** -- "한국어 여성 음성. 따뜻하고 감성이 풍부합니다."
+4. **Ono_Anna** -- "일본어 여성 음성."
+
+**`DETECTED_LANG = ja` (일본어):**
+1. **Ono_Anna (Recommended)** -- "일본어 여성 음성."
+2. **Sohee** -- "한국어 여성 음성. 따뜻하고 감성이 풍부합니다."
+3. **Ryan** -- "영어 남성 음성."
+4. **Aiden** -- "영어 남성 음성."
+
+> 참고: `RECOMMENDED_SPEAKER`가 `SPEAKER_OPTIONS`에서 첫 번째로 표시됩니다.
+> 중국어 음성(Vivian, Serena, Uncle_Fu, Dylan, Eric)은 기본 선택지에서 제외합니다.
 > 사용자가 Other로 직접 입력하면 모든 화자명을 수용합니다.
 
 선택 결과를 `SPEAKER` 변수에 저장합니다.
@@ -387,15 +436,17 @@ AskUserQuestion으로 질문합니다:
 
 5개 이벤트에 대해 텍스트(및 CustomVoice 모드에서는 감정/스타일)를 설정합니다.
 
-**기본 한국어 텍스트 및 감정:**
+**기본 텍스트 및 감정 (감지된 언어 기준):**
+
+1.5단계에서 읽어온 `PRESETS` (tts-presets.json의 감지된 언어 `events` 객체)의 값을 `DEFAULT_TEXT`, `DEFAULT_INSTRUCT`로 사용합니다.
 
 | 이벤트 | 기본 텍스트 | 기본 감정(instruct) |
 |--------|-----------|---------------------|
-| `task.complete` | "작업이 완료되었습니다!" | "밝고 활기찬 어조로" |
-| `task.error` | "오류가 발생했습니다." | "긴급하고 주의를 끄는 어조로" |
-| `input.required` | "입력이 필요합니다." | "부드럽고 안내하는 어조로" |
-| `session.start` | "세션을 시작합니다." | "차분하고 환영하는 어조로" |
-| `session.end` | "세션이 종료됩니다." | "차분하고 마무리하는 어조로" |
+| `task.complete` | `PRESETS["task.complete"].text` | `PRESETS["task.complete"].instruct` |
+| `task.error` | `PRESETS["task.error"].text` | `PRESETS["task.error"].instruct` |
+| `input.required` | `PRESETS["input.required"].text` | `PRESETS["input.required"].instruct` |
+| `session.start` | `PRESETS["session.start"].text` | `PRESETS["session.start"].instruct` |
+| `session.end` | `PRESETS["session.end"].text` | `PRESETS["session.end"].instruct` |
 
 > **참고**: 감정(instruct)은 **CustomVoice 모드에서만 적용**됩니다.
 > 보이스 클로닝 모드는 참조 음성의 음색만 복제하며, 감정 제어를 지원하지 않습니다.
@@ -407,14 +458,14 @@ AskUserQuestion으로 질문합니다:
 이벤트별 TTS 텍스트를 설정합니다.
 각 이벤트에 대해 읽어줄 텍스트를 지정할 수 있습니다.
 (보이스 클로닝 모드에서는 감정/스타일 제어가 지원되지 않습니다.)
-기본값은 한국어 텍스트입니다.
+기본값은 {TTS_LANGUAGE} 텍스트입니다.
 ```
 
 **CustomVoice 모드:**
 ```
 이벤트별 TTS 텍스트를 설정합니다.
 각 이벤트에 대해 읽어줄 텍스트와 감정/스타일을 지정할 수 있습니다.
-기본값은 한국어 텍스트입니다.
+기본값은 {TTS_LANGUAGE} 텍스트입니다.
 ```
 
 #### 클로닝 모드 (`clone`)
@@ -469,8 +520,8 @@ AskUserQuestion으로 질문합니다:
   "ref_text": "참조 텍스트",
   "events": {
     "task.complete": {
-      "text": "작업이 완료되었습니다!",
-      "language": "Korean",
+      "text": "DEFAULT_TEXT",
+      "language": "TTS_LANGUAGE",
       "output_file": "complete.wav"
     }
   }
@@ -482,12 +533,12 @@ AskUserQuestion으로 질문합니다:
 {
   "voice_mode": "custom",
   "model": "MODEL_NAME",
-  "speaker": "Sohee",
+  "speaker": "RECOMMENDED_SPEAKER",
   "events": {
     "task.complete": {
-      "text": "작업이 완료되었습니다!",
-      "instruct": "밝고 활기찬 어조로",
-      "language": "Korean",
+      "text": "DEFAULT_TEXT",
+      "instruct": "DEFAULT_INSTRUCT",
+      "language": "TTS_LANGUAGE",
       "output_file": "complete.wav"
     }
   }
@@ -523,7 +574,7 @@ AskUserQuestion으로 질문합니다:
   --ref-audio 'REF_AUDIO' \
   --ref-text 'REF_TEXT' \
   --text 'PREVIEW_TEXT' \
-  --language Korean \
+  --language 'TTS_LANGUAGE' \
   --output 'PACK_DIR/preview.wav'
 ```
 
@@ -536,7 +587,7 @@ AskUserQuestion으로 질문합니다:
   --speaker 'SPEAKER' \
   --text 'PREVIEW_TEXT' \
   --instruct 'PREVIEW_INSTRUCT' \
-  --language Korean \
+  --language 'TTS_LANGUAGE' \
   --output 'PACK_DIR/preview.wav'
 ```
 
