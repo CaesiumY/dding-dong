@@ -25,7 +25,7 @@ const items = tData<FeatureItem[]>('features.items', lang);
 
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
       {items?.map((item) => (
-        <div class="reveal rounded-2xl bg-hanji p-6 border border-changho hover:-translate-y-0.5 transition-all duration-200">
+        <div class="reveal rounded-2xl bg-hanji p-6 border border-changho">
           <Icon name={item.icon} class="w-8 h-8 text-hobak mb-4" />
           <h3 class="font-semibold text-lg text-meok mb-2">{item.title}</h3>
           <p class="text-onggi text-sm leading-relaxed">{item.description}</p>
