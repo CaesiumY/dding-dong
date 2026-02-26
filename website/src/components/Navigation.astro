@@ -56,6 +56,7 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
         class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-changho text-sm font-medium text-onggi hover:border-hobak hover:text-hobak transition-colors duration-200"
         aria-label={t('nav.switchTo', lang)}
       >
+        <Icon name="ph:globe" class="w-4 h-4" />
         {altLabel}
       </a>
 
@@ -110,7 +111,9 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
     <a
       href={altHref}
       class="mt-2 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-changho text-base font-medium text-onggi hover:border-hobak hover:text-hobak transition-colors duration-200"
+      aria-label={t('nav.switchTo', lang)}
     >
+      <Icon name="ph:globe" class="w-5 h-5" />
       {t('nav.viewInAlt', lang)}
     </a>
   </div>
