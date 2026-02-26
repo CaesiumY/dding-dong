@@ -42,7 +42,7 @@ const steps = tData<Step[]>('quickstart.steps', lang);
               </div>
 
               <!-- 스텝 내용 -->
-              <div class="flex-1 pt-1">
+              <div class="flex-1 min-w-0 pt-1">
                 <h3 class="font-semibold text-lg text-meok mb-1">{step.title}</h3>
                 <p class="text-onggi text-sm mb-3">{step.description}</p>
                 <CopyButton code={step.code} lang={lang} />
