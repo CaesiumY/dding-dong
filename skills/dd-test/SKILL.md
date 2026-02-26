@@ -1,7 +1,7 @@
 ---
 name: dd-test
 description: "Test dding-dong notifications interactively. Play each event one by one, replay or skip. 알림 인터랙티브 테스트. Use when the user says '알림 테스트', 'test notification', 'test sound', '소리 테스트'."
-allowed-tools: [Bash, Read, AskUserQuestion]
+allowed-tools: [Bash, Read, Edit, AskUserQuestion]
 ---
 
 # dding-dong 인터랙티브 알림 테스트
@@ -26,6 +26,17 @@ ls "${PROJECT_DIR}/.dding-dong/packs/"*"/.tts-config.json" 2>/dev/null || echo "
 ```
 
 TTS 팩 여부를 기억해두세요 (이후 "재생성" 선택지 제공 여부에 사용).
+
+TTS 팩인 경우, 활성 팩 경로의 `.tts-config.json`을 Read로 읽어서 다음을 파악합니다:
+- `voice_mode`: `"clone"` 또는 `"custom"`
+- `model`: 사용 모델명
+- `ref_audio`, `ref_text`: 참조 음성 (clone 모드)
+- `speaker`: 화자명 (custom 모드)
+- `events.<이벤트명>.text`: 각 이벤트의 현재 텍스트
+- `events.<이벤트명>.instruct`: 감정/스타일 지시 (custom 모드, 선택)
+- `events.<이벤트명>.output_file`: 출력 파일명
+
+이 정보를 이후 "재생성" 서브플로우에서 사용합니다.
 
 ## 2단계: 이벤트별 인터랙티브 루프
 
@@ -65,7 +76,79 @@ AskUserQuestion으로 다음 선택지를 제공합니다:
 - **다시 듣기**: 2-1로 돌아가 같은 이벤트를 다시 재생
 - **다음/완료**: 다음 이벤트로 진행 (또는 종료)
 - **건너뛰기**: 루프를 즉시 종료하고 3단계로 이동
-- **재생성**: "`/dding-dong:dd-tts-pack`으로 TTS 팩을 재생성할 수 있습니다." 안내 후 테스트 종료
+- **재생성**: 아래 "2-4. 인라인 재생성" 서브플로우를 실행
+
+### 2-4. 인라인 재생성 (TTS 팩 전용)
+
+"재생성"을 선택하면, 해당 이벤트의 TTS 음성을 즉시 다시 생성합니다.
+
+#### 2-4-1. TTS 환경 확인
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/check-env.mjs"
+```
+
+출력 JSON의 `all_ok`를 확인합니다.
+- `all_ok: false` → "TTS 환경이 준비되지 않았습니다. `/dding-dong:dd-tts-pack`으로 환경을 설정해주세요." 안내 후 2-2 선택지로 돌아감 (테스트는 계속)
+- `all_ok: true` → `python_path`를 기억하고 다음 단계로 진행
+
+#### 2-4-2. 텍스트 변경 여부
+
+현재 이벤트의 텍스트를 보여주고 AskUserQuestion으로 질문합니다:
+
+> 현재 텍스트: "**<.tts-config.json의 해당 이벤트 text>**"
+
+선택지:
+- 그대로 재생성 — 현재 텍스트로 바로 재생성
+- 텍스트 변경 — 새 텍스트를 입력받음
+
+"텍스트 변경" 선택 시:
+1. AskUserQuestion으로 새 텍스트를 입력받습니다 (Other 입력 유도)
+2. `.tts-config.json`의 해당 이벤트 `text` 필드를 Edit로 업데이트합니다
+
+#### 2-4-3. generate-tts.py 실행
+
+1단계에서 읽은 `.tts-config.json` 설정과 2-4-1의 `python_path`를 사용합니다.
+
+**clone 모드:**
+```bash
+<python_path> "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
+  --voice-mode clone --mode preview \
+  --model "<model>" \
+  --ref-audio "<활성팩경로>/<ref_audio>" \
+  --ref-text "<ref_text>" \
+  --text "<이벤트 텍스트>" \
+  --language "<language>" \
+  --output "<활성팩경로>/<output_file>"
+```
+
+**custom 모드:**
+```bash
+<python_path> "${CLAUDE_PLUGIN_ROOT}/skills/dd-tts-pack/scripts/generate-tts.py" \
+  --voice-mode custom --mode preview \
+  --model "<model>" \
+  --speaker "<speaker>" \
+  --text "<이벤트 텍스트>" \
+  --instruct "<instruct>" \
+  --language "<language>" \
+  --output "<활성팩경로>/<output_file>"
+```
+
+주의: `--instruct`는 `.tts-config.json`에 `instruct` 필드가 있을 때만 포함합니다.
+
+생성 결과 JSON의 `ok` 필드를 확인합니다:
+- `ok: true` → "✅ 재생성 완료" 안내 후 2-4-4로 진행
+- `ok: false` → 에러 메시지를 표시하고 2-2 선택지로 돌아감
+
+#### 2-4-4. 재생 및 루프 복귀
+
+재생성된 음성을 즉시 재생합니다:
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/notify.mjs" test <이벤트명>
+```
+
+재생 후 "🔔 **<이벤트명>** 재생성 후 재생 완료" 안내와 함께 2-2 선택지로 돌아갑니다.
 
 ## 3단계: 완료 안내
 
