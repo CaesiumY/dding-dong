@@ -1,4 +1,5 @@
 ---
+import { Icon } from 'astro-icon/components';
 import { t, soundUrl } from '../i18n/utils';
 
 interface Props {
@@ -30,16 +31,7 @@ const bellSoundUrl = soundUrl('default', 'complete.wav');
           type="button"
         >
           <!-- 벨 아이콘 -->
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
-          </svg>
+          <Icon name="ph:bell-fill" class="w-7 h-7" aria-hidden="true" />
         </button>
       </div>
 
@@ -65,10 +57,7 @@ const bellSoundUrl = soundUrl('default', 'complete.wav');
           class="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-hobak text-hanji font-semibold text-base hover:bg-hobak-deep hover:shadow-md active:scale-95 transition-all duration-200"
         >
           {t('hero.cta', lang)}
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="5" y1="12" x2="19" y2="12"/>
-            <polyline points="12 5 19 12 12 19"/>
-          </svg>
+          <Icon name="ph:arrow-right-bold" class="w-4 h-4" aria-hidden="true" />
         </a>
 
         <!-- Secondary: 소리 들어보기 -->
@@ -76,11 +65,7 @@ const bellSoundUrl = soundUrl('default', 'complete.wav');
           href="#gallery"
           class="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border-2 border-changho text-onggi font-semibold text-base hover:border-hobak hover:text-hobak hover:bg-hobak-soft/30 active:scale-95 transition-all duration-200"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-          </svg>
+          <Icon name="ph:speaker-high-bold" class="w-4 h-4" aria-hidden="true" />
           {t('hero.listen', lang)}
         </a>
       </div>

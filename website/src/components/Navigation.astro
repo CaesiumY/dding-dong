@@ -1,4 +1,5 @@
 ---
+import { Icon } from 'astro-icon/components';
 import { t, localePath } from '../i18n/utils';
 
 interface Props {
@@ -66,21 +67,9 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
         class="hidden md:flex w-8 h-8 items-center justify-center rounded-full text-onggi hover:text-hobak hover:bg-changho/60 transition-colors duration-200"
       >
         <!-- 라이트 아이콘 (태양) -->
-        <svg id="icon-light" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/>
-          <line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
+        <Icon name="ph:sun" id="icon-light" class="hidden w-[18px] h-[18px]" />
         <!-- 다크 아이콘 (달) -->
-        <svg id="icon-dark" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
+        <Icon name="ph:moon" id="icon-dark" class="w-[18px] h-[18px]" />
       </button>
 
       <!-- 모바일 햄버거 -->
@@ -92,15 +81,8 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
         aria-controls="mobile-menu"
         class="md:hidden flex w-8 h-8 items-center justify-center rounded text-onggi hover:text-hobak transition-colors duration-200"
       >
-        <svg id="hamburger-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="3" y1="6" x2="21" y2="6"/>
-          <line x1="3" y1="12" x2="21" y2="12"/>
-          <line x1="3" y1="18" x2="21" y2="18"/>
-        </svg>
-        <svg id="close-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden">
-          <line x1="18" y1="6" x2="6" y2="18"/>
-          <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
+        <Icon name="ph:list" id="hamburger-icon" class="w-[22px] h-[22px]" />
+        <Icon name="ph:x" id="close-icon" class="hidden w-[22px] h-[22px]" />
       </button>
     </div>
   </nav>

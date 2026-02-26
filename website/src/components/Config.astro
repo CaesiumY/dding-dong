@@ -1,4 +1,5 @@
 ---
+import { Icon } from 'astro-icon/components';
 import { t, tData } from '../i18n/utils';
 import CopyButton from './CopyButton.astro';
 
@@ -69,10 +70,7 @@ const configExample = `{
 
         <!-- 우선순위 방향 표시 -->
         <div class="mt-4 flex items-center gap-2 text-xs text-onggi">
-          <svg class="w-4 h-4 text-hobak" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <polyline points="19 12 12 19 5 12"></polyline>
-          </svg>
+          <Icon name="ph:arrow-down" class="w-4 h-4 text-hobak" />
           <span>
             {t('config.priorityNote', lang)}
           </span>
