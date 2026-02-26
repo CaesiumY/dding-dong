@@ -1,7 +1,7 @@
 ---
 import { Icon } from 'astro-icon/components';
 import { t, tData, soundUrl } from '../i18n/utils';
-import AudioPlayer from './AudioPlayer.astro';
+import TtsAudioRow from './TtsAudioRow.astro';
 
 interface Props {
   lang: string;
@@ -38,9 +38,9 @@ interface PreviewPack {
   packName: string;
   packDescription: string;
   events: Record<string, string>;
-  onomatopoeia: Record<string, string>;
 }
 const previewPacks = tData<PreviewPack[]>('ttsVoice.preview.packs', lang) ?? [];
+const eventNames = tData<Record<string, string>>('gallery.events', lang) ?? {};
 ---
 
 <section id="tts-voice" class="bg-misaek">
@@ -100,11 +100,11 @@ const previewPacks = tData<PreviewPack[]>('ttsVoice.preview.packs', lang) ?? [];
                   const file = metroManifestEvents[eventKey]?.files?.[0];
                   const url = file ? soundUrl(pack.id, file) : '';
                   return (
-                    <AudioPlayer
+                    <TtsAudioRow
                       soundUrl={url}
                       packColor={pack.color}
-                      onomatopoeia={packI18n.onomatopoeia[eventKey] ?? eventKey}
-                      eventLabel={packI18n.events[eventKey] ?? eventKey}
+                      eventName={eventNames[eventKey] ?? eventKey}
+                      spokenText={packI18n.events[eventKey] ?? eventKey}
                     />
                   );
                 })}

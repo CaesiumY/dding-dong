@@ -109,12 +109,12 @@
   },
   "ttsVoice": {
     "heading": "내 목소리로 알림 받기",
-    "description": "Qwen3-TTS로 음성 알림을 생성하세요. 내 목소리를 클로닝해서 나만의 알림을 만들 수 있습니다.",
+    "description": "Qwen3-TTS로 음성 알림을 생성하세요. 단 3초의 음성 샘플로 내 목소리를 클로닝할 수 있습니다.",
     "cards": [
       {
         "icon": "ph:microphone-duotone",
         "title": "보이스 클로닝",
-        "description": "짧은 샘플을 녹음하면 내 목소리로 클로닝. 모든 알림이 내 목소리로 울립니다."
+        "description": "3초 이상의 음성 샘플만 있으면 내 목소리로 클로닝 가능. 모든 알림이 내 목소리로 울립니다."
       },
       {
         "icon": "ph:waveform-duotone",
@@ -135,36 +135,22 @@
           "packName": "지하철 안내 보이스 (한국어)",
           "packDescription": "지하철 안내방송 보이스 클론 — Qwen3-TTS",
           "events": {
-            "task.complete": "\"작업이 완료되었습니다!\"",
-            "task.error": "\"오류가 발생했습니다.\"",
-            "input.required": "\"입력이 필요합니다.\"",
-            "session.start": "\"세션을 시작합니다.\"",
-            "session.end": "\"세션이 종료됩니다.\""
-          },
-          "onomatopoeia": {
-            "task.complete": "작업이 완료되었습니다!",
-            "task.error": "오류가 발생했습니다.",
-            "input.required": "입력이 필요합니다.",
-            "session.start": "세션을 시작합니다.",
-            "session.end": "세션이 종료됩니다."
+            "task.complete": "\"이번 작업의 종착역에 도착하였습니다. 결과를 확인해 주시기 바랍니다.\"",
+            "task.error": "\"열차 운행에 장애가 발생하였습니다.\"",
+            "input.required": "\"이번 역은 대기, 대기역입니다. 고객님의 입력이 필요합니다.\"",
+            "session.start": "\"이번 열차는 코딩, 코딩행입니다. 출발합니다.\"",
+            "session.end": "\"이번 열차는 여기까지입니다. 이용해 주셔서 감사합니다.\""
           }
         },
         {
           "packName": "지하철 안내 보이스 (English)",
           "packDescription": "지하철 안내방송 보이스 클론 (영어) — Qwen3-TTS",
           "events": {
-            "task.complete": "\"Task complete!\"",
-            "task.error": "\"An error occurred.\"",
-            "input.required": "\"Input needed.\"",
-            "session.start": "\"Starting session.\"",
-            "session.end": "\"Session ending.\""
-          },
-          "onomatopoeia": {
-            "task.complete": "Task complete!",
-            "task.error": "An error occurred.",
-            "input.required": "Input needed.",
-            "session.start": "Starting session.",
-            "session.end": "Session ending."
+            "task.complete": "\"This train has arrived at its final destination. Please check your results.\"",
+            "task.error": "\"We are experiencing a service disruption on this line.\"",
+            "input.required": "\"This station is Standby. Your input is required.\"",
+            "session.start": "\"This is a Coding-bound train. Now departing.\"",
+            "session.end": "\"This train terminates here. Thank you for riding with us.\""
           }
         }
       ]
