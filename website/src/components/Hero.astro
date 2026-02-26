@@ -11,46 +11,35 @@ const { lang } = Astro.props;
 const bellSoundUrl = soundUrl('default', 'complete.wav');
 ---
 
-<section class="min-h-[calc(100vh-4rem)] flex items-center">
-  <div class="max-w-6xl mx-auto px-6 md:px-8 lg:px-12 py-24 md:py-32 w-full">
-    <div class="flex flex-col items-center text-center gap-8">
+<section class="min-h-[calc(100vh-4rem)] flex items-center overflow-x-clip">
+  <div class="max-w-6xl mx-auto px-6 md:px-8 lg:px-12 py-24 md:py-32 w-full grid grid-cols-1 md:grid-cols-[3fr_2fr] items-center gap-12 lg:gap-16">
+
+    <!-- 좌측: 텍스트 콘텐츠 -->
+    <div class="flex flex-col items-center md:items-start text-center md:text-left gap-6 order-2 md:order-1">
 
       <!-- 로고 타이포그래피 -->
       <div class="reveal" style="transition-delay: 0ms;">
-        <h1 class="font-gmarket text-[length:var(--text-hero)] leading-tight text-meok select-none">
+        <h1 class="font-gmarket font-bold text-[length:var(--text-hero)] leading-tight text-meok select-none whitespace-nowrap">
           {t('hero.logo', lang)}
         </h1>
       </div>
 
-      <!-- 초인종 버튼 (음파 컨테이너) -->
-      <div class="reveal relative inline-flex items-center justify-center" style="transition-delay: 100ms;">
-        <button
-          class="doorbell-btn relative z-10 w-16 h-16 rounded-full bg-hobak text-hanji flex items-center justify-center shadow-lg hover:bg-hobak-deep hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
-          data-sound-url={bellSoundUrl}
-          aria-label={t('hero.doorbell', lang)}
-          type="button"
-        >
-          <!-- 벨 아이콘 -->
-          <Icon name="ph:bell-fill" class="w-7 h-7" aria-hidden="true" />
-        </button>
-      </div>
-
       <!-- 서브타이틀 -->
-      <div class="reveal" style="transition-delay: 200ms;">
+      <div class="reveal" style="transition-delay: 100ms;">
         <p class="text-[length:var(--text-h2)] text-onggi font-medium max-w-xl text-balance">
           {t('hero.subtitle', lang)}
         </p>
       </div>
 
       <!-- 설명 -->
-      <div class="reveal" style="transition-delay: 300ms;">
+      <div class="reveal" style="transition-delay: 200ms;">
         <p class="text-[length:var(--text-body)] text-onggi max-w-2xl leading-relaxed">
           {t('hero.description', lang)}
         </p>
       </div>
 
       <!-- CTA 버튼 -->
-      <div class="reveal flex flex-wrap items-center justify-center gap-4 mt-2" style="transition-delay: 400ms;">
+      <div class="reveal flex flex-wrap items-center justify-center md:justify-start gap-4 mt-2" style="transition-delay: 300ms;">
         <!-- Primary: 시작하기 -->
         <a
           href="#quickstart"
@@ -71,5 +60,53 @@ const bellSoundUrl = soundUrl('default', 'complete.wav');
       </div>
 
     </div>
+
+    <!-- 우측: 초인종 쇼케이스 -->
+    <div class="reveal flex items-center justify-center order-1 md:order-2" style="transition-delay: 150ms;">
+      <div class="relative w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 flex items-center justify-center">
+
+        <!-- Layer 1: 의성어 배경 워터마크 -->
+        <span
+          class="hero-onomatopoeia absolute inset-0 flex items-center justify-center text-7xl md:text-8xl lg:text-9xl font-bold text-hobak/[0.07] dark:text-hobak/[0.10] select-none pointer-events-none text-center"
+          aria-hidden="true"
+        >
+          {t('hero.onomatopoeia', lang)}
+        </span>
+
+        <!-- Layer 1b: 장식 동심원 (소나 패턴) -->
+        <div class="absolute inset-4 md:inset-6 rounded-full border border-changho/30 pointer-events-none" aria-hidden="true"></div>
+        <div class="absolute inset-10 md:inset-14 rounded-full border border-changho/20 pointer-events-none" aria-hidden="true"></div>
+        <div class="absolute inset-16 md:inset-22 rounded-full border border-changho/10 pointer-events-none" aria-hidden="true"></div>
+
+        <!-- Layer 2: 초인종 버튼 (음파 컨테이너) -->
+        <div class="relative inline-flex items-center justify-center">
+          <button
+            class="doorbell-btn relative z-10 w-20 h-20 md:w-24 md:h-24 rounded-full bg-hobak text-hanji flex items-center justify-center shadow-lg hover:bg-hobak-deep hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+            data-sound-url={bellSoundUrl}
+            aria-label={t('hero.doorbell', lang)}
+            type="button"
+          >
+            <Icon name="ph:bell-fill" class="w-9 h-9 md:w-10 md:h-10" aria-hidden="true" />
+          </button>
+        </div>
+
+        <!-- Layer 3: 알림 미리보기 카드 -->
+        <div
+          class="reveal hero-notification-card absolute -bottom-4 -right-4 md:bottom-2 md:-right-8 lg:-right-12 bg-hanji dark:bg-misaek border border-changho rounded-xl shadow-lg px-4 py-3 pointer-events-none max-w-48 md:max-w-56"
+          style="transition-delay: 500ms;"
+          aria-hidden="true"
+        >
+          <div class="flex items-center gap-2 mb-1">
+            <Icon name="ph:bell-ringing-fill" class="w-4 h-4 text-hobak shrink-0" aria-hidden="true" />
+            <span class="font-gmarket text-xs text-meok truncate">{t('hero.logo', lang)}</span>
+          </div>
+          <p class="text-xs text-onggi leading-snug">
+            {t('hero.notificationPreview', lang)}
+          </p>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 </section>

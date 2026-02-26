@@ -19,7 +19,9 @@
     "subtitle": "코드가 끝나면, 초인종이 울립니다.",
     "description": "Claude Code 알림 플러그인 — 작업 완료·오류·입력 필요 시 소리와 OS 알림으로 알려줍니다.",
     "cta": "시작하기",
-    "listen": "소리 들어보기"
+    "listen": "소리 들어보기",
+    "onomatopoeia": "띵동!",
+    "notificationPreview": "작업이 완료되었습니다!"
   },
   "features": {
     "heading": "어떻게 알려주나요?",

@@ -19,7 +19,9 @@
     "subtitle": "When code is done, the doorbell rings.",
     "description": "Claude Code notification plugin — alerts you with sounds and OS notifications on task completion, errors, and input requests.",
     "cta": "Get Started",
-    "listen": "Listen below"
+    "listen": "Listen below",
+    "onomatopoeia": "dding-dong!",
+    "notificationPreview": "Task complete! Your code is ready."
   },
   "features": {
     "heading": "How does it notify you?",
