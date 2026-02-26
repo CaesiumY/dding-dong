@@ -67,6 +67,9 @@ cd website && pnpm build      # Production build
 - Resolution order: Project (`.dding-dong/packs/`) → User (`~/.config/dding-dong/packs/`) → Built-in (`sounds/`)
 - Rotation: `"random"` = random pick from `files[]`. `"sequential"` or unset = always `files[0]` (no cycling)
 
+### TTS Generation
+- **NEVER generate TTS files in parallel**. Always run `generate-tts.py` sequentially, one event at a time. Parallel GPU inference causes resource conflicts and unpredictable output quality
+
 ### Cooldown
 - Global (not per-event). Single `lastNotifiedAt` timestamp. A `session.start` within 3s of `task.complete` is suppressed
 

@@ -1,8 +1,28 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, openSync, readSync, closeSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync, spawn } from 'node:child_process';
 import { detectPlatform, detectAudioPlayer } from './platform.mjs';
 import { getPacksDir, findProjectRoot, getProjectPacksDir } from './config.mjs';
+
+/**
+ * WAV 파일 헤더에서 재생 시간(ms) 계산
+ * @param {string} filePath
+ * @returns {number} 밀리초 (실패 시 10000)
+ */
+function getWavDurationMs(filePath) {
+  try {
+    const fd = openSync(filePath, 'r');
+    const header = Buffer.alloc(44);
+    readSync(fd, header, 0, 44, 0);
+    closeSync(fd);
+    const byteRate = header.readUInt32LE(28);
+    if (byteRate === 0) return 10000;
+    const fileSize = statSync(filePath).size;
+    return Math.ceil(((fileSize - 44) / byteRate) * 1000);
+  } catch {
+    return 10000;
+  }
+}
 
 /**
  * 사운드 팩 manifest에서 이벤트에 해당하는 파일 경로 반환
@@ -96,13 +116,14 @@ export async function playSound(eventType, config, cwd = null) {
         return;
       }
 
+      const sleepMs = getWavDurationMs(filePath) + 1000;
       const ps = `
 Add-Type -AssemblyName PresentationCore
 $p = New-Object System.Windows.Media.MediaPlayer
 $p.Open([Uri]::new('${winPath.replace(/\\/g, '\\\\')}'))
 $p.Volume = ${volume}
 $p.Play()
-Start-Sleep -Milliseconds 2000
+Start-Sleep -Milliseconds ${sleepMs}
 $p.Close()
 `.trim();
 
@@ -151,13 +172,14 @@ export function playFile(filePath, volume = 1.0) {
         }).toString().trim();
       } catch { return; }
 
+      const sleepMs = getWavDurationMs(filePath) + 1000;
       const ps = `
 Add-Type -AssemblyName PresentationCore
 $p = New-Object System.Windows.Media.MediaPlayer
 $p.Open([Uri]::new('${winPath.replace(/\\/g, '\\\\')}'))
 $p.Volume = ${volume}
 $p.Play()
-Start-Sleep -Milliseconds 3000
+Start-Sleep -Milliseconds ${sleepMs}
 $p.Close()
 `.trim();
 

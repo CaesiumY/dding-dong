@@ -42,7 +42,6 @@ except ImportError as e:
 # ─── 상수 ───────────────────────────────────────────
 TARGET_SR = 44100       # dding-dong WAV 표준 샘플레이트
 TARGET_BITS = 16        # 16-bit PCM
-MAX_DURATION_S = 3.0    # 최대 길이 (초)
 MIN_DURATION_S = 0.3    # 최소 길이 (초)
 FADE_MS = 30            # 페이드 인/아웃 (ms)
 SILENCE_THRESHOLD = 0.003  # 무음 판정 진폭 기준
@@ -107,14 +106,11 @@ def apply_fade(audio, sr, fade_ms=FADE_MS):
     return audio
 
 
-def enforce_duration(audio, sr, min_s=MIN_DURATION_S, max_s=MAX_DURATION_S):
-    """최소/최대 길이 제한"""
+def enforce_duration(audio, sr, min_s=MIN_DURATION_S):
+    """최소 길이 보장 (최대 길이 제한 없음)"""
     min_samples = int(sr * min_s)
-    max_samples = int(sr * max_s)
 
-    if len(audio) > max_samples:
-        audio = audio[:max_samples]
-    elif len(audio) < min_samples:
+    if len(audio) < min_samples:
         # 짧으면 무음 패딩
         pad = np.zeros(min_samples - len(audio), dtype=np.float32)
         audio = np.concatenate([audio, pad])
