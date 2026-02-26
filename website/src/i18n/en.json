@@ -22,7 +22,9 @@
     "cta": "Get Started",
     "listen": "Listen below",
     "onomatopoeia": "dding-dong!",
-    "notificationPreview": "Task complete! Your code is ready."
+    "notificationPreview": "Task complete! Your code is ready.",
+    "ttsLabel": "AI Voice Clone",
+    "ttsQuote": "\"Task complete.\""
   },
   "features": {
     "heading": "How does it notify you?",

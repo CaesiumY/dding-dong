@@ -104,6 +104,11 @@ document.addEventListener('click', async (e) => {
   const soundUrlAttr = btn.dataset.soundUrl;
   if (!soundUrlAttr) return;
 
+  // 히어로 토스트가 재생 중이면 복원
+  document.querySelectorAll('.hero-toast.is-playing').forEach((el) => {
+    resetHeroToast(el as HTMLElement);
+  });
+
   // 같은 버튼 클릭 시 토글
   if (currentBtn === btn && currentAudio && !currentAudio.paused) {
     await fadeOutCurrent();
@@ -154,39 +159,69 @@ document.addEventListener('click', async (e) => {
   }, { once: true });
 });
 
-// 초인종 버튼 (Hero 섹션)
+// 히어로 토스트 — idle 복원
+function resetHeroToast(toast: HTMLElement) {
+  toast.classList.remove('is-playing');
+  toast.dataset.active = '';
+  const playIcon = toast.querySelector('.hero-toast-play') as HTMLElement;
+  const waveBars = toast.querySelector('.hero-toast-waves') as HTMLElement;
+  if (playIcon) playIcon.style.display = '';
+  if (waveBars) waveBars.style.display = 'none';
+}
+
+// 히어로 토스트 클릭 핸들러
 document.addEventListener('click', (e) => {
-  const doorbell = (e.target as HTMLElement).closest('.doorbell-btn') as HTMLElement;
-  if (!doorbell) return;
+  const toast = (e.target as HTMLElement).closest('.hero-toast') as HTMLElement;
+  if (!toast) return;
 
-  const soundUrlAttr = doorbell.dataset.soundUrl;
-  if (!soundUrlAttr) return;
+  const url = toast.dataset.soundUrl;
+  if (!url) return;
 
-  // 흔들림 애니메이션
-  doorbell.classList.add('doorbell-wobble');
-  doorbell.addEventListener('animationend', () => {
-    doorbell.classList.remove('doorbell-wobble');
-  }, { once: true });
+  const accentColor = toast.dataset.accentColor || '';
+  const playIcon = toast.querySelector('.hero-toast-play') as HTMLElement;
+  const waveBars = toast.querySelector('.hero-toast-waves') as HTMLElement;
 
-  // 음파 방사 동심원
-  const container = doorbell.parentElement;
-  if (container) {
-    for (let i = 0; i < 3; i++) {
-      const wave = document.createElement('div');
-      wave.className = 'sound-wave absolute inset-0 rounded-full border-2 border-hobak pointer-events-none';
-      wave.style.animationDelay = `${i * 0.15}s`;
-      container.style.position = 'relative';
-      container.appendChild(wave);
-      wave.addEventListener('animationend', () => wave.remove(), { once: true });
-    }
+  // 갤러리 재생 버튼이 재생 중이면 복원
+  if (currentBtn) {
+    setState(currentBtn, 'idle');
+    currentBtn = null;
   }
 
-  // 사운드 재생
-  if (currentAudio && !currentAudio.paused) {
+  // 다른 토스트가 재생 중이면 복원
+  document.querySelectorAll('.hero-toast.is-playing').forEach((el) => {
+    resetHeroToast(el as HTMLElement);
+  });
+
+  // 같은 토스트 재클릭 시 토글 (정지)
+  if (currentAudio && !currentAudio.paused && toast.dataset.active === 'true') {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    resetHeroToast(toast);
+    currentAudio = null;
+    return;
+  }
+
+  // 이전 재생 정지
+  if (currentAudio) {
     currentAudio.pause();
     currentAudio.currentTime = 0;
   }
-  const audio = new Audio(soundUrlAttr);
-  audio.play().catch(() => {});
+
+  // 재생 상태 적용
+  if (accentColor) toast.style.setProperty('--toast-accent', accentColor);
+  toast.classList.add('is-playing');
+  toast.dataset.active = 'true';
+  if (playIcon) playIcon.style.display = 'none';
+  if (waveBars) waveBars.style.display = 'flex';
+
+  // 사운드 재생
+  const audio = new Audio(url);
+  audio.play().catch(() => resetHeroToast(toast));
   currentAudio = audio;
+
+  // 재생 완료 → idle 복원
+  audio.addEventListener('ended', () => {
+    resetHeroToast(toast);
+    currentAudio = null;
+  }, { once: true });
 });

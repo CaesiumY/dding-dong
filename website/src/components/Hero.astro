@@ -8,7 +8,8 @@ interface Props {
 
 const { lang } = Astro.props;
 
-const bellSoundUrl = soundUrl('default', 'complete.wav');
+const completeSoundUrl = soundUrl('default', 'complete.wav');
+const ttsSoundUrl = soundUrl('metro-voice', 'complete.wav');
 ---
 
 <section class="min-h-[calc(100vh-4rem)] flex items-center overflow-x-clip">
@@ -61,51 +62,65 @@ const bellSoundUrl = soundUrl('default', 'complete.wav');
 
     </div>
 
-    <!-- 우측: 초인종 쇼케이스 -->
-    <div class="reveal flex items-center justify-center order-1 md:order-2" style="transition-delay: 150ms;">
-      <div class="relative w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 flex items-center justify-center">
+    <!-- 우측: 토스트 알림 쇼케이스 -->
+    <div class="flex flex-col items-center md:items-end gap-3 order-1 md:order-2 w-full md:w-auto">
 
-        <!-- Layer 1: 의성어 배경 워터마크 -->
-        <span
-          class="hero-onomatopoeia absolute inset-0 flex items-center justify-center text-7xl md:text-8xl lg:text-9xl font-bold text-hobak/7 dark:text-hobak/10 select-none pointer-events-none text-center"
-          aria-hidden="true"
-        >
-          {t('hero.onomatopoeia', lang)}
-        </span>
-
-        <!-- Layer 1b: 장식 동심원 (소나 패턴) -->
-        <div class="absolute inset-4 md:inset-6 rounded-full border border-changho/30 pointer-events-none" aria-hidden="true"></div>
-        <div class="absolute inset-10 md:inset-14 rounded-full border border-changho/20 pointer-events-none" aria-hidden="true"></div>
-        <div class="absolute inset-16 md:inset-22 rounded-full border border-changho/10 pointer-events-none" aria-hidden="true"></div>
-
-        <!-- Layer 2: 초인종 버튼 (음파 컨테이너) -->
-        <div class="relative inline-flex items-center justify-center">
-          <button
-            class="doorbell-btn relative z-10 w-20 h-20 md:w-24 md:h-24 rounded-full bg-hobak text-hanji flex items-center justify-center shadow-lg hover:bg-hobak-deep hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
-            data-sound-url={bellSoundUrl}
-            aria-label={t('hero.doorbell', lang)}
-            type="button"
-          >
-            <Icon name="ph:bell-fill" class="w-9 h-9 md:w-10 md:h-10" aria-hidden="true" />
-          </button>
-        </div>
-
-        <!-- Layer 3: 알림 미리보기 카드 -->
-        <div
-          class="reveal hero-notification-card absolute -bottom-4 -right-4 md:bottom-2 md:-right-8 lg:-right-12 bg-hanji dark:bg-misaek border border-changho rounded-xl shadow-lg px-4 py-3 pointer-events-none max-w-48 md:max-w-56"
-          style="transition-delay: 500ms;"
-          aria-hidden="true"
-        >
-          <div class="flex items-center gap-2 mb-1">
-            <Icon name="ph:bell-ringing-fill" class="w-4 h-4 text-hobak shrink-0" aria-hidden="true" />
-            <span class="font-gmarket text-xs text-meok truncate">{t('hero.logo', lang)}</span>
+      <!-- Toast 1: 사운드 알림 -->
+      <button
+        class="hero-toast reveal group w-full max-w-80 text-left bg-hanji dark:bg-misaek border border-changho rounded-xl shadow-lg px-5 py-4"
+        data-sound-url={completeSoundUrl}
+        data-accent-color="var(--color-hobak)"
+        style="transition-delay: 400ms;"
+        type="button"
+      >
+        <div class="flex items-center justify-between mb-1.5">
+          <div class="flex items-center gap-2">
+            <Icon name="ph:bell-ringing-fill" class="w-5 h-5 text-hobak shrink-0" aria-hidden="true" />
+            <span class="font-gmarket text-sm text-meok">{t('hero.logo', lang)}</span>
           </div>
-          <p class="text-xs text-onggi leading-snug">
-            {t('hero.notificationPreview', lang)}
-          </p>
+          <span class="hero-toast-icon flex items-center justify-center w-6 h-6">
+            <span class="hero-toast-play">
+              <Icon name="ph:play-circle-fill" class="w-6 h-6 text-onggi/50 group-hover:text-hobak transition-colors" aria-hidden="true" />
+            </span>
+            <span class="hero-toast-waves items-center gap-0.5 h-4" style="display:none;">
+              <span class="wave-bar w-0.5 bg-current rounded-full" style="animation-delay:0s;height:4px;"></span>
+              <span class="wave-bar w-0.5 bg-current rounded-full" style="animation-delay:0.15s;height:4px;"></span>
+              <span class="wave-bar w-0.5 bg-current rounded-full" style="animation-delay:0.3s;height:4px;"></span>
+              <span class="wave-bar w-0.5 bg-current rounded-full" style="animation-delay:0.45s;height:4px;"></span>
+            </span>
+          </span>
         </div>
+        <p class="text-sm text-onggi leading-snug">{t('hero.notificationPreview', lang)}</p>
+      </button>
 
-      </div>
+      <!-- Toast 2: TTS 보이스 -->
+      <button
+        class="hero-toast reveal group w-full max-w-80 text-left bg-hanji dark:bg-misaek border border-changho rounded-xl shadow-lg px-5 py-4"
+        data-sound-url={ttsSoundUrl}
+        data-accent-color="#8B5CF6"
+        style="transition-delay: 550ms;"
+        type="button"
+      >
+        <div class="flex items-center justify-between mb-1.5">
+          <div class="flex items-center gap-2">
+            <Icon name="ph:microphone-fill" class="w-5 h-5 text-[#8B5CF6] shrink-0" aria-hidden="true" />
+            <span class="font-gmarket text-sm text-meok">{t('hero.ttsLabel', lang)}</span>
+          </div>
+          <span class="hero-toast-icon flex items-center justify-center w-6 h-6">
+            <span class="hero-toast-play">
+              <Icon name="ph:play-circle-fill" class="w-6 h-6 text-onggi/50 group-hover:text-[#8B5CF6] transition-colors" aria-hidden="true" />
+            </span>
+            <span class="hero-toast-waves items-center gap-0.5 h-4" style="display:none;">
+              <span class="wave-bar w-0.5 bg-current rounded-full" style="animation-delay:0s;height:4px;"></span>
+              <span class="wave-bar w-0.5 bg-current rounded-full" style="animation-delay:0.15s;height:4px;"></span>
+              <span class="wave-bar w-0.5 bg-current rounded-full" style="animation-delay:0.3s;height:4px;"></span>
+              <span class="wave-bar w-0.5 bg-current rounded-full" style="animation-delay:0.45s;height:4px;"></span>
+            </span>
+          </span>
+        </div>
+        <p class="text-sm text-onggi leading-snug">{t('hero.ttsQuote', lang)}</p>
+      </button>
+
     </div>
 
   </div>

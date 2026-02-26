@@ -149,26 +149,21 @@ pre {
   animation: wave-bar 0.6s ease-in-out infinite;
 }
 
-/* 히어로 의성어 배경 떠다니는 효과 */
-@keyframes hero-float {
-  0%, 100% { transform: translateY(0) rotate(-6deg); }
-  50% { transform: translateY(-8px) rotate(-6deg); }
+/* 히어로 토스트 카드 인터랙션 */
+.hero-toast {
+  cursor: pointer;
+  transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.2s ease;
 }
 
-.hero-onomatopoeia {
-  transform: rotate(-6deg);
-  animation: hero-float 6s ease-in-out infinite;
+/* 재생 중 토스트 — 액센트 보더 + 글로우 */
+.hero-toast.is-playing {
+  border-color: var(--toast-accent, var(--color-hobak));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--toast-accent, var(--color-hobak)) 20%, transparent);
 }
 
-/* 히어로 알림 카드 떠다니는 효과 */
-@keyframes hero-card-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
-.hero-notification-card {
-  animation: hero-card-float 5s ease-in-out infinite;
-  animation-delay: 1s;
+/* 재생 중 웨이브바 색상 */
+.hero-toast.is-playing .hero-toast-waves {
+  color: var(--toast-accent, var(--color-hobak));
 }
 
 /* font-display: swap 전역 */
