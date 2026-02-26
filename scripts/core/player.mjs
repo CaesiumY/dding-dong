@@ -4,6 +4,8 @@ import { execFileSync, spawn } from 'node:child_process';
 import { detectPlatform, detectAudioPlayer } from './platform.mjs';
 import { getPacksDir, findProjectRoot, getProjectPacksDir } from './config.mjs';
 
+const MAX_PLAY_MS = 30000; // 알림 사운드 최대 재생 시간 30초 (좀비 프로세스 방지)
+
 /**
  * WAV 파일 헤더에서 재생 시간(ms) 계산
  * @param {string} filePath
@@ -116,7 +118,7 @@ export async function playSound(eventType, config, cwd = null) {
         return;
       }
 
-      const sleepMs = getWavDurationMs(filePath) + 1000;
+      const sleepMs = Math.min(getWavDurationMs(filePath), MAX_PLAY_MS) + 1000;
       const ps = `
 Add-Type -AssemblyName PresentationCore
 $p = New-Object System.Windows.Media.MediaPlayer
@@ -172,7 +174,7 @@ export function playFile(filePath, volume = 1.0) {
         }).toString().trim();
       } catch { return; }
 
-      const sleepMs = getWavDurationMs(filePath) + 1000;
+      const sleepMs = Math.min(getWavDurationMs(filePath), MAX_PLAY_MS) + 1000;
       const ps = `
 Add-Type -AssemblyName PresentationCore
 $p = New-Object System.Windows.Media.MediaPlayer

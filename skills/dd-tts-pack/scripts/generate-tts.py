@@ -48,6 +48,11 @@ SILENCE_THRESHOLD = 0.003  # 무음 판정 진폭 기준
 TAIL_PAD_MS = 150       # 뒤쪽 무음 트림 후 여유 (ms)
 END_PAD_MS = 100        # 최종 출력 끝에 추가할 무음 (ms, 재생기 호환성)
 
+# 오디오 환각 방지: 모델 레벨 생성 길이 제한
+TOKENS_PER_SEC = 12     # Qwen3-TTS 12Hz 토크나이저
+MAX_AUDIO_SEC = 30      # 알림 사운드 최대 길이 (초)
+MAX_NEW_TOKENS = TOKENS_PER_SEC * MAX_AUDIO_SEC  # 360 tokens = 30초
+
 # TTS 텍스트 종결 부호 (한중일 + 서양)
 SENTENCE_ENDINGS = '.!?。！？…'
 
@@ -196,6 +201,7 @@ def generate_clone(model, text, language, ref_audio, ref_text, voice_clone_promp
     kwargs = {
         'text': text,
         'language': language,
+        'max_new_tokens': MAX_NEW_TOKENS,
     }
 
     if voice_clone_prompt is not None:
@@ -216,6 +222,7 @@ def generate_custom(model, text, language, speaker, instruct=None):
         'text': text,
         'language': language,
         'speaker': speaker,
+        'max_new_tokens': MAX_NEW_TOKENS,
     }
     if instruct:
         kwargs['instruct'] = instruct
