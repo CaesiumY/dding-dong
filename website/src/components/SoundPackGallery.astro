@@ -148,7 +148,7 @@ const packs = [
     if (!tab) return;
 
     const packId = tab.dataset.pack;
-    const packColor = tab.dataset.color ?? '';
+    const _packColor = tab.dataset.color ?? '';
 
     // Update tab active states
     document.querySelectorAll<HTMLElement>('.pack-tab').forEach((t) => {

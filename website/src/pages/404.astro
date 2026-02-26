@@ -31,6 +31,7 @@ import Layout from '../layouts/Layout.astro';
 
 <script is:inline>
   (function() {
+    // eslint-disable-next-line no-var -- intentional: is:inline bypasses module bundling
     var isKo = window.location.pathname.indexOf('/ko/') !== -1
       || navigator.language.startsWith('ko');
     if (isKo) {

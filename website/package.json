@@ -6,7 +6,9 @@
     "dev": "node scripts/copy-sounds.mjs && astro dev",
     "build": "node scripts/copy-sounds.mjs && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.3.1",
@@ -16,9 +18,17 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.4",
-    "tailwindcss": "^4.1.4"
+    "eslint": "^10.0.2",
+    "eslint-plugin-astro": "^1.6.0",
+    "globals": "^17.3.0",
+    "tailwindcss": "^4.1.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.1"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "sharp"]
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ]
   }
 }
