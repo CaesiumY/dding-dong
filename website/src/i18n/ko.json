@@ -106,6 +106,30 @@
       }
     }
   },
+  "ttsVoice": {
+    "heading": "내 목소리로 알림 받기",
+    "description": "Qwen3-TTS로 음성 알림을 생성하세요. 내 목소리를 클로닝해서 나만의 알림을 만들 수 있습니다.",
+    "cards": [
+      {
+        "icon": "ph:microphone-duotone",
+        "title": "보이스 클로닝",
+        "description": "짧은 샘플을 녹음하면 내 목소리로 클로닝. 모든 알림이 내 목소리로 울립니다."
+      },
+      {
+        "icon": "ph:waveform-duotone",
+        "title": "5가지 이벤트 음성",
+        "description": "작업 완료, 오류, 입력 필요, 세션 시작/종료 — 이벤트마다 고유한 음성 대사."
+      },
+      {
+        "icon": "ph:terminal-duotone",
+        "title": "명령어 하나로 설정",
+        "description": "/dd-tts-pack 실행 후 안내를 따라가세요. Qwen3-TTS 모델은 첫 사용 시 자동 다운로드."
+      }
+    ],
+    "ctaPrimary": "시작하기",
+    "ctaSecondary": "/dd-tts-pack",
+    "ctaSecondaryLabel": "명령어 복사"
+  },
   "quickstart": {
     "heading": "30초면 됩니다",
     "description": "세 단계면 알림이 울립니다.",

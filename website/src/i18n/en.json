@@ -106,6 +106,30 @@
       }
     }
   },
+  "ttsVoice": {
+    "heading": "Make it speak in your voice",
+    "description": "Generate TTS voice notifications with Qwen3-TTS. Clone your own voice for a truly personal touch.",
+    "cards": [
+      {
+        "icon": "ph:microphone-duotone",
+        "title": "Voice Cloning",
+        "description": "Record a short sample and clone your voice. Every notification sounds like you."
+      },
+      {
+        "icon": "ph:waveform-duotone",
+        "title": "5 Event Voices",
+        "description": "Unique voice lines for each event — task complete, error, input required, session start, and end."
+      },
+      {
+        "icon": "ph:terminal-duotone",
+        "title": "One Command Setup",
+        "description": "Run /dd-tts-pack and follow the prompts. Auto-downloads Qwen3-TTS model on first use."
+      }
+    ],
+    "ctaPrimary": "Get Started",
+    "ctaSecondary": "/dd-tts-pack",
+    "ctaSecondaryLabel": "Copy command"
+  },
   "quickstart": {
     "heading": "30 seconds to start",
     "description": "Three simple steps to get notifications working.",
