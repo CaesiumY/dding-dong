@@ -25,6 +25,11 @@ node scripts/pack-wizard.mjs discover
 node scripts/sync-version.mjs sync
 node scripts/sync-version.mjs verify
 node scripts/sync-version.mjs bump patch   # or minor, major
+
+# Website (pnpm required — do NOT use npm/yarn)
+cd website && pnpm install    # Install dependencies
+cd website && pnpm dev        # Dev server (auto-copies sound files)
+cd website && pnpm build      # Production build
 ```
 
 ## Design Rules
@@ -67,6 +72,14 @@ node scripts/sync-version.mjs bump patch   # or minor, major
 
 ### Events
 - `task.error`: defined in config/messages but has no triggering hook. Only testable via CLI test mode. Reserved for future Claude Code error hook support
+
+### Website
+- **pnpm only**: `website/` uses pnpm. Do NOT use `npm install` or `yarn` — breaks `pnpm-lock.yaml`
+- **Tailwind v4 — no config file**: `tailwind.config.js` does not exist. Theme is defined in `src/styles/global.css` via `@theme` block
+- **Sound copy dependency**: `pnpm dev`/`build` runs `copy-sounds.mjs` which requires `../sounds/` to exist. `public/sounds/` is gitignored and ephemeral
+- **Base URL `/dding-dong/`**: For GitHub Pages. All internal links must use `localePath()` or `import.meta.env.BASE_URL`. Missing base URL → works locally, 404 on deploy
+- **Korean color names**: Theme variables in `global.css` use Korean names (hanji, meok, onggi, etc.). This is intentional — do not rename to English
+- **i18n manual routing**: Pages at `pages/ko/index.astro` must be created manually. Astro i18n does not auto-generate locale pages
 
 ## SKILL.md Conventions
 
