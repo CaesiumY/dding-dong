@@ -18,6 +18,7 @@ const eventKeys = ['task.complete', 'task.error', 'input.required', 'session.sta
 // tData()로 객체를 통째로 가져와서 직접 인덱싱
 const eventLabels = tData<Record<string, string>>('gallery.events', lang) ?? {};
 const eventOnomatopoeia = tData<Record<string, string>>('gallery.onomatopoeia', lang) ?? {};
+const packNames = tData<Record<string, { displayName: string; description: string }>>('gallery.packs', lang) ?? {};
 
 const packs = [
   { manifest: defaultManifest, color: '#334155', id: 'default' },
@@ -51,7 +52,7 @@ const packs = [
           aria-selected={i === 0 ? 'true' : 'false'}
           type="button"
         >
-          {pack.manifest.displayName}
+          {packNames[pack.id]?.displayName ?? pack.manifest.displayName}
         </button>
       ))}
     </div>
@@ -73,9 +74,9 @@ const packs = [
                 class="w-3 h-3 rounded-full shrink-0"
                 style={`background-color: ${pack.color};`}
               ></span>
-              <span class="font-semibold text-meok">{pack.manifest.displayName}</span>
+              <span class="font-semibold text-meok">{packNames[pack.id]?.displayName ?? pack.manifest.displayName}</span>
             </div>
-            <p class="text-sm text-onggi pl-5">{pack.manifest.description}</p>
+            <p class="text-sm text-onggi pl-5">{packNames[pack.id]?.description ?? pack.manifest.description}</p>
           </div>
           <div class="border-t border-changho/50 mx-5 my-3"></div>
           <!-- Event rows -->
@@ -113,9 +114,9 @@ const packs = [
                 class="w-3 h-3 rounded-full shrink-0"
                 style={`background-color: ${pack.color};`}
               ></span>
-              <span class="font-semibold text-meok">{pack.manifest.displayName}</span>
+              <span class="font-semibold text-meok">{packNames[pack.id]?.displayName ?? pack.manifest.displayName}</span>
             </div>
-            <p class="text-sm text-onggi pl-5">{pack.manifest.description}</p>
+            <p class="text-sm text-onggi pl-5">{packNames[pack.id]?.description ?? pack.manifest.description}</p>
           </div>
           <div class="border-t border-changho/50 mx-5 my-3"></div>
           <!-- Event rows -->

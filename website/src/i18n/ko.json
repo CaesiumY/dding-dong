@@ -15,6 +15,7 @@
   "hero": {
     "title": "dding-dong",
     "logo": "띵동",
+    "doorbell": "초인종 누르기",
     "subtitle": "코드가 끝나면, 초인종이 울립니다.",
     "description": "Claude Code 알림 플러그인 — 작업 완료·오류·입력 필요 시 소리와 OS 알림으로 알려줍니다.",
     "cta": "시작하기",
@@ -71,6 +72,20 @@
       "input.required": "띵-",
       "session.start": "뚜둣",
       "session.end": "뚜뚜-"
+    },
+    "packs": {
+      "default": {
+        "displayName": "기본 효과음",
+        "description": "기본 알림 효과음 팩"
+      },
+      "retro": {
+        "displayName": "레트로 게임 (8-bit)",
+        "description": "칩튠 스타일의 게임기 효과음 팩"
+      },
+      "musical": {
+        "displayName": "뮤지컬 코드 (Musical)",
+        "description": "피아노 코드 기반의 화성적 알림음 팩"
+      }
     }
   },
   "quickstart": {

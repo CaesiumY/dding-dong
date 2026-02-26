@@ -14,7 +14,8 @@
   },
   "hero": {
     "title": "dding-dong",
-    "logo": "띵동",
+    "logo": "dding-dong",
+    "doorbell": "Ring the doorbell",
     "subtitle": "When code is done, the doorbell rings.",
     "description": "Claude Code notification plugin — alerts you with sounds and OS notifications on task completion, errors, and input requests.",
     "cta": "Get Started",
@@ -71,6 +72,20 @@
       "input.required": "ting-",
       "session.start": "tu-dut",
       "session.end": "tu-tu-"
+    },
+    "packs": {
+      "default": {
+        "displayName": "Default Effects",
+        "description": "Default notification sound pack"
+      },
+      "retro": {
+        "displayName": "Retro Game (8-bit)",
+        "description": "Chiptune-style game sound effects pack"
+      },
+      "musical": {
+        "displayName": "Musical Chord",
+        "description": "Piano chord-based harmonic notification pack"
+      }
     }
   },
   "quickstart": {

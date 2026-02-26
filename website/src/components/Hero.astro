@@ -17,7 +17,7 @@ const bellSoundUrl = soundUrl('default', 'complete.wav');
       <!-- 로고 타이포그래피 -->
       <div class="reveal" style="transition-delay: 0ms;">
         <h1 class="font-gmarket text-[length:var(--text-hero)] leading-tight text-meok select-none">
-          띵동
+          {t('hero.logo', lang)}
         </h1>
       </div>
 
@@ -26,7 +26,7 @@ const bellSoundUrl = soundUrl('default', 'complete.wav');
         <button
           class="doorbell-btn relative z-10 w-16 h-16 rounded-full bg-hobak text-hanji flex items-center justify-center shadow-lg hover:bg-hobak-deep hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
           data-sound-url={bellSoundUrl}
-          aria-label={lang === 'ko' ? '초인종 누르기' : 'Ring the doorbell'}
+          aria-label={t('hero.doorbell', lang)}
           type="button"
         >
           <!-- 벨 아이콘 -->
@@ -45,7 +45,7 @@ const bellSoundUrl = soundUrl('default', 'complete.wav');
 
       <!-- 서브타이틀 -->
       <div class="reveal" style="transition-delay: 200ms;">
-        <p class="text-[length:var(--text-h2)] text-onggi font-medium max-w-xl">
+        <p class="text-[length:var(--text-h2)] text-onggi font-medium max-w-xl text-balance">
           {t('hero.subtitle', lang)}
         </p>
       </div>
