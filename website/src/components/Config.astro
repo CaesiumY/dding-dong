@@ -83,13 +83,13 @@ const configExample = `{
         <CopyButton code={configExample} lang={lang} />
 
         <!-- 환경변수 목록 -->
-        <ul class="space-y-2">
+        <ul class="space-y-2.5">
           {envVars.map((envVar) => (
-            <li class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
-              <code class="font-code text-sm bg-hanji dark:bg-meok/10 px-2 py-0.5 rounded text-meok shrink-0">
+            <li class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 bg-hanji rounded-lg px-3 py-2.5 border border-changho">
+              <code class="font-code text-sm bg-changho/50 px-2 py-0.5 rounded text-meok shrink-0 w-fit font-medium">
                 {envVar.name}
               </code>
-              <span class="text-onggi text-sm">{envVar.description}</span>
+              <span class="text-meok/70 text-sm leading-relaxed">{envVar.description}</span>
             </li>
           ))}
         </ul>
