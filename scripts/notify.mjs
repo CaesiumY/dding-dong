@@ -81,7 +81,7 @@ if (process.argv[2] === 'test') {
   console.log('dding-dong 테스트 모드 시작...');
   for (const ev of events) {
     console.log(`  테스트: ${ev}`);
-    await notify(ev);
+    await notify(ev, { cwd: process.cwd() });
     await new Promise(r => setTimeout(r, 1500));
   }
   console.log('테스트 완료.');
@@ -95,7 +95,7 @@ if (process.argv[2] === 'test-sound') {
   console.log(`dding-dong 사운드 팩 미리듣기: ${packName}`);
   for (const ev of soundEvents) {
     console.log(`  재생: ${ev}`);
-    await notify(ev, { message: `${packName} - ${ev}` });
+    await notify(ev, { message: `${packName} - ${ev}`, cwd: process.cwd() });
     await new Promise(r => setTimeout(r, 1500));
   }
   console.log('미리듣기 완료.');

@@ -1,36 +1,87 @@
 ---
 name: dd-test
-description: "Test dding-dong notifications. Runs all event types in sequence, or test a specific event. 알림 테스트. Use when the user says '알림 테스트', 'test notification', 'test sound', '소리 테스트'."
-allowed-tools: [Bash, Read]
-disable-model-invocation: true
+description: "Test dding-dong notifications interactively. Play each event one by one, replay or skip. 알림 인터랙티브 테스트. Use when the user says '알림 테스트', 'test notification', 'test sound', '소리 테스트'."
+allowed-tools: [Bash, Read, AskUserQuestion]
 ---
 
-# dding-dong 알림 테스트
+# dding-dong 인터랙티브 알림 테스트
 
-## 사용법
+이벤트별로 하나씩 재생하고, 사용자가 다시 듣기/다음/건너뛰기를 선택할 수 있는 인터랙티브 테스트.
 
-- 인자 없이: 모든 이벤트를 순서대로 테스트
-- 특정 이벤트: `${ARGUMENTS}`로 지정 (예: task.complete, input.required)
+## 1단계: 팩 정보 확인
 
-## 실행
+현재 활성 사운드 팩을 확인합니다:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/notify.mjs" test ${ARGUMENTS}
+node "${CLAUDE_PLUGIN_ROOT}/scripts/pack-wizard.mjs" discover --cwd "${PROJECT_DIR}"
 ```
 
-## 결과 안내
+출력에서 `[active]`로 표시된 팩 이름과 경로를 파악합니다.
 
-exit code에 따라 결과를 안내합니다:
+그리고 활성 팩이 TTS 팩인지 확인합니다:
 
-**성공 (exit 0):**
-각 테스트 결과를 한국어로 안내합니다:
-- "🔔 [이벤트] 테스트 중..."
-- "✅ 사운드 재생 성공" 또는 "❌ 사운드 재생 실패"
-- "✅ OS 알림 전송 성공" 또는 "❌ OS 알림 전송 실패"
+```bash
+# 활성 팩 경로에 .tts-config.json이 있으면 TTS 팩
+ls "${PROJECT_DIR}/.dding-dong/packs/"*"/.tts-config.json" 2>/dev/null || echo "NOT_TTS"
+```
 
-**알 수 없는 이벤트 (exit 1):**
-- "알 수 없는 이벤트입니다. 사용 가능: task.complete, task.error, input.required, session.start, session.end"
+TTS 팩 여부를 기억해두세요 (이후 "재생성" 선택지 제공 여부에 사용).
 
-**알림 미재생 (exit 0이나 소리/알림 없음):**
+## 2단계: 이벤트별 인터랙티브 루프
+
+테스트할 이벤트 목록:
+- 인자가 있으면 (`${ARGUMENTS}`): 해당 이벤트만 테스트
+- 인자가 없으면: `task.complete`, `task.error`, `input.required`, `session.start`, `session.end` 순서대로
+
+**각 이벤트마다 다음을 반복합니다:**
+
+### 2-1. 이벤트 재생
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/scripts/notify.mjs" test <이벤트명>
+```
+
+재생 후 사용자에게 결과를 안내합니다:
+- "🔔 **<이벤트명>** 재생 완료"
+
+### 2-2. 사용자 선택 (AskUserQuestion)
+
+AskUserQuestion으로 다음 선택지를 제공합니다:
+
+**이벤트가 여러 개인 경우:**
+- 🔄 다시 듣기 — 같은 이벤트를 다시 재생
+- ⏭️ 다음 — 다음 이벤트로 이동
+- ⏹️ 건너뛰기 — 나머지 이벤트를 건너뛰고 종료
+
+**이벤트가 1개뿐인 경우:**
+- 🔄 다시 듣기 — 같은 이벤트를 다시 재생
+- ✅ 완료 — 테스트 종료
+
+**TTS 팩이 활성화된 경우 추가 선택지:**
+- 🔁 재생성 — TTS 음성을 다시 생성하고 싶을 때
+
+### 2-3. 선택에 따른 처리
+
+- **다시 듣기**: 2-1로 돌아가 같은 이벤트를 다시 재생
+- **다음/완료**: 다음 이벤트로 진행 (또는 종료)
+- **건너뛰기**: 루프를 즉시 종료하고 3단계로 이동
+- **재생성**: "`/dding-dong:dd-tts-pack`으로 TTS 팩을 재생성할 수 있습니다." 안내 후 테스트 종료
+
+## 3단계: 완료 안내
+
+모든 이벤트 테스트가 끝나면 다음을 안내합니다:
+
+```
+✅ 알림 테스트 완료!
+
+관련 명령어:
+  /dding-dong:dd-sounds   — 사운드 팩 변경
+  /dding-dong:dd-config   — 알림 설정 변경
+  /dding-dong:dd-doctor   — 알림 문제 진단
+```
+
+## 결과 안내 참고
+
+**소리/알림이 재생되지 않는 경우:**
 - 설정에서 비활성화되어 있을 수 있습니다. `/dding-dong:dd-config show`로 확인하세요.
 - 사운드 플레이어/알림 도구가 설치되지 않았을 수 있습니다. `/dding-dong:dd-doctor`로 진단하세요.
