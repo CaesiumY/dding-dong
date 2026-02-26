@@ -42,7 +42,7 @@ const packs = [
         <button
           class={`pack-tab flex-1 py-2 px-3 rounded-full text-sm font-medium transition-all duration-200 ${
             i === 0
-              ? 'text-hanji'
+              ? 'text-white'
               : 'bg-changho/60 text-onggi'
           }`}
           style={i === 0 ? `background-color: ${pack.color};` : ''}
@@ -154,7 +154,7 @@ const packs = [
     document.querySelectorAll<HTMLElement>('.pack-tab').forEach((t) => {
       const isActive = t.dataset.pack === packId;
       t.style.backgroundColor = isActive ? (t.dataset.color ?? '') : '';
-      t.classList.toggle('text-hanji', isActive);
+      t.classList.toggle('text-white', isActive);
       t.classList.toggle('bg-changho/60', !isActive);
       t.classList.toggle('text-onggi', !isActive);
       t.setAttribute('aria-selected', isActive ? 'true' : 'false');
