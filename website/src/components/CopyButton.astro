@@ -11,7 +11,7 @@ const { code, lang = 'en', class: className = '' } = Astro.props;
 ---
 
 <div class:list={['copy-wrapper relative group', className]}>
-  <pre class="bg-meok/5 dark:bg-hanji/5 rounded-xl p-4 pr-12 overflow-x-auto text-sm font-code"><code set:text={code} /></pre>
+  <pre class="bg-meok/5 dark:bg-meok/10 rounded-xl p-4 pr-12 overflow-x-auto text-sm font-code"><code set:text={code} /></pre>
   <button
     class="copy-btn absolute top-3 right-3 w-8 h-8 rounded-lg bg-changho/80 dark:bg-changho/20 text-onggi hover:text-hobak hover:bg-hobak-soft flex items-center justify-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all duration-200 cursor-pointer"
     data-copy-text={code}
