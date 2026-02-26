@@ -1,0 +1,101 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  lang?: string;
+  ogImage?: string;
+}
+
+const { title, description, lang = 'en', ogImage = '/dding-dong/og-image.svg' } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const altLang = lang === 'ko' ? 'en' : 'ko';
+const altPath = lang === 'ko' ? '/dding-dong/' : '/dding-dong/ko/';
+const altURL = new URL(altPath, Astro.site);
+---
+
+<!doctype html>
+<html lang={lang} class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- SEO -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- hreflang -->
+    <link rel="alternate" hreflang={lang} href={canonicalURL} />
+    <link rel="alternate" hreflang={altLang} href={altURL} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site)} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:locale" content={lang === 'ko' ? 'ko_KR' : 'en_US'} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Gmarket+Sans:wght@700&text=%EB%9D%B5%EB%8F%99&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap"
+    />
+
+    <!-- Global CSS -->
+    <style is:global>
+      @import '../styles/global.css';
+    </style>
+
+    <!-- Dark mode: prevent flash -->
+    <script is:inline>
+      (function() {
+        const stored = localStorage.getItem('theme');
+        if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+
+    <slot name="head" />
+  </head>
+  <body class="bg-hanji text-meok min-h-screen antialiased">
+    <slot />
+
+    <!-- 전역 스크롤 리빌 애니메이션 -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const revealEls = document.querySelectorAll('.reveal');
+        if ('IntersectionObserver' in window) {
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add('visible');
+                  observer.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0.1 }
+          );
+          revealEls.forEach((el) => observer.observe(el));
+        } else {
+          revealEls.forEach((el) => el.classList.add('visible'));
+        }
+      });
+    </script>
+  </body>
+</html>

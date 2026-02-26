@@ -6,3 +6,9 @@ __pycache__/
 .state.json
 .dding-dong/config.local.json
 .dding-dong/packs/
+
+# Website
+website/node_modules/
+website/dist/
+website/.astro/
+website/public/sounds/

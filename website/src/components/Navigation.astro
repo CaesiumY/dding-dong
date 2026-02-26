@@ -1,0 +1,196 @@
+---
+import { t, localePath } from '../i18n/utils';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+
+const navLinks = [
+  { key: 'features', href: '#features' },
+  { key: 'sounds',   href: '#gallery' },
+  { key: 'quickstart', href: '#quickstart' },
+  { key: 'config',   href: '#config' },
+  { key: 'platform', href: '#platform' },
+];
+
+const altLang = lang === 'ko' ? 'en' : 'ko';
+const altHref = lang === 'ko' ? `${import.meta.env.BASE_URL}` : `${import.meta.env.BASE_URL}ko/`;
+const altLabel = lang === 'ko' ? 'EN' : 'KO';
+---
+
+<header class="sticky top-0 z-50 backdrop-blur-md bg-hanji/80 border-b border-changho/60 transition-colors duration-200">
+  <nav class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+
+    <!-- 로고 -->
+    <a
+      href={localePath('/', lang)}
+      class="font-gmarket text-2xl font-bold text-meok hover:text-hobak transition-colors duration-200"
+      aria-label="띵동 홈"
+    >
+      띵동
+    </a>
+
+    <!-- 데스크탑 링크 -->
+    <ul class="hidden md:flex items-center gap-6 text-sm font-medium text-onggi">
+      {navLinks.map(({ key, href }) => (
+        <li>
+          <a
+            href={href}
+            class="hover:text-meok hover:text-hobak transition-colors duration-200 py-1"
+          >
+            {t(`nav.${key}`, lang)}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- 우측: 언어 토글 + 다크모드 + 햄버거 -->
+    <div class="flex items-center gap-3">
+
+      <!-- 언어 토글 -->
+      <a
+        href={altHref}
+        class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-changho text-sm font-medium text-onggi hover:border-hobak hover:text-hobak transition-colors duration-200"
+        aria-label={`Switch to ${altLabel}`}
+      >
+        {altLabel}
+      </a>
+
+      <!-- 다크 모드 토글 -->
+      <button
+        id="theme-toggle"
+        type="button"
+        aria-label="다크 모드 전환"
+        class="hidden md:flex w-8 h-8 items-center justify-center rounded-full text-onggi hover:text-hobak hover:bg-changho/60 transition-colors duration-200"
+      >
+        <!-- 라이트 아이콘 (태양) -->
+        <svg id="icon-light" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <!-- 다크 아이콘 (달) -->
+        <svg id="icon-dark" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+
+      <!-- 모바일 햄버거 -->
+      <button
+        id="mobile-menu-btn"
+        type="button"
+        aria-label="메뉴 열기"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        class="md:hidden flex w-8 h-8 items-center justify-center rounded text-onggi hover:text-hobak transition-colors duration-200"
+      >
+        <svg id="hamburger-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        <svg id="close-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- 모바일 풀스크린 오버레이 -->
+  <div
+    id="mobile-menu"
+    class="md:hidden hidden fixed inset-0 top-16 z-40 bg-hanji/95 backdrop-blur-md flex flex-col items-center justify-center gap-8"
+    aria-hidden="true"
+  >
+    <ul class="flex flex-col items-center gap-6 text-xl font-medium text-meok">
+      {navLinks.map(({ key, href }) => (
+        <li>
+          <a
+            href={href}
+            class="mobile-nav-link hover:text-hobak transition-colors duration-200"
+          >
+            {t(`nav.${key}`, lang)}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- 언어 토글 (모바일) -->
+    <a
+      href={altHref}
+      class="mt-2 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-changho text-base font-medium text-onggi hover:border-hobak hover:text-hobak transition-colors duration-200"
+    >
+      {altLabel === 'KO' ? '한국어로 보기' : 'View in English'}
+    </a>
+  </div>
+</header>
+
+<script>
+  // 햄버거 메뉴 토글
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const hamburgerIcon = document.getElementById('hamburger-icon');
+  const closeIcon = document.getElementById('close-icon');
+
+  function openMenu() {
+    mobileMenu?.classList.remove('hidden');
+    hamburgerIcon?.classList.add('hidden');
+    closeIcon?.classList.remove('hidden');
+    menuBtn?.setAttribute('aria-expanded', 'true');
+    mobileMenu?.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMenu() {
+    mobileMenu?.classList.add('hidden');
+    hamburgerIcon?.classList.remove('hidden');
+    closeIcon?.classList.add('hidden');
+    menuBtn?.setAttribute('aria-expanded', 'false');
+    mobileMenu?.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  menuBtn?.addEventListener('click', () => {
+    const isOpen = menuBtn.getAttribute('aria-expanded') === 'true';
+    isOpen ? closeMenu() : openMenu();
+  });
+
+  // 모바일 링크 클릭 시 닫기
+  document.querySelectorAll('.mobile-nav-link').forEach((link) => {
+    link.addEventListener('click', closeMenu);
+  });
+
+  // ESC 키로 닫기
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
+  });
+
+  // 다크 모드 토글
+  const themeToggle = document.getElementById('theme-toggle');
+  const iconLight = document.getElementById('icon-light');
+  const iconDark = document.getElementById('icon-dark');
+
+  function updateThemeIcons() {
+    const isDark = document.documentElement.classList.contains('dark');
+    iconLight?.classList.toggle('hidden', !isDark);
+    iconDark?.classList.toggle('hidden', isDark);
+  }
+
+  updateThemeIcons();
+
+  themeToggle?.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.contains('dark');
+    document.documentElement.classList.toggle('dark', !isDark);
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    updateThemeIcons();
+  });
+</script>

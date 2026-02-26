@@ -1,0 +1,90 @@
+---
+import { t, soundUrl } from '../i18n/utils';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+
+const bellSoundUrl = soundUrl('default', 'complete.wav');
+---
+
+<section class="min-h-[calc(100vh-4rem)] flex items-center">
+  <div class="max-w-6xl mx-auto px-6 md:px-8 lg:px-12 py-24 md:py-32 w-full">
+    <div class="flex flex-col items-center text-center gap-8">
+
+      <!-- 로고 타이포그래피 -->
+      <div class="reveal" style="transition-delay: 0ms;">
+        <h1 class="font-gmarket text-[length:var(--text-hero)] leading-tight text-meok select-none">
+          띵동
+        </h1>
+      </div>
+
+      <!-- 초인종 버튼 (음파 컨테이너) -->
+      <div class="reveal relative inline-flex items-center justify-center" style="transition-delay: 100ms;">
+        <button
+          class="doorbell-btn relative z-10 w-16 h-16 rounded-full bg-hobak text-hanji flex items-center justify-center shadow-lg hover:bg-hobak-deep hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+          data-sound-url={bellSoundUrl}
+          aria-label={lang === 'ko' ? '초인종 누르기' : 'Ring the doorbell'}
+          type="button"
+        >
+          <!-- 벨 아이콘 -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 서브타이틀 -->
+      <div class="reveal" style="transition-delay: 200ms;">
+        <p class="text-[length:var(--text-h2)] text-onggi font-medium max-w-xl">
+          {t('hero.subtitle', lang)}
+        </p>
+      </div>
+
+      <!-- 설명 -->
+      <div class="reveal" style="transition-delay: 300ms;">
+        <p class="text-[length:var(--text-body)] text-onggi max-w-2xl leading-relaxed">
+          {t('hero.description', lang)}
+        </p>
+      </div>
+
+      <!-- CTA 버튼 -->
+      <div class="reveal flex flex-wrap items-center justify-center gap-4 mt-2" style="transition-delay: 400ms;">
+        <!-- Primary: 시작하기 -->
+        <a
+          href="#quickstart"
+          class="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-hobak text-hanji font-semibold text-base hover:bg-hobak-deep hover:shadow-md active:scale-95 transition-all duration-200"
+        >
+          {t('hero.cta', lang)}
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </a>
+
+        <!-- Secondary: 소리 들어보기 -->
+        <a
+          href="#gallery"
+          class="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border-2 border-changho text-onggi font-semibold text-base hover:border-hobak hover:text-hobak hover:bg-hobak-soft/30 active:scale-95 transition-all duration-200"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+          {t('hero.listen', lang)}
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>

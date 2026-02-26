@@ -1,0 +1,30 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Hero from '../../components/Hero.astro';
+import Features from '../../components/Features.astro';
+import SoundPackGallery from '../../components/SoundPackGallery.astro';
+import QuickStart from '../../components/QuickStart.astro';
+import Config from '../../components/Config.astro';
+import Platform from '../../components/Platform.astro';
+import Footer from '../../components/Footer.astro';
+
+const lang = 'ko';
+---
+
+<Layout
+  title="띵동 — Claude Code 알림 플러그인"
+  description="작업 완료·오류·입력 필요 시 소리와 OS 알림으로 알려줍니다. 크로스 플랫폼, 커스텀 사운드 팩, 한/영 지원."
+  lang={lang}
+>
+  <Navigation lang={lang} />
+  <main>
+    <Hero lang={lang} />
+    <Features lang={lang} />
+    <SoundPackGallery lang={lang} />
+    <QuickStart lang={lang} />
+    <Config lang={lang} />
+    <Platform lang={lang} />
+  </main>
+  <Footer lang={lang} />
+</Layout>

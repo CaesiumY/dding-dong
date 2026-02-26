@@ -1,0 +1,30 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Hero from '../components/Hero.astro';
+import Features from '../components/Features.astro';
+import SoundPackGallery from '../components/SoundPackGallery.astro';
+import QuickStart from '../components/QuickStart.astro';
+import Config from '../components/Config.astro';
+import Platform from '../components/Platform.astro';
+import Footer from '../components/Footer.astro';
+
+const lang = 'en';
+---
+
+<Layout
+  title="dding-dong — Claude Code Notification Plugin"
+  description="Alerts you with sounds and OS notifications when Claude Code finishes a task or needs your attention. Cross-platform, customizable sound packs, and bilingual support."
+  lang={lang}
+>
+  <Navigation lang={lang} />
+  <main>
+    <Hero lang={lang} />
+    <Features lang={lang} />
+    <SoundPackGallery lang={lang} />
+    <QuickStart lang={lang} />
+    <Config lang={lang} />
+    <Platform lang={lang} />
+  </main>
+  <Footer lang={lang} />
+</Layout>

@@ -1,0 +1,141 @@
+{
+  "nav": {
+    "home": "Home",
+    "features": "Features",
+    "sounds": "Sounds",
+    "quickstart": "Quick Start",
+    "config": "Config",
+    "platform": "Platform"
+  },
+  "hero": {
+    "title": "dding-dong",
+    "logo": "띵동",
+    "subtitle": "When code is done, the doorbell rings.",
+    "description": "Claude Code notification plugin — alerts you with sounds and OS notifications on task completion, errors, and input requests.",
+    "cta": "Get Started",
+    "listen": "Listen below"
+  },
+  "features": {
+    "heading": "How does it notify you?",
+    "items": [
+      {
+        "icon": "ph:desktop-duotone",
+        "title": "Cross-Platform",
+        "description": "Works on macOS, Linux, and WSL. Automatically detects your environment and audio tools."
+      },
+      {
+        "icon": "ph:speaker-high-duotone",
+        "title": "Sound Packs",
+        "description": "Choose from built-in packs — default, retro 8-bit, or musical piano chords. Create your own too."
+      },
+      {
+        "icon": "ph:microphone-duotone",
+        "title": "TTS Voice",
+        "description": "Generate custom voice notifications with Qwen3-TTS. Clone your own voice for a personal touch."
+      },
+      {
+        "icon": "ph:moon-duotone",
+        "title": "Quiet Hours",
+        "description": "Set quiet hours to silence notifications during focus time or late-night sessions."
+      },
+      {
+        "icon": "ph:sliders-duotone",
+        "title": "Flexible Config",
+        "description": "5-stage config merge: defaults → global → project → local → env vars. Override anything, anywhere."
+      },
+      {
+        "icon": "ph:translate-duotone",
+        "title": "Korean & English",
+        "description": "Full bilingual support. Notification messages, setup wizard, and all skills in both languages."
+      }
+    ]
+  },
+  "gallery": {
+    "heading": "What sounds will you hear?",
+    "description": "3 built-in sound packs, 5 events each. Click to preview.",
+    "events": {
+      "task.complete": "Task Complete",
+      "task.error": "Error",
+      "input.required": "Input Required",
+      "session.start": "Session Start",
+      "session.end": "Session End"
+    },
+    "onomatopoeia": {
+      "task.complete": "ding-dong!",
+      "task.error": "beep!",
+      "input.required": "ting-",
+      "session.start": "tu-dut",
+      "session.end": "tu-tu-"
+    }
+  },
+  "quickstart": {
+    "heading": "30 seconds to start",
+    "description": "Three simple steps to get notifications working.",
+    "steps": [
+      {
+        "number": "1",
+        "title": "Install",
+        "description": "Add dding-dong from the plugin marketplace.",
+        "code": "/plugin marketplace add https://github.com/CaesiumY/dding-dong\n/plugin install dding-dong"
+      },
+      {
+        "number": "2",
+        "title": "Setup",
+        "description": "Auto-detect your platform and audio tools.",
+        "code": "/dding-dong:dd-setup"
+      },
+      {
+        "number": "3",
+        "title": "Test",
+        "description": "Hear all notification sounds in sequence.",
+        "code": "/dding-dong:dd-test"
+      }
+    ]
+  },
+  "config": {
+    "heading": "Customize to your taste",
+    "description": "5-stage config merge — later stages override earlier ones.",
+    "layers": [
+      { "name": "Default", "description": "Built-in defaults" },
+      { "name": "Global", "description": "~/.config/dding-dong/config.json" },
+      { "name": "Project", "description": ".dding-dong/config.json" },
+      { "name": "Local", "description": ".dding-dong/config.local.json" },
+      { "name": "Env", "description": "DDING_DONG_* variables" }
+    ],
+    "envVars": [
+      { "name": "DDING_DONG_ENABLED", "description": "Enable/disable notifications" },
+      { "name": "DDING_DONG_VOLUME", "description": "Volume level (0.0–1.0)" },
+      { "name": "DDING_DONG_LANG", "description": "Language (ko/en)" },
+      { "name": "DDING_DONG_PACK", "description": "Sound pack name" }
+    ]
+  },
+  "platform": {
+    "heading": "dding-dong everywhere",
+    "platforms": [
+      {
+        "name": "macOS",
+        "icon": "ph:apple-logo-duotone",
+        "sound": "afplay",
+        "notification": "osascript"
+      },
+      {
+        "name": "Linux",
+        "icon": "ph:linux-logo-duotone",
+        "sound": "pw-play / paplay / ffplay / mpv / aplay",
+        "notification": "notify-send"
+      },
+      {
+        "name": "WSL",
+        "icon": "ph:windows-logo-duotone",
+        "sound": "PowerShell MediaPlayer",
+        "notification": "wsl-notify-send / WinRT Toast"
+      }
+    ]
+  },
+  "footer": {
+    "license": "MIT License",
+    "github": "GitHub",
+    "madeWith": "Made with",
+    "byAuthor": "by ChangSik Yoon"
+  }
+}

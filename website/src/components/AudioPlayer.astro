@@ -1,0 +1,42 @@
+---
+interface Props {
+  soundUrl: string;
+  packColor: string;
+  onomatopoeia: string;
+  eventLabel: string;
+}
+
+const { soundUrl, packColor, onomatopoeia, eventLabel } = Astro.props;
+---
+
+<div class="audio-row flex items-center justify-between py-2.5 px-3 rounded-lg transition-colors duration-200">
+  <div class="flex items-center gap-3 min-w-0">
+    <span class="text-sm text-onggi truncate">{eventLabel}</span>
+    <span
+      class="onomatopoeia text-xs text-onggi/70 font-medium transition-all duration-200 whitespace-nowrap"
+    >
+      {onomatopoeia}
+    </span>
+  </div>
+  <button
+    class="play-btn w-8 h-8 rounded-full bg-changho/60 text-onggi flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 shrink-0"
+    data-sound-url={soundUrl}
+    data-pack-color={packColor}
+    data-onomatopoeia={onomatopoeia}
+    data-state="idle"
+    aria-label={`Play ${eventLabel}`}
+    type="button"
+  >
+    <span class="play-icon flex items-center justify-center">
+      <svg width="12" height="14" viewBox="0 0 12 14" fill="currentColor">
+        <path d="M0 0L12 7L0 14Z" />
+      </svg>
+    </span>
+    <span class="wave-bars hidden items-center gap-0.5 h-4" style="display:none;">
+      <span class="wave-bar w-0.5 bg-current rounded-full" style="animation-delay:0s;height:4px;"></span>
+      <span class="wave-bar w-0.5 bg-current rounded-full" style="animation-delay:0.15s;height:4px;"></span>
+      <span class="wave-bar w-0.5 bg-current rounded-full" style="animation-delay:0.3s;height:4px;"></span>
+      <span class="wave-bar w-0.5 bg-current rounded-full" style="animation-delay:0.45s;height:4px;"></span>
+    </span>
+  </button>
+</div>

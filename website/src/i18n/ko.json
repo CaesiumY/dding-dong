@@ -1,0 +1,141 @@
+{
+  "nav": {
+    "home": "홈",
+    "features": "기능",
+    "sounds": "소리",
+    "quickstart": "시작하기",
+    "config": "설정",
+    "platform": "플랫폼"
+  },
+  "hero": {
+    "title": "dding-dong",
+    "logo": "띵동",
+    "subtitle": "코드가 끝나면, 초인종이 울립니다.",
+    "description": "Claude Code 알림 플러그인 — 작업 완료·오류·입력 필요 시 소리와 OS 알림으로 알려줍니다.",
+    "cta": "시작하기",
+    "listen": "소리 들어보기"
+  },
+  "features": {
+    "heading": "어떻게 알려주나요?",
+    "items": [
+      {
+        "icon": "ph:desktop-duotone",
+        "title": "크로스 플랫폼",
+        "description": "macOS, Linux, WSL 어디서든. 환경과 오디오 도구를 자동으로 감지합니다."
+      },
+      {
+        "icon": "ph:speaker-high-duotone",
+        "title": "사운드 팩",
+        "description": "기본, 레트로 8-bit, 뮤지컬 피아노 코드 중 선택. 나만의 팩도 만들 수 있어요."
+      },
+      {
+        "icon": "ph:microphone-duotone",
+        "title": "TTS 보이스",
+        "description": "Qwen3-TTS로 음성 알림을 생성하세요. 내 목소리를 클로닝해서 쓸 수도 있습니다."
+      },
+      {
+        "icon": "ph:moon-duotone",
+        "title": "야간 모드",
+        "description": "집중 시간이나 야근 중에는 알림을 조용히. 시간대별 제어가 가능합니다."
+      },
+      {
+        "icon": "ph:sliders-duotone",
+        "title": "유연한 설정",
+        "description": "5단계 설정 병합: 기본값 → 전역 → 프로젝트 → 로컬 → 환경변수. 어디서든 덮어쓸 수 있어요."
+      },
+      {
+        "icon": "ph:translate-duotone",
+        "title": "한국어 & 영어",
+        "description": "완전한 이중 언어 지원. 알림 메시지, 설정 마법사, 모든 스킬이 두 언어로."
+      }
+    ]
+  },
+  "gallery": {
+    "heading": "어떤 소리가 날까요?",
+    "description": "내장 사운드 팩 3개, 이벤트 5개. 클릭해서 들어보세요.",
+    "events": {
+      "task.complete": "작업 완료",
+      "task.error": "오류 발생",
+      "input.required": "입력 필요",
+      "session.start": "세션 시작",
+      "session.end": "세션 종료"
+    },
+    "onomatopoeia": {
+      "task.complete": "딩동!",
+      "task.error": "삐빅!",
+      "input.required": "띵-",
+      "session.start": "뚜둣",
+      "session.end": "뚜뚜-"
+    }
+  },
+  "quickstart": {
+    "heading": "30초면 됩니다",
+    "description": "세 단계면 알림이 울립니다.",
+    "steps": [
+      {
+        "number": "1",
+        "title": "설치",
+        "description": "플러그인 마켓플레이스에서 띵동을 추가합니다.",
+        "code": "/plugin marketplace add https://github.com/CaesiumY/dding-dong\n/plugin install dding-dong"
+      },
+      {
+        "number": "2",
+        "title": "환경 설정",
+        "description": "플랫폼과 오디오 도구를 자동 감지합니다.",
+        "code": "/dding-dong:dd-setup"
+      },
+      {
+        "number": "3",
+        "title": "테스트",
+        "description": "모든 알림 소리를 순서대로 재생합니다.",
+        "code": "/dding-dong:dd-test"
+      }
+    ]
+  },
+  "config": {
+    "heading": "내 입맛에 맞게",
+    "description": "5단계 설정 병합 — 나중 단계가 이전 단계를 덮어씁니다.",
+    "layers": [
+      { "name": "기본값", "description": "내장 기본 설정" },
+      { "name": "전역", "description": "~/.config/dding-dong/config.json" },
+      { "name": "프로젝트", "description": ".dding-dong/config.json" },
+      { "name": "로컬", "description": ".dding-dong/config.local.json" },
+      { "name": "환경변수", "description": "DDING_DONG_* 변수" }
+    ],
+    "envVars": [
+      { "name": "DDING_DONG_ENABLED", "description": "알림 활성화/비활성화" },
+      { "name": "DDING_DONG_VOLUME", "description": "볼륨 (0.0–1.0)" },
+      { "name": "DDING_DONG_LANG", "description": "언어 (ko/en)" },
+      { "name": "DDING_DONG_PACK", "description": "사운드 팩 이름" }
+    ]
+  },
+  "platform": {
+    "heading": "어디서든 띵동",
+    "platforms": [
+      {
+        "name": "macOS",
+        "icon": "ph:apple-logo-duotone",
+        "sound": "afplay",
+        "notification": "osascript"
+      },
+      {
+        "name": "Linux",
+        "icon": "ph:linux-logo-duotone",
+        "sound": "pw-play / paplay / ffplay / mpv / aplay",
+        "notification": "notify-send"
+      },
+      {
+        "name": "WSL",
+        "icon": "ph:windows-logo-duotone",
+        "sound": "PowerShell MediaPlayer",
+        "notification": "wsl-notify-send / WinRT Toast"
+      }
+    ]
+  },
+  "footer": {
+    "license": "MIT 라이선스",
+    "github": "GitHub",
+    "madeWith": "Made with",
+    "byAuthor": "by ChangSik Yoon"
+  }
+}

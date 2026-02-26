@@ -5,6 +5,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/CaesiumY/dding-dong?style=flat&color=yellow)](https://github.com/CaesiumY/dding-dong/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
+> **[웹사이트 방문하기](https://caesiumy.github.io/dding-dong/ko/)** — 사운드 팩을 미리 듣고 기능을 살펴보세요.
+
 > Claude Code 알림 플러그인 — 작업 완료·오류·입력 필요 시 소리와 OS 알림으로 알려줍니다. AI 음성 합성으로 나만의 알림음도 만들 수 있습니다.
 
 **띵동(dding-dong)** 은 한국어로 초인종 소리를 나타냅니다. Claude Code가 작업을 마쳤을 때, 당신의 주의가 필요할 때 알려드립니다.

@@ -1,0 +1,172 @@
+---
+import { t, soundUrl } from '../i18n/utils';
+import AudioPlayer from './AudioPlayer.astro';
+
+import defaultManifest from '../../../sounds/default/manifest.json';
+import retroManifest from '../../../sounds/retro/manifest.json';
+import musicalManifest from '../../../sounds/musical/manifest.json';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+
+const eventKeys = ['task.complete', 'task.error', 'input.required', 'session.start', 'session.end'] as const;
+
+const packs = [
+  { manifest: defaultManifest, color: '#334155', id: 'default' },
+  { manifest: retroManifest,   color: '#65A30D', id: 'retro'   },
+  { manifest: musicalManifest, color: '#7E22CE', id: 'musical'  },
+];
+---
+
+<section id="gallery" class="reveal py-24 md:py-32 lg:py-40">
+  <div class="max-w-6xl mx-auto px-6 md:px-8 lg:px-12">
+    <h2 class="text-[length:var(--text-h1)] font-bold text-meok mb-4">
+      {t('gallery.heading', lang)}
+    </h2>
+    <p class="text-onggi text-lg mb-12">
+      {t('gallery.description', lang)}
+    </p>
+
+    <!-- Mobile/Tablet: Tab pill buttons (hidden on lg+) -->
+    <div class="flex gap-2 mb-6 lg:hidden" role="tablist" aria-label="Sound packs">
+      {packs.map((pack, i) => (
+        <button
+          class={`pack-tab flex-1 py-2 px-3 rounded-full text-sm font-medium transition-all duration-200 ${
+            i === 0
+              ? 'text-hanji'
+              : 'bg-changho/60 text-onggi'
+          }`}
+          style={i === 0 ? `background-color: ${pack.color};` : ''}
+          data-pack={pack.id}
+          data-color={pack.color}
+          role="tab"
+          aria-selected={i === 0 ? 'true' : 'false'}
+          type="button"
+        >
+          {pack.manifest.displayName}
+        </button>
+      ))}
+    </div>
+
+    <!-- Mobile/Tablet: Single card shown at a time (hidden on lg+) -->
+    <div class="lg:hidden">
+      {packs.map((pack, i) => (
+        <div
+          class={`pack-card-mobile rounded-2xl bg-hanji dark:bg-misaek border border-changho border-l-4 transition-all duration-200 ${
+            i !== 0 ? 'hidden' : ''
+          }`}
+          style={`border-left-color: ${pack.color};`}
+          data-pack={pack.id}
+        >
+          <!-- Card header -->
+          <div class="p-5 pb-0">
+            <div class="flex items-center gap-2.5 mb-1">
+              <span
+                class="w-3 h-3 rounded-full shrink-0"
+                style={`background-color: ${pack.color};`}
+              ></span>
+              <span class="font-semibold text-meok">{pack.manifest.displayName}</span>
+            </div>
+            <p class="text-sm text-onggi pl-5">{pack.manifest.description}</p>
+          </div>
+          <div class="border-t border-changho/50 mx-5 my-3"></div>
+          <!-- Event rows -->
+          <div class="px-3 pb-3">
+            {eventKeys.map((eventKey) => {
+              const file = pack.manifest.events[eventKey]?.files?.[0];
+              const url = file ? soundUrl(pack.id, file) : '';
+              return (
+                <AudioPlayer
+                  soundUrl={url}
+                  packColor={pack.color}
+                  onomatopoeia={t(`gallery.onomatopoeia.${eventKey}`, lang)}
+                  eventLabel={t(`gallery.events.${eventKey}`, lang)}
+                />
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Desktop: 3-column grid (hidden below lg) -->
+    <div class="hidden lg:grid lg:grid-cols-3 gap-6">
+      {packs.map((pack) => (
+        <div
+          class="pack-card-desktop rounded-2xl bg-hanji dark:bg-misaek border border-changho border-l-4 transition-all duration-200 hover:border-l-[6px] hover:-translate-y-0.5 group"
+          style={`border-left-color: ${pack.color};`}
+          data-pack={pack.id}
+          data-color={pack.color}
+        >
+          <!-- Card header -->
+          <div class="p-5 pb-0">
+            <div class="flex items-center gap-2.5 mb-1">
+              <span
+                class="w-3 h-3 rounded-full shrink-0"
+                style={`background-color: ${pack.color};`}
+              ></span>
+              <span class="font-semibold text-meok">{pack.manifest.displayName}</span>
+            </div>
+            <p class="text-sm text-onggi pl-5">{pack.manifest.description}</p>
+          </div>
+          <div class="border-t border-changho/50 mx-5 my-3"></div>
+          <!-- Event rows -->
+          <div class="px-3 pb-3">
+            {eventKeys.map((eventKey) => {
+              const file = pack.manifest.events[eventKey]?.files?.[0];
+              const url = file ? soundUrl(pack.id, file) : '';
+              return (
+                <AudioPlayer
+                  soundUrl={url}
+                  packColor={pack.color}
+                  onomatopoeia={t(`gallery.onomatopoeia.${eventKey}`, lang)}
+                  eventLabel={t(`gallery.events.${eventKey}`, lang)}
+                />
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script src="../scripts/audio-player.ts"></script>
+
+<script>
+  document.addEventListener('click', (e) => {
+    const tab = (e.target as HTMLElement).closest('.pack-tab') as HTMLElement | null;
+    if (!tab) return;
+
+    const packId = tab.dataset.pack;
+    const packColor = tab.dataset.color ?? '';
+
+    // Update tab active states
+    document.querySelectorAll<HTMLElement>('.pack-tab').forEach((t) => {
+      const isActive = t.dataset.pack === packId;
+      t.style.backgroundColor = isActive ? (t.dataset.color ?? '') : '';
+      t.classList.toggle('text-hanji', isActive);
+      t.classList.toggle('bg-changho/60', !isActive);
+      t.classList.toggle('text-onggi', !isActive);
+      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+
+    // Show only the selected mobile card
+    document.querySelectorAll<HTMLElement>('.pack-card-mobile').forEach((card) => {
+      card.classList.toggle('hidden', card.dataset.pack !== packId);
+    });
+  });
+</script>
+
+<style>
+  .pack-card-desktop:hover {
+    background-color: color-mix(in srgb, var(--pack-color, transparent) 5%, transparent);
+  }
+
+  .pack-card-desktop {
+    --pack-color: transparent;
+  }
+</style>

@@ -1,0 +1,56 @@
+---
+import { t, tData } from '../i18n/utils';
+import CopyButton from './CopyButton.astro';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+
+interface Step {
+  number: string;
+  title: string;
+  description: string;
+  code: string;
+}
+
+const steps = tData<Step[]>('quickstart.steps', lang);
+---
+
+<section id="quickstart" class="bg-hanji py-24 md:py-32 lg:py-40">
+  <div class="max-w-6xl mx-auto px-6 md:px-8 lg:px-12">
+    <h2 class="text-[length:var(--text-h1)] font-bold text-meok mb-4">
+      {t('quickstart.heading', lang)}
+    </h2>
+    <p class="text-onggi text-lg mb-12">
+      {t('quickstart.description', lang)}
+    </p>
+
+    <div class="max-w-2xl mx-auto">
+      <div class="relative">
+        <!-- 수직 연결선 -->
+        <div class="absolute left-5 top-5 bottom-5 w-0.5 bg-changho"></div>
+
+        <!-- 스텝 목록 -->
+        <div class="space-y-8">
+          {steps.map((step) => (
+            <div class="reveal flex gap-6 items-start">
+              <!-- 번호 원 -->
+              <div class="w-10 h-10 rounded-full bg-hobak text-hanji font-bold flex items-center justify-center relative z-10 shrink-0">
+                {step.number}
+              </div>
+
+              <!-- 스텝 내용 -->
+              <div class="flex-1 pt-1">
+                <h3 class="font-semibold text-lg text-meok mb-1">{step.title}</h3>
+                <p class="text-onggi text-sm mb-3">{step.description}</p>
+                <CopyButton code={step.code} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -5,6 +5,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/CaesiumY/dding-dong?style=flat&color=yellow)](https://github.com/CaesiumY/dding-dong/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
+> **[Visit the website](https://caesiumy.github.io/dding-dong/)** — Listen to sound packs and explore features.
+
 > Claude Code notification plugin — Alerts you with sounds and OS notifications on task completion, errors, and input requests. Create custom notification sounds with AI voice synthesis.
 
 **dding-dong (띵동)** is a Korean onomatopoeia for a doorbell chime. It notifies you when Claude Code finishes a task or needs your attention.

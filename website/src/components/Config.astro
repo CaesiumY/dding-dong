@@ -1,0 +1,102 @@
+---
+import { t, tData } from '../i18n/utils';
+import CopyButton from './CopyButton.astro';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+
+interface Layer {
+  name: string;
+  description: string;
+}
+
+interface EnvVar {
+  name: string;
+  description: string;
+}
+
+const layers = tData<Layer[]>('config.layers', lang);
+const envVars = tData<EnvVar[]>('config.envVars', lang);
+
+const layerStyles = [
+  'bg-hobak-soft/30 border-l-4 border-hobak/20',
+  'bg-hobak-soft/50 border-l-4 border-hobak/40',
+  'bg-hobak-soft/70 border-l-4 border-hobak/60',
+  'bg-hobak-soft/90 border-l-4 border-hobak/80',
+  'bg-hobak-soft border-l-4 border-hobak',
+];
+
+const configExample = `{
+  "enabled": true,
+  "sound": {
+    "pack": "default",
+    "volume": 0.7
+  },
+  "notification": true,
+  "lang": "ko",
+  "quietHours": {
+    "enabled": true,
+    "start": "23:00",
+    "end": "07:00"
+  }
+}`;
+---
+
+<section id="config" class="bg-misaek py-24 md:py-32 lg:py-40">
+  <div class="max-w-6xl mx-auto px-6 md:px-8 lg:px-12">
+    <h2 class="text-[length:var(--text-h1)] font-bold text-meok mb-4">
+      {t('config.heading', lang)}
+    </h2>
+    <p class="text-onggi text-lg mb-12">
+      {t('config.description', lang)}
+    </p>
+
+    <div class="reveal grid md:grid-cols-2 gap-8 mt-12">
+
+      <!-- 왼쪽: 5단계 병합 레이어 다이어그램 -->
+      <div>
+        <div class="space-y-2">
+          {layers.map((layer, i) => (
+            <div class={`rounded-lg p-3 ${layerStyles[i]}`}>
+              <span class="font-semibold text-meok text-sm">{layer.name}</span>
+              <span class="text-onggi text-sm ml-2">{layer.description}</span>
+            </div>
+          ))}
+        </div>
+
+        <!-- 우선순위 방향 표시 -->
+        <div class="mt-4 flex items-center gap-2 text-xs text-onggi">
+          <svg class="w-4 h-4 text-hobak" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <polyline points="19 12 12 19 5 12"></polyline>
+          </svg>
+          <span>
+            {lang === 'ko' ? '아래로 갈수록 우선순위가 높습니다' : 'Lower layers override higher ones'}
+          </span>
+        </div>
+      </div>
+
+      <!-- 오른쪽: JSON 예시 + 환경변수 -->
+      <div class="space-y-6">
+        <!-- JSON 설정 예시 -->
+        <CopyButton code={configExample} />
+
+        <!-- 환경변수 목록 -->
+        <ul class="space-y-2">
+          {envVars.map((envVar) => (
+            <li class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+              <code class="font-code text-sm bg-hanji px-2 py-0.5 rounded text-meok shrink-0">
+                {envVar.name}
+              </code>
+              <span class="text-onggi text-sm">{envVar.description}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>

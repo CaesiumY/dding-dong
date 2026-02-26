@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* 한국적 색상 팔레트 */
+  --color-hanji: #FAF7F0;
+  --color-misaek: #F0EBE1;
+  --color-meok: #1C1917;
+  --color-onggi: #78716C;
+  --color-hobak: #D97706;
+  --color-hobak-deep: #B45309;
+  --color-hobak-soft: #FEF3C7;
+  --color-onggi-red: #B45541;
+  --color-cheongja: #4D7C6F;
+  --color-changho: #E7E0D6;
+
+  /* 사운드팩별 테마색 */
+  --color-pack-default: #334155;
+  --color-pack-retro: #65A30D;
+  --color-pack-musical: #7E22CE;
+
+  /* 타이포그래피 */
+  --font-pretendard: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+  --font-gmarket: "Gmarket Sans", sans-serif;
+  --font-code: "Fira Code", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* 타이포그래피 스케일 (반응형 clamp) */
+:root {
+  --text-hero: clamp(3.5rem, 8vw + 1rem, 7rem);
+  --text-h1: clamp(2rem, 4vw + 0.5rem, 3.5rem);
+  --text-h2: clamp(1.5rem, 2vw + 0.5rem, 2.25rem);
+  --text-body: clamp(1rem, 1vw + 0.5rem, 1.125rem);
+}
+
+/* 다크 모드 색상 */
+.dark {
+  --color-hanji: #1C1917;
+  --color-misaek: #292524;
+  --color-meok: #FAF7F0;
+  --color-onggi: #A8A29E;
+  --color-hobak: #F59E0B;
+  --color-hobak-deep: #D97706;
+  --color-hobak-soft: #451A03;
+  --color-changho: #44403C;
+}
+
+/* 글로벌 스타일 */
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-pretendard);
+  color: var(--color-meok);
+  background-color: var(--color-hanji);
+}
+
+body {
+  font-size: var(--text-body);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 전역 트랜지션 (다크 모드 전환) */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* prefers-reduced-motion 대응 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* 코드 블록 스타일 */
+code {
+  font-family: var(--font-code);
+  font-size: 0.9em;
+}
+
+pre {
+  font-family: var(--font-code);
+  border-radius: 0.75rem;
+  overflow-x: auto;
+}
+
+/* "띵동" 로고 전용 */
+.font-gmarket {
+  font-family: var(--font-gmarket);
+}
+
+/* 스크롤 리빌 애니메이션 */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 초인종 흔들림 애니메이션 */
+@keyframes doorbell-wobble {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(-12deg); }
+  30% { transform: rotate(10deg); }
+  45% { transform: rotate(-8deg); }
+  60% { transform: rotate(6deg); }
+  75% { transform: rotate(-3deg); }
+}
+
+.doorbell-wobble {
+  animation: doorbell-wobble 0.4s ease-in-out;
+}
+
+/* 음파 방사 동심원 */
+@keyframes sound-wave {
+  0% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.5);
+  }
+}
+
+.sound-wave {
+  animation: sound-wave 0.8s ease-out forwards;
+}
+
+/* 웨이브바 (재생 중 표시) */
+@keyframes wave-bar {
+  0%, 100% { height: 4px; }
+  50% { height: 16px; }
+}
+
+.wave-bar {
+  animation: wave-bar 0.6s ease-in-out infinite;
+}
+
+/* font-display: swap 전역 */
+@font-face {
+  font-display: swap;
+}

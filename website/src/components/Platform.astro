@@ -1,0 +1,50 @@
+---
+import { Icon } from 'astro-icon/components';
+import { t, tData } from '../i18n/utils';
+
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+
+interface PlatformItem {
+  name: string;
+  icon: string;
+  sound: string;
+  notification: string;
+}
+
+const platforms = tData<PlatformItem[]>('platform.platforms', lang);
+---
+
+<section id="platform" class="bg-misaek">
+  <div class="py-24 md:py-32 lg:py-40 max-w-6xl mx-auto px-6 md:px-8 lg:px-12">
+    <h2 class="text-[length:var(--text-h1)] font-bold text-meok">
+      {t('platform.heading', lang)}
+    </h2>
+
+    <div class="grid md:grid-cols-3 gap-6 mt-12">
+      {platforms?.map((platform) => (
+        <div class="reveal rounded-2xl bg-hanji p-6 border border-changho">
+          <Icon name={platform.icon} class="w-10 h-10 text-hobak mb-4" />
+          <h3 class="font-semibold text-lg text-meok mb-3">{platform.name}</h3>
+          <div class="flex flex-col gap-2">
+            <div class="flex items-start gap-2 text-sm">
+              <span class="text-onggi shrink-0">Sound</span>
+              <code class="font-code bg-misaek px-2 py-0.5 rounded text-sm text-meok break-all">
+                {platform.sound}
+              </code>
+            </div>
+            <div class="flex items-start gap-2 text-sm">
+              <span class="text-onggi shrink-0">Notification</span>
+              <code class="font-code bg-misaek px-2 py-0.5 rounded text-sm text-meok break-all">
+                {platform.notification}
+              </code>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
