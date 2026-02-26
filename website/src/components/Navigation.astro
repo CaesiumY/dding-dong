@@ -27,7 +27,7 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
     <a
       href={localePath('/', lang)}
       class="font-gmarket text-2xl font-bold text-meok hover:text-hobak transition-colors duration-200"
-      aria-label="띵동 홈"
+      aria-label={t('nav.logoLabel', lang)}
     >
       띵동
     </a>
@@ -53,7 +53,7 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
       <a
         href={altHref}
         class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-changho text-sm font-medium text-onggi hover:border-hobak hover:text-hobak transition-colors duration-200"
-        aria-label={`Switch to ${altLabel}`}
+        aria-label={t('nav.switchTo', lang)}
       >
         {altLabel}
       </a>
@@ -62,7 +62,7 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
       <button
         id="theme-toggle"
         type="button"
-        aria-label="다크 모드 전환"
+        aria-label={t('nav.themeToggle', lang)}
         class="hidden md:flex w-8 h-8 items-center justify-center rounded-full text-onggi hover:text-hobak hover:bg-changho/60 transition-colors duration-200"
       >
         <!-- 라이트 아이콘 (태양) -->
@@ -87,7 +87,7 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
       <button
         id="mobile-menu-btn"
         type="button"
-        aria-label="메뉴 열기"
+        aria-label={t('nav.openMenu', lang)}
         aria-expanded="false"
         aria-controls="mobile-menu"
         class="md:hidden flex w-8 h-8 items-center justify-center rounded text-onggi hover:text-hobak transition-colors duration-200"
@@ -129,7 +129,7 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
       href={altHref}
       class="mt-2 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-changho text-base font-medium text-onggi hover:border-hobak hover:text-hobak transition-colors duration-200"
     >
-      {altLabel === 'KO' ? '한국어로 보기' : 'View in English'}
+      {t('nav.viewInAlt', lang)}
     </a>
   </div>
 </header>

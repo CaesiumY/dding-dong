@@ -1,5 +1,5 @@
 ---
-import { t, soundUrl } from '../i18n/utils';
+import { t, tData, soundUrl } from '../i18n/utils';
 import AudioPlayer from './AudioPlayer.astro';
 
 import defaultManifest from '../../../sounds/default/manifest.json';
@@ -13,6 +13,11 @@ interface Props {
 const { lang } = Astro.props;
 
 const eventKeys = ['task.complete', 'task.error', 'input.required', 'session.start', 'session.end'] as const;
+
+// t()는 점(.)으로 키를 분할하므로 "task.complete" 같은 키를 처리할 수 없음
+// tData()로 객체를 통째로 가져와서 직접 인덱싱
+const eventLabels = tData<Record<string, string>>('gallery.events', lang) ?? {};
+const eventOnomatopoeia = tData<Record<string, string>>('gallery.onomatopoeia', lang) ?? {};
 
 const packs = [
   { manifest: defaultManifest, color: '#334155', id: 'default' },
@@ -31,7 +36,7 @@ const packs = [
     </p>
 
     <!-- Mobile/Tablet: Tab pill buttons (hidden on lg+) -->
-    <div class="flex gap-2 mb-6 lg:hidden" role="tablist" aria-label="Sound packs">
+    <div class="flex gap-2 mb-6 lg:hidden" role="tablist" aria-label={t('gallery.heading', lang)}>
       {packs.map((pack, i) => (
         <button
           class={`pack-tab flex-1 py-2 px-3 rounded-full text-sm font-medium transition-all duration-200 ${
@@ -82,8 +87,8 @@ const packs = [
                 <AudioPlayer
                   soundUrl={url}
                   packColor={pack.color}
-                  onomatopoeia={t(`gallery.onomatopoeia.${eventKey}`, lang)}
-                  eventLabel={t(`gallery.events.${eventKey}`, lang)}
+                  onomatopoeia={eventOnomatopoeia[eventKey] ?? eventKey}
+                  eventLabel={eventLabels[eventKey] ?? eventKey}
                 />
               );
             })}
@@ -122,8 +127,8 @@ const packs = [
                 <AudioPlayer
                   soundUrl={url}
                   packColor={pack.color}
-                  onomatopoeia={t(`gallery.onomatopoeia.${eventKey}`, lang)}
-                  eventLabel={t(`gallery.events.${eventKey}`, lang)}
+                  onomatopoeia={eventOnomatopoeia[eventKey] ?? eventKey}
+                  eventLabel={eventLabels[eventKey] ?? eventKey}
                 />
               );
             })}

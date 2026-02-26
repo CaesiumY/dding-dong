@@ -5,7 +5,12 @@
     "sounds": "소리",
     "quickstart": "시작하기",
     "config": "설정",
-    "platform": "플랫폼"
+    "platform": "플랫폼",
+    "logoLabel": "띵동 홈",
+    "switchTo": "영어로 보기",
+    "themeToggle": "다크 모드 전환",
+    "openMenu": "메뉴 열기",
+    "viewInAlt": "View in English"
   },
   "hero": {
     "title": "dding-dong",
@@ -94,6 +99,7 @@
   },
   "config": {
     "heading": "내 입맛에 맞게",
+    "priorityNote": "아래로 갈수록 우선순위가 높습니다",
     "description": "5단계 설정 병합 — 나중 단계가 이전 단계를 덮어씁니다.",
     "layers": [
       { "name": "기본값", "description": "내장 기본 설정" },
@@ -111,6 +117,8 @@
   },
   "platform": {
     "heading": "어디서든 띵동",
+    "soundLabel": "소리",
+    "notificationLabel": "알림",
     "platforms": [
       {
         "name": "macOS",
@@ -131,6 +139,17 @@
         "notification": "wsl-notify-send / WinRT Toast"
       }
     ]
+  },
+  "common": {
+    "copyToClipboard": "클립보드에 복사"
+  },
+  "errors": {
+    "notFound": {
+      "title": "404 — 띵동",
+      "heading": "페이지를 찾을 수 없습니다",
+      "message": "찾고 있는 페이지가 존재하지 않습니다.",
+      "goHome": "홈으로 가기"
+    }
   },
   "footer": {
     "license": "MIT 라이선스",

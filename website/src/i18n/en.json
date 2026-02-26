@@ -5,7 +5,12 @@
     "sounds": "Sounds",
     "quickstart": "Quick Start",
     "config": "Config",
-    "platform": "Platform"
+    "platform": "Platform",
+    "logoLabel": "dding-dong home",
+    "switchTo": "Switch to Korean",
+    "themeToggle": "Toggle dark mode",
+    "openMenu": "Open menu",
+    "viewInAlt": "한국어로 보기"
   },
   "hero": {
     "title": "dding-dong",
@@ -94,6 +99,7 @@
   },
   "config": {
     "heading": "Customize to your taste",
+    "priorityNote": "Lower layers override higher ones",
     "description": "5-stage config merge — later stages override earlier ones.",
     "layers": [
       { "name": "Default", "description": "Built-in defaults" },
@@ -111,6 +117,8 @@
   },
   "platform": {
     "heading": "dding-dong everywhere",
+    "soundLabel": "Sound",
+    "notificationLabel": "Notification",
     "platforms": [
       {
         "name": "macOS",
@@ -131,6 +139,17 @@
         "notification": "wsl-notify-send / WinRT Toast"
       }
     ]
+  },
+  "common": {
+    "copyToClipboard": "Copy to clipboard"
+  },
+  "errors": {
+    "notFound": {
+      "title": "404 — dding-dong",
+      "heading": "Page not found",
+      "message": "The page you're looking for doesn't exist.",
+      "goHome": "Go Home"
+    }
   },
   "footer": {
     "license": "MIT License",

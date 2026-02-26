@@ -74,7 +74,7 @@ const configExample = `{
             <polyline points="19 12 12 19 5 12"></polyline>
           </svg>
           <span>
-            {lang === 'ko' ? '아래로 갈수록 우선순위가 높습니다' : 'Lower layers override higher ones'}
+            {t('config.priorityNote', lang)}
           </span>
         </div>
       </div>
@@ -82,7 +82,7 @@ const configExample = `{
       <!-- 오른쪽: JSON 예시 + 환경변수 -->
       <div class="space-y-6">
         <!-- JSON 설정 예시 -->
-        <CopyButton code={configExample} />
+        <CopyButton code={configExample} lang={lang} />
 
         <!-- 환경변수 목록 -->
         <ul class="space-y-2">
