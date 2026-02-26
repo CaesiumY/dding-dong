@@ -17,10 +17,10 @@ interface TtsCard {
 
 const cards = tData<TtsCard[]>('ttsVoice.cards', lang);
 
-// TTS 프리뷰 팩 배열 — 두 카드 모두 metro-voice WAV 사용 (향후 영어 팩 추가 시 id만 교체)
+// TTS 프리뷰 팩 배열 — 한국어/영어 각각 별도 팩 참조
 const ttsPreviews = [
-  { id: 'metro-voice', color: '#8B5CF6' },  // 한국어 — 보라
-  { id: 'metro-voice', color: '#3B82F6' },  // 영어 — 파랑 (시각적 구분)
+  { id: 'metro-voice', color: '#8B5CF6' },     // 한국어 — 보라
+  { id: 'metro-voice-en', color: '#3B82F6' },   // 영어 — 파랑
 ];
 
 // 두 팩 모두 동일 WAV 파일 참조
