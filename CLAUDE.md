@@ -82,8 +82,9 @@ cd website && pnpm build      # Production build
 - **Sound copy dependency**: `pnpm dev`/`build` runs `copy-sounds.mjs` which requires `../sounds/` to exist. `public/sounds/` is gitignored and ephemeral
 - **Base URL `/dding-dong/`**: For GitHub Pages. All internal links must use `localePath()` or `import.meta.env.BASE_URL`. Missing base URL → works locally, 404 on deploy
 - **Korean color names**: Theme variables in `global.css` use Korean names (hanji, meok, onggi, etc.). This is intentional — do not rename to English
-- **Tailwind v4 opacity**: 정수 프리셋 사용 (`text-hobak/7`), 소수 대괄호 금지 (`text-hobak/[0.07]`). `calc()`이나 커스텀 그리드 등 프리셋이 없는 경우만 arbitrary value 허용
+- **Tailwind v4 opacity**: Use integer presets (`text-hobak/7`), never decimal brackets (`text-hobak/[0.07]`). Arbitrary values are only allowed when no preset exists (e.g., `calc()` or custom grids)
 - **i18n manual routing**: Pages at `pages/ko/index.astro` must be created manually. Astro i18n does not auto-generate locale pages
+- **Post-change verification required**: After any website code change, always run `cd website && pnpm build` and `cd website && pnpm lint` to verify no errors before considering the task complete
 
 ## SKILL.md Conventions
 
