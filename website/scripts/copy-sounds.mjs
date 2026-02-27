@@ -43,12 +43,12 @@ for (const pack of packs) {
 const ttsPacks = [
   {
     id: 'metro-voice',
-    src: resolve(rootDir, '..', '.dding-dong', 'packs', 'metro-voice'),
+    src: resolve(soundsSrc, 'tts', 'metro-voice'),
     files: ['manifest.json', 'complete.wav', 'error.wav', 'input-required.wav', 'session-start.wav', 'session-end.wav'],
   },
   {
     id: 'metro-voice-en',
-    src: resolve(rootDir, '..', '.dding-dong', 'packs', 'metro-voice-en'),
+    src: resolve(soundsSrc, 'tts', 'metro-voice-en'),
     files: ['manifest.json', 'complete.wav', 'error.wav', 'input-required.wav', 'session-start.wav', 'session-end.wav'],
   },
 ];

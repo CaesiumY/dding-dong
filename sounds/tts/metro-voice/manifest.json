@@ -1,0 +1,34 @@
+{
+  "name": "metro-voice",
+  "displayName": "Metro Announce",
+  "version": "1.0.0",
+  "author": "caesiumy",
+  "description": "TTS notification sounds generated with subway announcement voice",
+  "events": {
+    "task.complete": {
+      "files": [
+        "complete.wav"
+      ]
+    },
+    "task.error": {
+      "files": [
+        "error.wav"
+      ]
+    },
+    "input.required": {
+      "files": [
+        "input-required.wav"
+      ]
+    },
+    "session.start": {
+      "files": [
+        "session-start.wav"
+      ]
+    },
+    "session.end": {
+      "files": [
+        "session-end.wav"
+      ]
+    }
+  }
+}
