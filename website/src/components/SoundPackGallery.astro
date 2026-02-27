@@ -61,7 +61,7 @@ const packs = [
     <div class="lg:hidden">
       {packs.map((pack, i) => (
         <div
-          class={`pack-card-mobile rounded-2xl bg-hanji dark:bg-misaek border border-changho border-l-4 transition-all duration-200 ${
+          class={`pack-card-mobile rounded-2xl bg-misaek border border-changho border-l-4 transition-all duration-200 ${
             i !== 0 ? 'hidden' : ''
           }`}
           style={`border-left-color: ${pack.color};`}
@@ -102,7 +102,7 @@ const packs = [
     <div class="hidden lg:grid lg:grid-cols-3 gap-6">
       {packs.map((pack) => (
         <div
-          class="pack-card-desktop rounded-2xl bg-hanji dark:bg-misaek border border-changho border-l-4"
+          class="pack-card-desktop rounded-2xl bg-misaek border border-changho border-l-4"
           style={`border-left-color: ${pack.color};`}
           data-pack={pack.id}
           data-color={pack.color}

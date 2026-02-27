@@ -59,11 +59,11 @@ const categoryConfig = [
               </div>
               <p class="text-onggi text-sm leading-relaxed mb-4">{item.description}</p>
               <div class="flex items-center gap-2">
-                <code class="flex-1 min-w-0 text-xs font-code bg-meok/5 dark:bg-meok/10 rounded-lg px-3 py-2 text-meok overflow-x-auto whitespace-nowrap scrollbar-hide">
+                <code class="flex-1 min-w-0 text-xs font-code bg-meok/10 rounded-lg px-3 py-2 text-meok overflow-x-auto whitespace-nowrap scrollbar-hide">
                   {item.command}
                 </code>
                 <button
-                  class="copy-btn shrink-0 w-8 h-8 rounded-lg bg-changho/80 dark:bg-changho/20 text-onggi hover:text-hobak hover:bg-hobak-soft flex items-center justify-center transition-all duration-200 cursor-pointer"
+                  class="copy-btn shrink-0 w-8 h-8 rounded-lg bg-changho/20 text-onggi hover:text-hobak hover:bg-hobak-soft flex items-center justify-center transition-all duration-200 cursor-pointer"
                   data-copy-text={item.command}
                   aria-label={t('common.copyToClipboard', lang)}
                   type="button"

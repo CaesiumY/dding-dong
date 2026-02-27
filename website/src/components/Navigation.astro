@@ -60,19 +60,6 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
         {altLabel}
       </a>
 
-      <!-- 다크 모드 토글 -->
-      <button
-        id="theme-toggle"
-        type="button"
-        aria-label={t('nav.themeToggle', lang)}
-        class="hidden md:flex w-8 h-8 items-center justify-center rounded-full text-onggi hover:text-hobak hover:bg-changho/60 transition-colors duration-200"
-      >
-        <!-- 라이트 아이콘 (태양) -->
-        <Icon name="ph:sun" id="icon-light" class="hidden w-[18px] h-[18px]" />
-        <!-- 다크 아이콘 (달) -->
-        <Icon name="ph:moon" id="icon-dark" class="w-[18px] h-[18px]" />
-      </button>
-
       <!-- 모바일 햄버거 -->
       <button
         id="mobile-menu-btn"
@@ -109,17 +96,6 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
       </div>
 
       <div class="flex items-center justify-center gap-3 py-2">
-        <!-- 다크모드 토글 (모바일) -->
-        <button
-          id="theme-toggle-mobile"
-          type="button"
-          aria-label={t('nav.themeToggle', lang)}
-          class="flex w-10 h-10 items-center justify-center rounded-full text-onggi hover:text-hobak hover:bg-changho/60 transition-colors duration-200"
-        >
-          <Icon name="ph:sun" id="icon-light-mobile" class="hidden w-5 h-5" />
-          <Icon name="ph:moon" id="icon-dark-mobile" class="w-5 h-5" />
-        </button>
-
         <!-- 언어 토글 (모바일) -->
         <a
           href={altHref}
@@ -176,45 +152,4 @@ const altLabel = lang === 'ko' ? 'EN' : 'KO';
     if (e.key === 'Escape') closeMenu();
   });
 
-  // 다크 모드 토글
-  const themeToggle = document.getElementById('theme-toggle');
-  const iconLight = document.getElementById('icon-light');
-  const iconDark = document.getElementById('icon-dark');
-
-  function updateThemeIcons() {
-    const isDark = document.documentElement.classList.contains('dark');
-    iconLight?.classList.toggle('hidden', !isDark);
-    iconDark?.classList.toggle('hidden', isDark);
-  }
-
-  updateThemeIcons();
-
-  themeToggle?.addEventListener('click', () => {
-    const isDark = document.documentElement.classList.contains('dark');
-    document.documentElement.classList.toggle('dark', !isDark);
-    localStorage.setItem('theme', isDark ? 'light' : 'dark');
-    updateThemeIcons();
-    updateMobileThemeIcons();
-  });
-
-  // 모바일 다크 모드 토글
-  const themeToggleMobile = document.getElementById('theme-toggle-mobile');
-  const iconLightMobile = document.getElementById('icon-light-mobile');
-  const iconDarkMobile = document.getElementById('icon-dark-mobile');
-
-  function updateMobileThemeIcons() {
-    const isDark = document.documentElement.classList.contains('dark');
-    iconLightMobile?.classList.toggle('hidden', !isDark);
-    iconDarkMobile?.classList.toggle('hidden', isDark);
-  }
-
-  updateMobileThemeIcons();
-
-  themeToggleMobile?.addEventListener('click', () => {
-    const isDark = document.documentElement.classList.contains('dark');
-    document.documentElement.classList.toggle('dark', !isDark);
-    localStorage.setItem('theme', isDark ? 'light' : 'dark');
-    updateThemeIcons();
-    updateMobileThemeIcons();
-  });
 </script>

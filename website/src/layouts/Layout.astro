@@ -70,16 +70,6 @@ const altURL = new URL(altPath, Astro.site);
       @import '../styles/global.css';
     </style>
 
-    <!-- Dark mode: prevent flash -->
-    <script is:inline>
-      (function() {
-        const stored = localStorage.getItem('theme');
-        if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          document.documentElement.classList.add('dark');
-        }
-      })();
-    </script>
-
     <slot name="head" />
   </head>
   <body class="bg-hanji text-meok min-h-screen antialiased">
