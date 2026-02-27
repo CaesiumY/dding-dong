@@ -47,8 +47,10 @@ const altURL = new URL(altPath, Astro.site);
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={new URL(resolvedOgImage, Astro.site)} />
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <!-- Favicon (Evil Martians 2026 minimal set) -->
+    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.ico`} sizes="32x32" />
+    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}apple-touch-icon.png`} />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
