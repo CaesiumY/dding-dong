@@ -27,6 +27,9 @@ export default tseslint.config(
     files: ["src/**/*.astro"],
     languageOptions: {
       globals: { ...globals.browser },
+      parserOptions: {
+        parser: tseslint.parser,
+      },
     },
   },
 
