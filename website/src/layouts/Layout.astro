@@ -6,7 +6,8 @@ interface Props {
   ogImage?: string;
 }
 
-const { title, description, lang = 'en', ogImage = '/dding-dong/og-image.svg' } = Astro.props;
+const { title, description, lang = 'en', ogImage } = Astro.props;
+const resolvedOgImage = ogImage ?? `/dding-dong/og-${lang}.png`;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const altLang = lang === 'ko' ? 'en' : 'ko';
 const altPath = lang === 'ko' ? '/dding-dong/' : '/dding-dong/ko/';
@@ -33,9 +34,18 @@ const altURL = new URL(altPath, Astro.site);
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={new URL(ogImage, Astro.site)} />
+    <meta property="og:image" content={new URL(resolvedOgImage, Astro.site)} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:locale" content={lang === 'ko' ? 'ko_KR' : 'en_US'} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(resolvedOgImage, Astro.site)} />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
