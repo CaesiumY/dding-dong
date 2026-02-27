@@ -80,6 +80,14 @@ body {
   }
 }
 
+/* 스크롤바 숨김 (스크롤 기능은 유지) */
+.scrollbar-hide {
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* 코드 블록 스타일 */
 code {
   font-family: var(--font-code);
