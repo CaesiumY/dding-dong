@@ -85,19 +85,19 @@ function iconDataUri(pathData: string, color: string): string {
 // Satori VNode: plain { type, props } objects (no React dependency needed)
 
 function waveBars(color: string) {
-  const heights = [4, 12, 8, 14];
+  const heights = [8, 24, 16, 30];
   return {
     type: 'div',
     props: {
-      style: { display: 'flex', alignItems: 'flex-end', gap: '3px', marginLeft: '8px' },
+      style: { display: 'flex', alignItems: 'flex-end', gap: '5px', marginLeft: '12px' },
       children: heights.map((h) => ({
         type: 'div',
         props: {
           style: {
-            width: '3px',
+            width: '5px',
             height: `${h}px`,
             backgroundColor: color,
-            borderRadius: '2px',
+            borderRadius: '3px',
           },
         },
       })),
@@ -112,11 +112,11 @@ function toastCard(iconPath: string, iconColor: string, label: string, message: 
       style: {
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: '#FFFFFF',
-        border: '1px solid #E7E0D6',
-        borderRadius: '12px',
-        boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-        padding: '16px 20px',
+        backgroundColor: '#292524',
+        border: '1px solid #44403C',
+        borderRadius: '20px',
+        boxShadow: '0 10px 25px -5px rgba(0,0,0,0.3)',
+        padding: '32px 40px',
       },
       children: [
         {
@@ -128,8 +128,8 @@ function toastCard(iconPath: string, iconColor: string, label: string, message: 
                 type: 'img',
                 props: {
                   src: iconDataUri(iconPath, iconColor),
-                  width: 24,
-                  height: 24,
+                  width: 52,
+                  height: 52,
                 },
               },
               {
@@ -137,10 +137,10 @@ function toastCard(iconPath: string, iconColor: string, label: string, message: 
                 props: {
                   style: {
                     fontFamily: 'GmarketSans',
-                    fontSize: '16px',
+                    fontSize: '36px',
                     fontWeight: 700,
-                    color: '#1C1917',
-                    marginLeft: '8px',
+                    color: '#FAF7F0',
+                    marginLeft: '12px',
                   },
                   children: label,
                 },
@@ -154,9 +154,9 @@ function toastCard(iconPath: string, iconColor: string, label: string, message: 
           props: {
             style: {
               fontFamily: 'Pretendard',
-              fontSize: '14px',
-              color: '#78716C',
-              marginTop: '8px',
+              fontSize: '28px',
+              color: '#A8A29E',
+              marginTop: '12px',
             },
             children: message,
           },
@@ -175,129 +175,40 @@ function createOgLayout(locale: string) {
         flexDirection: 'column',
         width: '1200px',
         height: '630px',
-        backgroundColor: '#FAF7F0',
+        backgroundColor: '#1C1917',
       },
       children: [
         // Top accent bar
         {
           type: 'div',
-          props: { style: { width: '100%', height: '6px', backgroundColor: '#D97706' } },
+          props: { style: { width: '100%', height: '6px', backgroundColor: '#F59E0B' } },
         },
 
-        // Main content
+        // Card container
         {
           type: 'div',
           props: {
             style: {
               display: 'flex',
+              flexDirection: 'column',
               flex: 1,
-              padding: '40px 50px',
-              alignItems: 'center',
-            },
-            children: [
-              // Left: text
-              {
-                type: 'div',
-                props: {
-                  style: {
-                    display: 'flex',
-                    flexDirection: 'column',
-                    flex: 1,
-                    paddingRight: '30px',
-                  },
-                  children: [
-                    {
-                      type: 'span',
-                      props: {
-                        style: {
-                          fontFamily: 'GmarketSans',
-                          fontSize: '48px',
-                          fontWeight: 700,
-                          color: '#1C1917',
-                        },
-                        children: t('hero.logo', locale),
-                      },
-                    },
-                    {
-                      type: 'span',
-                      props: {
-                        style: {
-                          fontFamily: 'Pretendard',
-                          fontSize: '20px',
-                          color: '#78716C',
-                          marginTop: '12px',
-                        },
-                        children: t('hero.subtitle', locale),
-                      },
-                    },
-                    {
-                      type: 'span',
-                      props: {
-                        style: {
-                          fontFamily: 'Pretendard',
-                          fontSize: '16px',
-                          color: '#78716C',
-                          marginTop: '12px',
-                          lineHeight: '1.5',
-                        },
-                        children: t('hero.description', locale),
-                      },
-                    },
-                  ],
-                },
-              },
-
-              // Right: toast cards
-              {
-                type: 'div',
-                props: {
-                  style: {
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '16px',
-                    width: '420px',
-                  },
-                  children: [
-                    toastCard(
-                      BELL_PATH,
-                      '#D97706',
-                      t('hero.logo', locale),
-                      t('hero.notificationPreview', locale),
-                    ),
-                    toastCard(
-                      MIC_PATH,
-                      '#8B5CF6',
-                      t('hero.ttsLabel', locale),
-                      t('hero.ttsQuote', locale),
-                    ),
-                  ],
-                },
-              },
-            ],
-          },
-        },
-
-        // Footer text
-        {
-          type: 'div',
-          props: {
-            style: {
-              display: 'flex',
+              gap: '20px',
+              padding: '24px 48px',
               justifyContent: 'center',
-              paddingBottom: '16px',
             },
             children: [
-              {
-                type: 'span',
-                props: {
-                  style: {
-                    fontFamily: 'Pretendard',
-                    fontSize: '14px',
-                    color: '#78716C',
-                  },
-                  children: 'Claude Code Notification Plugin',
-                },
-              },
+              toastCard(
+                BELL_PATH,
+                '#F59E0B',
+                t('og.bellLabel', locale),
+                t('og.bellMessage', locale),
+              ),
+              toastCard(
+                MIC_PATH,
+                '#8B5CF6',
+                t('og.ttsLabel', locale),
+                t('og.ttsMessage', locale),
+              ),
             ],
           },
         },
@@ -305,7 +216,7 @@ function createOgLayout(locale: string) {
         // Bottom accent bar
         {
           type: 'div',
-          props: { style: { width: '100%', height: '6px', backgroundColor: '#D97706' } },
+          props: { style: { width: '100%', height: '6px', backgroundColor: '#F59E0B' } },
         },
       ],
     },

@@ -255,6 +255,12 @@
       "goHome": "홈으로 가기"
     }
   },
+  "og": {
+    "bellLabel": "작업 완료",
+    "bellMessage": "코드가 준비되었습니다. 띵동!",
+    "ttsLabel": "AI 보이스 클론",
+    "ttsMessage": "\"고객님의 입력이 필요합니다.\""
+  },
   "footer": {
     "license": "MIT 라이선스",
     "github": "GitHub"

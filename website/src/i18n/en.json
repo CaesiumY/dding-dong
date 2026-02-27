@@ -255,6 +255,12 @@
       "goHome": "Go Home"
     }
   },
+  "og": {
+    "bellLabel": "Task Complete",
+    "bellMessage": "Your code is ready. dding-dong!",
+    "ttsLabel": "AI Voice Clone",
+    "ttsMessage": "\"Your input is required.\""
+  },
   "footer": {
     "license": "MIT License",
     "github": "GitHub"
