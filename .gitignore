@@ -5,6 +5,7 @@ __pycache__/
 *.log
 .state.json
 .dding-dong/config.local.json
+.dding-dong/config.local.json.backup.*
 .dding-dong/packs/
 
 # Website
