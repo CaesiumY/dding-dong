@@ -26,6 +26,10 @@ node scripts/sync-version.mjs sync
 node scripts/sync-version.mjs verify
 node scripts/sync-version.mjs bump patch   # or minor, major
 
+# Release (creates git tag + pushes → GitHub Actions creates release)
+node scripts/release.mjs            # Create git tag and push
+node scripts/release.mjs --dry-run  # Preview without creating tag
+
 # Website (pnpm required — do NOT use npm/yarn)
 cd website && pnpm install    # Install dependencies
 cd website && pnpm dev        # Dev server (auto-copies sound files)
@@ -98,6 +102,7 @@ cd website && pnpm build      # Production build
 - Commit order: feature/fix commit first → version bump as a separate `chore:` commit
 - `node scripts/sync-version.mjs bump patch|minor|major`
 - `node scripts/sync-version.mjs verify` (exits 1 on mismatch)
+- Release flow: version bump commit → `node scripts/release.mjs` → GitHub Actions creates release
 
 ## Testing
 

@@ -1,0 +1,101 @@
+name: Create GitHub Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Verify version consistency
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PLUGIN_VERSION=$(node -e "process.stdout.write(JSON.parse(require('fs').readFileSync('.claude-plugin/plugin.json','utf8')).version)")
+          if [ "$TAG_VERSION" != "$PLUGIN_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match plugin.json version ($PLUGIN_VERSION)"
+            exit 1
+          fi
+          echo "VERSION=$TAG_VERSION" >> "$GITHUB_ENV"
+          echo "Version verified: $TAG_VERSION"
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          CURRENT_TAG="${GITHUB_REF_NAME}"
+          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep '^v' | sed -n '2p')
+
+          if [ -z "$PREVIOUS_TAG" ]; then
+            RANGE="$CURRENT_TAG"
+          else
+            RANGE="${PREVIOUS_TAG}..${CURRENT_TAG}"
+          fi
+
+          FEATURES=""
+          FIXES=""
+          WEBSITE=""
+          OTHER=""
+
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            # Skip version bump commits
+            echo "$line" | grep -qiE 'chore:.*bump version|chore:.*release' && continue
+
+            if echo "$line" | grep -qE '\(website\)'; then
+              WEBSITE="${WEBSITE}\n- ${line}"
+            elif echo "$line" | grep -qE '^feat(\(|:)'; then
+              FEATURES="${FEATURES}\n- ${line}"
+            elif echo "$line" | grep -qE '^fix(\(|:)'; then
+              FIXES="${FIXES}\n- ${line}"
+            else
+              OTHER="${OTHER}\n- ${line}"
+            fi
+          done <<< "$(git log "$RANGE" --pretty=format:'%s' --no-merges)"
+
+          {
+            echo 'RELEASE_NOTES<<NOTES_EOF'
+            echo "## dding-dong v${VERSION}"
+            echo ""
+            if [ -n "$FEATURES" ]; then
+              echo "### 🚀 New Features"
+              echo -e "$FEATURES"
+              echo ""
+            fi
+            if [ -n "$FIXES" ]; then
+              echo "### 🐛 Bug Fixes"
+              echo -e "$FIXES"
+              echo ""
+            fi
+            if [ -n "$WEBSITE" ]; then
+              echo "### 🌐 Website"
+              echo -e "$WEBSITE"
+              echo ""
+            fi
+            if [ -n "$OTHER" ]; then
+              echo "### 📝 Other Changes"
+              echo -e "$OTHER"
+              echo ""
+            fi
+            echo 'NOTES_EOF'
+          } >> "$GITHUB_ENV"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "v${VERSION}" \
+            --notes "$RELEASE_NOTES"
