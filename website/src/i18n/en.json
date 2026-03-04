@@ -198,7 +198,8 @@
       { "name": "dd-tts-pack", "icon": "ph:microphone-duotone", "command": "/dding-dong:dd-tts-pack", "description": "Generate voice notifications with Qwen3-TTS and voice cloning.", "category": "soundManagement" },
       { "name": "dd-config", "icon": "ph:gear-duotone", "command": "/dding-dong:dd-config", "description": "View, modify, and reset notification settings.", "category": "utilities" },
       { "name": "dd-doctor", "icon": "ph:stethoscope-duotone", "command": "/dding-dong:dd-doctor", "description": "Diagnose notification issues — checks platform, config, and audio tools.", "category": "utilities" },
-      { "name": "dd-feedback", "icon": "ph:chat-circle-text-duotone", "command": "/dding-dong:dd-feedback", "description": "Submit bug reports and feature requests as GitHub issues.", "category": "utilities" }
+      { "name": "dd-feedback", "icon": "ph:chat-circle-text-duotone", "command": "/dding-dong:dd-feedback", "description": "Submit bug reports and feature requests as GitHub issues.", "category": "utilities" },
+      { "name": "dd-uninstall", "icon": "ph:trash-duotone", "command": "/dding-dong:dd-uninstall", "description": "Selectively remove plugin artifacts — global config, project config, and TTS virtual environment with dry-run preview.", "category": "utilities" }
     ]
   },
   "config": {

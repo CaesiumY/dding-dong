@@ -198,7 +198,8 @@
       { "name": "dd-tts-pack", "icon": "ph:microphone-duotone", "command": "/dding-dong:dd-tts-pack", "description": "Qwen3-TTS와 보이스 클로닝으로 음성 알림을 생성합니다.", "category": "soundManagement" },
       { "name": "dd-config", "icon": "ph:gear-duotone", "command": "/dding-dong:dd-config", "description": "알림 설정을 조회, 변경, 초기화합니다.", "category": "utilities" },
       { "name": "dd-doctor", "icon": "ph:stethoscope-duotone", "command": "/dding-dong:dd-doctor", "description": "플랫폼, 설정, 오디오 도구를 점검하여 알림 문제를 진단합니다.", "category": "utilities" },
-      { "name": "dd-feedback", "icon": "ph:chat-circle-text-duotone", "command": "/dding-dong:dd-feedback", "description": "버그 리포트와 기능 요청을 GitHub 이슈로 제출합니다.", "category": "utilities" }
+      { "name": "dd-feedback", "icon": "ph:chat-circle-text-duotone", "command": "/dding-dong:dd-feedback", "description": "버그 리포트와 기능 요청을 GitHub 이슈로 제출합니다.", "category": "utilities" },
+      { "name": "dd-uninstall", "icon": "ph:trash-duotone", "command": "/dding-dong:dd-uninstall", "description": "플러그인이 생성한 아티팩트를 선택적으로 삭제합니다 — 전역 설정, 프로젝트 설정, TTS 가상환경을 dry-run 미리보기 후 정리.", "category": "utilities" }
     ]
   },
   "config": {
